@@ -9,7 +9,7 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 from pages.resume_screen import resume_screener_page
 from pages.top_leaderboard import leaderboard_page
 from pages.about_us import about_us_page
-from pages.feedback_form import feedback_form_page
+from pages.feedback_form import feedback_and_help_page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
