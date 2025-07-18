@@ -1491,16 +1491,15 @@ def resume_screener_page():
                 with col_cert_download:
                     st.info("PDF download is not available in this version.")
                 
-                # Send email button
+                # Automatically send email if candidate qualifies and email is found
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
-                    if st.button("📧 Send Certificate to Email", key="send_cert_email_button"):
-                        send_certificate_email(
-                            recipient_email=candidate_data['Email'],
-                            candidate_name=candidate_data['Candidate Name'],
-                            score=candidate_data['Score (%)'],
-                            gmail_address=st.secrets.get("GMAIL_ADDRESS"),
-                            gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
-                        )
+                    send_certificate_email(
+                        recipient_email=candidate_data['Email'],
+                        candidate_name=candidate_data['Candidate Name'],
+                        score=candidate_data['Score (%)'],
+                        gmail_address=st.secrets.get("GMAIL_ADDRESS"),
+                        gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
+                    )
                 else:
                     st.info(f"No email address found for {candidate_data['Candidate Name']}. Certificate could not be sent automatically.")
                 
