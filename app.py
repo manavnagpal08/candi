@@ -5,7 +5,13 @@ import os
 import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
 
-# --- Functions from your login.py ---
+# Import your page functions
+from pages.resume_screen import resume_screen_page
+from pages.top_leaderboard import top_leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_form_page
+
+# --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
 # File to store user credentials
 USER_DB_FILE = "users.json"
@@ -183,7 +189,7 @@ def login_section():
     )
 
     if tab_selection == "Login":
-        st.subheader("🔐 HR Login")
+        st.subheader("🔐 Candidate Login") # Changed from HR Login
         st.info("If you don't have an account, please go to the 'Register' option first.") # Added instructional message
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username", key="username_login")
@@ -217,94 +223,9 @@ def is_current_user_admin():
     # Check if the current username is in the ADMIN_USERNAME tuple
     return st.session_state.get("authenticated", False) and st.session_state.get("username") in ADMIN_USERNAME
 
-# --- Candidate Portal Pages ---
-
-def resume_screen_page():
-    st.title("📄 Resume Screen")
-    st.write(f"Welcome, {st.session_state.username}! This is your personal resume management area.")
-    st.write("Here you can upload, view, and edit your resume.")
-    
-    st.subheader("Upload Your Resume")
-    uploaded_file = st.file_uploader("Choose a PDF or DOCX file", type=["pdf", "docx"])
-    if uploaded_file is not None:
-        st.success(f"File '{uploaded_file.name}' uploaded successfully!")
-        # In a real application, you would save this file to a persistent storage
-        # and associate it with the logged-in user.
-        st.info("Note: In a real application, this file would be saved to a database or cloud storage.")
-
-    st.subheader("Your Stored Resumes")
-    st.write("No resumes uploaded yet. Upload one above!")
-    # Placeholder for displaying uploaded resumes
-    # For example:
-    # if st.session_state.get('user_resumes'):
-    #     for resume in st.session_state.user_resumes:
-    #         st.write(f"- {resume['name']} (Uploaded on {resume['date']})")
-    # else:
-    #     st.info("You haven't uploaded any resumes yet.")
-
-def top_leaderboard_page():
-    st.title("🏆 Top Leaderboard")
-    st.write("See how you rank against other candidates!")
-    
-    # Example data for the leaderboard
-    leaderboard_data = {
-        "Rank": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "Candidate": ["Alice Johnson", "Bob Williams", "Charlie Brown", "Diana Miller", "Eve Davis",
-                      "Frank White", "Grace Lee", "Harry Kim", "Ivy Chen", "Jack Green"],
-        "Score": [980, 950, 920, 890, 870, 850, 830, 810, 790, 770],
-        "Company": ["Tech Solutions", "Innovate Corp", "Global Digital", "Data Dynamics", "Future Systems",
-                    "Apex Innovations", "Quantum Tech", "Bright Minds", "Synergy Group", "Elite Software"]
-    }
-    df = pd.DataFrame(leaderboard_data)
-    st.dataframe(df.set_index("Rank"), use_container_width=True)
-
-def about_us_page():
-    st.title("ℹ️ About Us")
-    st.write("""
-    Welcome to the **ScreenerPro Candidate Portal**!
-    
-    We are dedicated to revolutionizing the job search experience for candidates and streamlining the hiring process for companies. Our platform empowers job seekers with tools to showcase their skills, manage their resumes, and connect with opportunities that truly match their potential.
-    
-    **Our Mission:** To bridge the gap between talent and opportunity by providing an intuitive, efficient, and fair platform for career advancement.
-    
-    **What We Offer:**
-    * **Personalized Profile:** Create a comprehensive profile highlighting your skills, experience, and aspirations.
-    * **Resume Management:** Easily upload, store, and update multiple versions of your resume.
-    * **Skill Assessments:** Take assessments to validate your skills and stand out to recruiters.
-    * **Job Matching:** Get recommendations for roles that align with your profile.
-    * **Performance Tracking:** Monitor your application progress and assessment scores.
-    
-    We are constantly working to improve your experience and welcome any feedback you may have!
-    """)
-
-def feedback_form_page():
-    st.title("💬 Feedback Form")
-    st.write("We value your input! Please share your thoughts, suggestions, or report any issues you've encountered.")
-    
-    with st.form("feedback_form", clear_on_submit=True):
-        feedback_type = st.radio("Type of Feedback:", ("Suggestion", "Bug Report", "General Comment", "Feature Request"))
-        subject = st.text_input("Subject")
-        message = st.text_area("Your Feedback", height=150)
-        email_contact = st.text_input("Your Email (Optional, for follow-up)", value=st.session_state.username if st.session_state.authenticated else "")
-        
-        submitted = st.form_submit_button("Submit Feedback")
-        
-        if submitted:
-            if not subject or not message:
-                st.error("Please fill in the Subject and Your Feedback fields.")
-            else:
-                st.success("Thank you for your feedback! We appreciate your contribution.")
-                # In a real application, this feedback would be saved to a database
-                # or sent to an internal system.
-                st.json({
-                    "feedback_type": feedback_type,
-                    "subject": subject,
-                    "message": message,
-                    "email_contact": email_contact,
-                    "user": st.session_state.username,
-                    "timestamp": pd.Timestamp.now().isoformat()
-                })
-                st.info("This feedback has been logged (simulated).")
+# --- Candidate Portal Pages (now imported) ---
+# The functions resume_screen_page, top_leaderboard_page, about_us_page, feedback_form_page
+# are now imported from their respective files in the 'pages' directory.
 
 def logout_page():
     st.title("👋 Logging Out...")
@@ -316,8 +237,7 @@ def logout_page():
         st.session_state.active_login_tab_selection = "Login" # Reset to login tab
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
-    # Add a small delay for user to read message, then auto-logout
-    # Note: st.rerun() makes this immediate, so a manual button is better for clarity.
+
 
 # --- Main Application Logic ---
 
