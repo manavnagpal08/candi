@@ -1,166 +1,103 @@
 import streamlit as st
-import requests
+import pandas as pd
+from datetime import datetime, date
 import json
+import firebase_admin
+from firebase_admin import credentials, firestore
 import os
-import pandas as pd # For displaying data
+import traceback # Import traceback for detailed error logging
 
-# Helper function to convert Firestore REST API format back to Python data
-# (Copied from top_leaderboard.py to ensure consistency)
-def _convert_from_firestore_rest_format(field_value):
-    """
-    Converts a Firestore REST API field value (e.g., {"stringValue": "abc"})
-    back to a standard Python value.
-    """
-    if "stringValue" in field_value:
-        return field_value["stringValue"]
-    elif "integerValue" in field_value:
-        return int(field_value["integerValue"])
-    elif "doubleValue" in field_value:
-        return float(field_value["doubleValue"])
-    elif "booleanValue" in field_value:
-        return field_value["booleanValue"]
-    elif "nullValue" in field_value:
-        return None
-    elif "arrayValue" in field_value:
-        return [_convert_from_firestore_rest_format(item) for item in field_value["arrayValue"].get("values", [])]
-    elif "mapValue" in field_value:
-        return {k: _convert_from_firestore_rest_format(v) for k, v in field_value["mapValue"].get("fields", {}).items()}
-    return None # Fallback for unknown types
-
-@st.cache_data(ttl=60) # Cache data for a short period
-def fetch_candidate_by_certificate_id(certificate_id):
-    """
-    Fetches candidate details from Firestore by Certificate ID using the REST API.
-    """
-    if not certificate_id:
-        return None
-
+# Initialize Firebase (only once)
+@st.cache_resource
+def initialize_firebase():
     try:
-        project_id = st.secrets["FIREBASE_PROJECT_ID"]
-        api_key = st.secrets["FIREBASE_API_KEY"]
-        collection_id = "leaderboard"
-
-        # Firestore REST API endpoint for running a structured query
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents:runQuery?key={api_key}"
-
-        # Structured query to find a document where 'Certificate ID' field matches the input
-        query_payload = {
-            "structuredQuery": {
-                "from": [{"collectionId": collection_id}],
-                "where": {
-                    "fieldFilter": {
-                        "field": {"fieldPath": "Certificate ID"},
-                        "op": "EQUAL",
-                        "value": {"stringValue": certificate_id}
-                    }
-                },
-                "limit": 1 # We only expect one result for a unique certificate ID
+        # Check if Firebase app is already initialized
+        if not firebase_admin._apps:
+            # Use Streamlit secrets for Firebase configuration
+            firebase_config = {
+                "apiKey": st.secrets["FIREBASE_API_KEY"],
+                "authDomain": st.secrets["FIREBASE_AUTH_DOMAIN"],
+                "projectId": st.secrets["FIREBASE_PROJECT_ID"],
+                "storageBucket": st.secrets["FIREBASE_STORAGE_BUCKET"],
+                "messagingSenderId": st.secrets["FIREBASE_MESSAGING_SENDER_ID"],
+                "appId": st.secrets["FIREBASE_APP_ID"],
+                "measurementId": st.secrets["FIREBASE_MEASUREMENT_ID"]
             }
-        }
-
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(url, headers=headers, data=json.dumps(query_payload))
-        response.raise_for_status() # Raise an HTTPError for bad responses
-
-        response_json = response.json()
-
-        # The response for runQuery is an array of results, each containing a 'document' field
-        if response_json and len(response_json) > 0 and "document" in response_json[0]:
-            doc_entry = response_json[0]["document"]
-            details = {}
-            for key, value_obj in doc_entry.get("fields", {}).items():
-                details[key] = _convert_from_firestore_rest_format(value_obj)
-            
-            # Ensure categorized skills are parsed from JSON strings if they come as such
-            if isinstance(details.get('Matched Keywords (Categorized)'), str):
-                try:
-                    details['Matched Keywords (Categorized)'] = json.loads(details['Matched Keywords (Categorized)'])
-                except json.JSONDecodeError:
-                    details['Matched Keywords (Categorized)'] = {}
-            if isinstance(details.get('Missing Skills (Categorized)'), str):
-                try:
-                    details['Missing Skills (Categorized)'] = json.loads(details['Missing Skills (Categorized)'])
-                except json.JSONDecodeError:
-                    details['Missing Skills (Categorized)'] = {}
-            
-            return details
-        else:
-            return None # No document found
-    except KeyError as e:
-        st.error(f"❌ Firebase REST API configuration error for certificate verification: Missing secret key '{e}'.")
-        return None
-    except requests.exceptions.HTTPError as e:
-        st.error(f"❌ Failed to fetch certificate details via REST API: HTTP Error {e.response.status_code}")
-        st.error(f"Response: {e.response.text}")
-        st.warning("Ensure Firestore security rules allow read access to the 'leaderboard' collection.")
-        return None
+            # Load service account key from secrets
+            service_account_key_json = st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]
+            cred = credentials.Certificate(json.loads(service_account_key_json))
+            firebase_admin.initialize_app(cred, firebase_config)
+        
+        db = firestore.client()
+        return db
     except Exception as e:
-        st.error(f"❌ An unexpected error occurred while verifying certificate: {e}")
-        st.exception(e)
+        st.error(f"❌ Error initializing Firebase: {e}")
+        st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
+        st.info("Please ensure ALL Firebase secrets (API Key, Auth Domain, Project ID, etc., and the Service Account Key JSON) are correctly configured in your secrets.toml or Streamlit Cloud secrets.")
         return None
 
-def certificate_verification_page():
-    """
-    Displays the Certificate Verification page in Streamlit.
-    Allows users to input a Certificate ID and view candidate details.
-    """
-    st.title("✅ Certificate Verification")
-    st.markdown("### Verify the authenticity of ScreenerPro Certificates.")
-    st.caption("Enter a Certificate ID below to view the associated candidate's details and screening assessment.")
+# Get Firestore DB client
+db = initialize_firebase()
 
-    st.info("💡 Certificate IDs are unique identifiers generated during the resume screening process.")
+# Global variable for app ID (as provided by the environment)
+# Note: appId is not directly used in the collection path here, as per the new rules
+# and user's Firestore structure which places 'leaderboard' at the root.
+appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
-    certificate_id_input = st.text_input("Enter Certificate ID", key="cert_id_input", placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000")
+def certificate_verifier_page():
+    st.title("✅ ScreenerPro Certificate Verification")
+    st.markdown("### Verify the authenticity of a ScreenerPro Certificate.")
+
+    if db is None:
+        st.warning("Firebase is not configured. Certificate verification is unavailable.")
+        return
+
+    certificate_id_input = st.text_input(
+        "Enter Certificate ID",
+        placeholder="e.g., a1b2c3d4-e5f6-7890-1234-567890abcdef",
+        help="Paste the unique Certificate ID found on the ScreenerPro certificate."
+    )
 
     if st.button("🔍 Verify Certificate"):
-        if certificate_id_input:
-            with st.spinner("Verifying certificate..."):
-                candidate_details = fetch_candidate_by_certificate_id(certificate_id_input)
-            
-            if candidate_details:
-                st.markdown("---")
-                st.subheader(f"Certificate Details for {candidate_details.get('Candidate Name', 'N/A')}")
-                
-                # Display key details in a structured way
-                col_info_1, col_info_2 = st.columns(2)
-                with col_info_1:
-                    st.write(f"**Candidate Name:** {candidate_details.get('Candidate Name', 'N/A')}")
-                    st.write(f"**Score (%):** {candidate_details.get('Score (%)', 0.0):.2f}%")
-                    st.write(f"**Years Experience:** {candidate_details.get('Years Experience', 0.0):.1f} years")
-                    st.write(f"**CGPA (4.0 Scale):** {candidate_details.get('CGPA (4.0 Scale)', 'N/A')}")
-                with col_info_2:
-                    st.write(f"**JD Used:** {candidate_details.get('JD Used', 'N/A')}")
-                    st.write(f"**Date Screened:** {pd.to_datetime(candidate_details.get('Date Screened', datetime.now().strftime('%Y-%m-%d'))).strftime('%Y-%m-%d')}")
-                    st.write(f"**Certificate Rank:** {candidate_details.get('Certificate Rank', 'N/A')}")
-                    st.write(f"**Tag:** {candidate_details.get('Tag', 'N/A')}")
-                
-                st.markdown("---")
-                st.subheader("AI Assessment Summary:")
-                st.markdown(f"**AI Suggestion:** {candidate_details.get('AI Suggestion', 'N/A')}")
-                st.markdown(f"**Detailed HR Assessment:**")
-                st.markdown(candidate_details.get('Detailed HR Assessment', 'N/A'))
+        if not certificate_id_input:
+            st.warning("Please enter a Certificate ID to verify.")
+            return
 
-                st.markdown("#### Matched Skills Breakdown:")
-                matched_kws_categorized_dict = candidate_details.get('Matched Keywords (Categorized)', {})
-                if matched_kws_categorized_dict:
-                    for category, skills in matched_kws_categorized_dict.items():
-                        st.write(f"**{category}:** {', '.join(skills)}")
+        with st.spinner(f"Verifying certificate ID: {certificate_id_input}..."):
+            try:
+                # Corrected: Access 'leaderboard' collection directly at the root
+                doc_ref = db.collection('leaderboard').document(certificate_id_input)
+                doc = doc_ref.get()
+
+                if doc.exists:
+                    certificate_data = doc.to_dict()
+                    st.success("Certificate Found and Verified!")
+                    st.markdown("---")
+                    st.markdown("#### Certificate Details:")
+                    
+                    st.write(f"**Candidate Name:** {certificate_data.get('Candidate Name', 'N/A')}")
+                    st.write(f"**Score (%):** {certificate_data.get('Score (%)', 0.0):.2f}%")
+                    st.write(f"**Years Experience:** {certificate_data.get('Years Experience', 0.0):.1f} years")
+                    
+                    cgpa_display = f"{certificate_data.get('CGPA (4.0 Scale)', None):.2f}" if pd.notna(certificate_data.get('CGPA (4.0 Scale)', None)) else "N/A"
+                    st.write(f"**CGPA (4.0 Scale):** {cgpa_display}")
+                    
+                    st.write(f"**Job Description Used:** {certificate_data.get('JD Used', 'N/A')}")
+                    st.write(f"**Date Screened:** {certificate_data.get('Date Screened', 'N/A')}")
+                    st.write(f"**Certificate Rank:** {certificate_data.get('Certificate Rank', 'N/A')}")
+                    st.write(f"**Tag:** {certificate_data.get('Tag', 'N/A')}")
+                    st.write(f"**Certificate ID:** `{certificate_data.get('Certificate ID', 'N/A')}`")
+
+                    st.markdown("---")
+                    st.info("This certificate is authentic and was issued by ScreenerPro.")
                 else:
-                    st.write("No categorized matched skills found.")
+                    st.error("Certificate not found. Please check the ID and try again.")
+                    st.info("The provided Certificate ID does not match any records in our system. It might be incorrect, or the certificate may not exist.")
 
-                st.markdown("#### Missing Skills Breakdown (from JD):")
-                missing_kws_categorized_dict = candidate_details.get('Missing Skills (Categorized)', {})
-                if missing_kws_categorized_dict:
-                    for category, skills in missing_kws_categorized_dict.items():
-                        st.write(f"**{category}:** {', '.join(skills)}")
-                else:
-                    st.write("No categorized missing skills found.")
-            else:
-                st.warning("Certificate ID not found or invalid. Please check the ID and try again.")
-        else:
-            st.error("Please enter a Certificate ID to verify.")
+            except Exception as e:
+                st.error(f"❌ An error occurred during verification: {e}")
+                st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
+                st.info("Please ensure your Firebase configuration is correct and the Certificate ID is valid.")
 
-# This block ensures the certificate_verification_page function is called when the script is run directly
 if __name__ == "__main__":
-    st.set_page_config(page_title="ScreenerPro Certificate Verification", layout="wide")
-    certificate_verification_page()
+    certificate_verifier_page()
