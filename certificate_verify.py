@@ -334,11 +334,10 @@ def certificate_verifier_page():
     st.title("✅ ScreenerPro Certificate Verification")
     st.markdown("### Verify the authenticity of a ScreenerPro Certificate.")
 
-    # Initialize session state for certificate preview if not already present
-    if 'show_certificate_preview_verifier' not in st.session_state:
-        st.session_state['show_certificate_preview_verifier'] = False
+    # Initialize session state for certificate preview
     if 'certificate_html_content_verifier' not in st.session_state:
         st.session_state['certificate_html_content_verifier'] = ""
+    # No longer need 'show_certificate_preview_verifier' as it will be automatic
 
     certificate_id_input = st.text_input(
         "Enter Certificate ID",
@@ -346,11 +345,11 @@ def certificate_verifier_page():
         help="Paste the unique Certificate ID found on the ScreenerPro certificate."
     )
 
+    # Use a button to trigger the verification process
     if st.button("🔍 Verify Certificate"):
         if not certificate_id_input:
             st.warning("Please enter a Certificate ID to verify.")
-            # Reset preview state if input is empty
-            st.session_state['show_certificate_preview_verifier'] = False
+            # Clear previous certificate display if input is empty
             st.session_state['certificate_html_content_verifier'] = ""
             return
 
@@ -386,19 +385,8 @@ def certificate_verifier_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content_verifier'] = certificate_html_content # Store for preview
 
-                col_cert_view, col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(4)
+                col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3) # Adjusted columns as view button is removed
                 
-                with col_cert_view:
-                    if st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button_verifier"):
-                        st.session_state['show_certificate_preview_verifier'] = True
-                    else:
-                        # If the button is clicked again (or another button on the page is clicked),
-                        # and this button is not, ensure the preview state is reset.
-                        # This ensures the preview only shows when explicitly requested.
-                        if st.session_state.get('show_certificate_preview_verifier', False) and st.session_state.get('last_clicked_button') != "view_cert_button_verifier":
-                             st.session_state['show_certificate_preview_verifier'] = False
-
-
                 with col_cert_download:
                     st.download_button(
                         label="⬇️ Download Certificate (HTML)",
@@ -427,22 +415,22 @@ This candidate was evaluated across multiple hiring parameters using AI-powered 
                 with col_share_whatsapp:
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
-                # Only show the HTML preview if the button was clicked
-                if st.session_state.get('show_certificate_preview_verifier', False) and st.session_state['certificate_html_content_verifier']:
-                    st.markdown("---")
-                    st.markdown("### Generated Certificate Preview (HTML)")
-                    st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=600, scrolling=True)
-                    st.markdown("---")
+                # --- Automatic HTML Preview Display ---
+                st.markdown("---")
+                st.markdown("### Generated Certificate Preview (HTML)")
+                st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=600, scrolling=True)
+                st.markdown("---")
 
             else:
                 st.error("Certificate not found. Please check the ID and try again.")
                 st.info("The provided Certificate ID does not match any records in our system. It might be incorrect, or the certificate may not exist.")
+                # Clear previous certificate display if not found
+                st.session_state['certificate_html_content_verifier'] = ""
 
-    # This ensures the preview is hidden if no certificate is found or input is cleared
-    if not certificate_id_input and st.session_state.get('show_certificate_preview_verifier', False):
-        st.session_state['show_certificate_preview_verifier'] = False
+    # This block ensures the preview is hidden if the input is cleared or no verification is done yet
+    if not certificate_id_input and st.session_state['certificate_html_content_verifier']:
         st.session_state['certificate_html_content_verifier'] = ""
-
+        st.rerun() # Rerun to clear the display immediately
 
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Certificate Verification", layout="wide")
