@@ -6,12 +6,13 @@ import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
-# Ensure these files are in a 'pages' subdirectory relative to app.py
+# Ensure these files are in the same directory as app.py or adjust paths
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page # New import
+from total_screened_page import total_screened_page # NEW: Import the total screened page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -243,10 +244,6 @@ def login_section():
 def is_current_user_admin():
     # Check if the current username is in the ADMIN_USERNAME tuple
     return st.session_state.get("authenticated", False) and st.session_state.get("username") in ADMIN_USERNAME
-
-# --- Candidate Portal Pages (now imported) ---
-# The functions resume_screener_page, leaderboard_page, about_us_page, feedback_and_help_page
-# are now imported from their respective files in the 'pages' directory.
 
 def logout_page():
     st.title("👋 Logging Out...")
@@ -546,6 +543,8 @@ def main():
         st.session_state.current_page = "top_leaderboard"
     if st.sidebar.button("✅ Verify Certificate", key="nav_certificate_verify"): # New button
         st.session_state.current_page = "certificate_verify"
+    if st.sidebar.button("📊 Total Resumes Screened", key="nav_total_screened"): # NEW: Total Resumes Screened button
+        st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
     if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
@@ -571,6 +570,9 @@ def main():
     elif st.session_state.current_page == "certificate_verify": # New page rendering
         st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         certificate_verifier_page()
+    elif st.session_state.current_page == "total_screened": # NEW: Render total screened page
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        total_screened_page()
     elif st.session_state.current_page == "about_us":
         st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         about_us_page()
