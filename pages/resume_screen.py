@@ -1489,7 +1489,8 @@ def resume_screener_page():
                     st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button")
                         
                 with col_cert_download:
-                    st.info("PDF download is not available in this version.")
+                    # Removed the PDF download message as it's a broader environmental limitation.
+                    pass 
                 
                 # Automatically send email if candidate qualifies and email is found
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
