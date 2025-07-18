@@ -101,6 +101,8 @@ def admin_registration_section():
             st.error("Please fill in all fields.")
         elif not is_valid_email(new_username): # Email format validation
             st.error("Please enter a valid email address for the username.")
+            # No need to set active_login_tab_selection here, it's an admin function.
+            # The previous code had a redundant line here.
         else:
             users = load_users()
             if new_username in users:
