@@ -27,8 +27,7 @@ import time
 import pandas as pd
 import json
 
-# Use a public URL for the logo to avoid FileNotFoundError
-st.image("https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png", width=140)
+# Removed the st.image call for the logo as requested.
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -1722,4 +1721,4 @@ def generate_certificate_html(candidate_data):
     return html_content
 
 if __name__ == "__main__":
-    resume_screen_page()
+    resume_screener_page()
