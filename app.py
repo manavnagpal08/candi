@@ -270,13 +270,20 @@ def main():
         st.markdown(
             """
             <style>
-            .stApp {
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+            html, body, .stApp {
+                font-family: 'Inter', sans-serif;
                 background-color: #1a1a1a;
                 color: #f0f0f0;
             }
             .stSidebar {
                 background-color: #262626;
                 color: #f0f0f0;
+                padding-top: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -289,6 +296,7 @@ def main():
                 background-color: #3A3A3A !important;
                 color: #f0f0f0 !important;
                 border: 1px solid #555555 !important;
+                border-radius: 0.5rem;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -299,32 +307,56 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #f0f0f0 !important;
+                font-weight: 500;
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
+                border-radius: 0.5rem;
+                padding: 0.6rem 1.2rem;
+                font-weight: 600;
+                transition: all 0.2s ease-in-out;
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
+                transform: translateY(-1px);
             }
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1rem;
             }
             .streamlit-expanderContent {
                 background-color: #2D2D2D;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
             }
             .stAlert > div > div > div > div {
                 color: #f0f0f0; /* Text inside alert */
+            }
+            /* Dataframe styling */
+            .stDataFrame {
+                border-radius: 0.5rem;
+                overflow: hidden; /* Ensures rounded corners are applied */
+            }
+            /* Metric boxes */
+            .stMetric {
+                background-color: #2D2D2D;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                border: 1px solid #555555;
             }
             </style>
             """,
@@ -334,13 +366,20 @@ def main():
         st.markdown(
             """
             <style>
-            .stApp {
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+            html, body, .stApp {
+                font-family: 'Inter', sans-serif;
                 background-color: #f0f2f6;
                 color: #333333;
             }
             .stSidebar {
                 background-color: #ffffff;
                 color: #333333;
+                padding-top: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -353,6 +392,7 @@ def main():
                 background-color: #ffffff !important;
                 color: #333333 !important;
                 border: 1px solid #ccc !important;
+                border-radius: 0.5rem;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -363,32 +403,56 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #333333 !important;
+                font-weight: 500;
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
+                border-radius: 0.5rem;
+                padding: 0.6rem 1.2rem;
+                font-weight: 600;
+                transition: all 0.2s ease-in-out;
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
+                transform: translateY(-1px);
             }
             /* Expander background */
             .streamlit-expanderHeader {
-                background-color: #f0f2f6;
+                background-color: #e0e0e0;
                 color: #333333;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1rem;
             }
             .streamlit-expanderContent {
-                background-color: #ffffff;
+                background-color: #f8f8f8;
                 color: #333333;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #ffffff;
                 color: #333333;
+                border-radius: 0.5rem;
             }
             .stAlert > div > div > div > div {
                 color: #333333; /* Text inside alert */
+            }
+            /* Dataframe styling */
+            .stDataFrame {
+                border-radius: 0.5rem;
+                overflow: hidden; /* Ensures rounded corners are applied */
+            }
+            /* Metric boxes */
+            .stMetric {
+                background-color: #ffffff;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                border: 1px solid #ccc;
             }
             </style>
             """,
