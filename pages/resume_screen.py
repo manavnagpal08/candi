@@ -254,7 +254,7 @@ NAME_EXCLUDE_TERMS = {
     "nationality", "gender", "location", "city", "country", "pin", "zipcode", "state", "whatsapp",
     "skype", "telegram", "handle", "id", "details", "connection", "reach", "network", "www",
     "https", "http", "contactinfo", "connect", "reference", "references","fees"
-]
+}
 EDU_MATCH_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(university|college|institute|school)[^–\n]{0,50}[–\-—]?\s*(expected\s*)?\d{4})', re.IGNORECASE)
 EDU_FALLBACK_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(b\.tech|m\.tech|b\.sc|m\.sc|bca|bba|mba|ph\.d)[^–\n]{0,50}\d{4})', re.IGNORECASE)
 WORK_HISTORY_SECTION_PATTERN = re.compile(r'(?:experience|work history|employment history)\s*(\n|$)', re.IGNORECASE)
