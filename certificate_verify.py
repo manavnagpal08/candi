@@ -411,26 +411,24 @@ def certificate_verifier_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content_verifier'] = certificate_html_content # Store for preview
 
-                # Generate shareable link
-                shareable_link = f"{APP_BASE_URL}?page=certificate_verify&cert_id={urllib.parse.quote(certificate_id_input)}"
-                st.text_input("🔗 Shareable Certificate Link", value=shareable_link, disabled=True, key="share_link_display")
-                
-                # JavaScript to copy to clipboard (using st.markdown for HTML)
-                copy_js = f"""
-                <script>
-                function copyToClipboard(text) {{
-                    var dummy = document.createElement("textarea");
-                    document.body.appendChild(dummy);
-                    dummy.value = text;
-                    dummy.select();
-                    document.execCommand("copy");
-                    document.body.removeChild(dummy);
-                    alert("Link copied to clipboard!"); // Use a custom message box in production
-                }}
-                </script>
-                <button onclick="copyToClipboard('{shareable_link}')" style="background-color:#00bcd4;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;margin-top:10px;">Copy Link</button>
-                """
-                st.markdown(copy_js, unsafe_allow_html=True)
+                # Removed the shareable link text input and copy button
+                # shareable_link = f"{APP_BASE_URL}?page=certificate_verify&cert_id={urllib.parse.quote(certificate_id_input)}"
+                # st.text_input("🔗 Shareable Certificate Link", value=shareable_link, disabled=True, key="share_link_display")
+                # copy_js = f"""
+                # <script>
+                # function copyToClipboard(text) {{
+                #     var dummy = document.createElement("textarea");
+                #     document.body.appendChild(dummy);
+                #     dummy.value = text;
+                #     dummy.select();
+                #     document.execCommand("copy");
+                #     document.body.removeChild(dummy);
+                #     alert("Link copied to clipboard!"); // Use a custom message box in production
+                # }}
+                # </script>
+                # <button onclick="copyToClipboard('{shareable_link}')" style="background-color:#00bcd4;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;margin-top:10px;">Copy Link</button>
+                # """
+                # st.markdown(copy_js, unsafe_allow_html=True)
 
 
                 col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3) 
@@ -450,13 +448,13 @@ def certificate_verifier_page():
 This candidate was evaluated across multiple hiring parameters using AI-powered screening technology and scored above {candidate_data['Score (%)']:.1f}%.
 
 #resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
-🌐 Verify this certificate: {shareable_link}
+🌐 Verify this certificate: {APP_BASE_URL}
 """
                 
                 # LinkedIn Share Button
                 # LinkedIn's shareArticle does not pre-fill the user's post text directly.
                 # The 'summary' parameter is for the link preview description.
-                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(shareable_link)}&title={urllib.parse.quote('ScreenerPro Certificate Verification')}&summary={urllib.parse.quote(share_message)}"
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(APP_BASE_URL)}&title={urllib.parse.quote('ScreenerPro Certificate Verification')}&summary={urllib.parse.quote(share_message)}"
                 with col_share_linkedin:
                     st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
 
