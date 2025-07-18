@@ -22,9 +22,30 @@ def total_screened_page():
     collection_id = "leaderboard" # Assuming results are saved to 'leaderboard' collection
 
     # Firestore REST API endpoint for listing documents in a collection
-    url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
+    base_url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
 
     st.markdown("---")
+
+    # --- Fake Data Toggle ---
+    if 'show_fake_total_count' not in st.session_state:
+        st.session_state['show_fake_total_count'] = False
+
+    # Only show this toggle if the user is an admin
+    # Assuming 'is_admin' is set in session_state by app.py
+    if st.session_state.get('is_admin', False):
+        st.subheader("Admin Options (Fake Data)")
+        st.session_state['show_fake_total_count'] = st.checkbox(
+            "📈 Show Inflated Total Count (Admin Only)",
+            value=st.session_state['show_fake_total_count'],
+            help="Toggle to show an artificially increased total count for demonstration purposes."
+        )
+        if st.session_state['show_fake_total_count']:
+            st.info("Displaying an inflated total count.")
+            FAKE_TOTAL_OFFSET = 150 # Define the amount to add for fake data
+        else:
+            FAKE_TOTAL_OFFSET = 0
+    else:
+        FAKE_TOTAL_OFFSET = 0 # No offset for non-admins
 
     # Button to refresh the count
     if st.button("🔄 Refresh Count"):
@@ -36,15 +57,32 @@ def total_screened_page():
         with st.spinner("Fetching total screened resumes from Firestore..."):
             try:
                 start_time = time.time()
-                response = requests.get(url)
-                response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
                 
-                data = response.json()
-                
-                # Firestore REST API returns documents in a 'documents' array
-                # If no documents, 'documents' key might be missing or empty
-                total_count = len(data.get('documents', []))
-                st.session_state['total_resumes_screened'] = total_count
+                total_count = 0
+                page_token = None
+
+                while True:
+                    url = base_url
+                    if page_token:
+                        url += f"&pageToken={page_token}"
+                    
+                    response = requests.get(url)
+                    response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+                    
+                    data = response.json()
+                    
+                    # Add the count of documents from the current page
+                    total_count += len(data.get('documents', []))
+                    
+                    # Check for next page token
+                    page_token = data.get("nextPageToken")
+                    if not page_token:
+                        break # No more pages, exit loop
+
+                # Apply fake offset if enabled
+                display_count = total_count + FAKE_TOTAL_OFFSET
+
+                st.session_state['total_resumes_screened'] = display_count
                 
                 end_time = time.time()
                 st.success(f"Data fetched successfully in {end_time - start_time:.2f} seconds.")
