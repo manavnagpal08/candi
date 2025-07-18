@@ -18,6 +18,7 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase # Import MIMEBase for PDF attachment
 from email import encoders
 import tempfile
 import shutil
@@ -992,7 +993,7 @@ Best regards,
 The {sender_name}""")
     return f"mailto:{recipient_email}?subject={subject}&body={body}"
 
-def send_certificate_email(recipient_email, candidate_name, score, gmail_address, gmail_app_password):
+def send_certificate_email(recipient_email, candidate_name, score, certificate_pdf_content, gmail_address, gmail_app_password):
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
@@ -1008,7 +1009,7 @@ Congratulations on successfully clearing the ScreenerPro resume screening proces
 
 We’re proud to award you an official certificate recognizing your skills and employability.
 
-You can view your certificate by returning to the ScreenerPro app.
+You can add this to your resume, LinkedIn, or share it with employers to stand out.
 
 Have questions? Contact us at support@screenerpro.in
 
@@ -1023,7 +1024,7 @@ Have questions? Contact us at support@screenerpro.in
             <p>Hi {candidate_name},</p>
             <p>Congratulations on successfully clearing the ScreenerPro resume screening process with a score of <strong>{score:.1f}%</strong>!</p>
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
-            <p>You can view your certificate by returning to the ScreenerPro app.</p>
+            <p>You can add this to your resume, LinkedIn, or share it with employers to stand out.</p>
             <p>Have questions? Contact us at support@screenerpro.in</p>
             <p>🚀 Keep striving. Keep growing.</p>
             <p>– Team ScreenerPro</p>
@@ -1036,6 +1037,19 @@ Have questions? Contact us at support@screenerpro.in
     msg_alternative.attach(MIMEText(html_body, 'html'))
     
     msg.attach(msg_alternative)
+
+    if certificate_pdf_content:
+        try:
+            attachment = MIMEBase('application', 'pdf')
+            attachment.set_payload(certificate_pdf_content)
+            encoders.encode_base64(attachment)
+            attachment.add_header('Content-Disposition', 'attachment', filename=f'ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.pdf')
+            msg.attach(attachment)
+            st.info(f"Attached certificate PDF to email for {candidate_name}.")
+        except Exception as e:
+            st.error(f"Failed to attach certificate PDF: {e}")
+    else:
+        st.warning("No PDF content generated to attach to email.")
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -1522,10 +1536,12 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
 
                 # Automatically send email if candidate qualifies and email is found
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
+                    # Pass None for certificate_pdf_content as PDF generation is not supported in this environment
                     send_certificate_email(
                         recipient_email=candidate_data['Email'],
                         candidate_name=candidate_data['Candidate Name'],
                         score=candidate_data['Score (%)'],
+                        certificate_pdf_content=None, # PDF content is not generated here
                         gmail_address=st.secrets.get("GMAIL_ADDRESS"),
                         gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
                     )
