@@ -1,3 +1,16 @@
 streamlit
 bcrypt
 pandas
+pdfplumber
+scikit-learn
+numpy
+matplotlib
+seaborn
+wordcloud
+sentence-transformers
+nltk
+weasyprint
+Pillow
+pytesseract
+opencv-python
+pdf2image
