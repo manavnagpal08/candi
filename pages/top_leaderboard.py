@@ -2,81 +2,69 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, date
 import json
-import firebase_admin
-from firebase_admin import credentials, firestore
 import os
+import requests # Import requests for REST API calls
 
-# Initialize Firebase (only once)
-@st.cache_resource
-def initialize_firebase():
-    """
-    Initializes the Firebase Admin SDK.
-    This function is cached to ensure Firebase is initialized only once per app run.
-    """
-    try:
-        # Check if Firebase app is already initialized to prevent re-initialization errors
-        if not firebase_admin._apps:
-            # Load Firebase configuration from Streamlit secrets
-            firebase_config = {
-                "apiKey": st.secrets["FIREBASE_API_KEY"],
-                "authDomain": st.secrets["FIREBASE_AUTH_DOMAIN"],
-                "projectId": st.secrets["FIREBASE_PROJECT_ID"],
-                "storageBucket": st.secrets["FIREBASE_STORAGE_BUCKET"],
-                "messagingSenderId": st.secrets["FIREBASE_MESSAGING_SENDER_ID"],
-                "appId": st.secrets["FIREBASE_APP_ID"],
-                "measurementId": st.secrets["FIREBASE_MEASUREMENT_ID"]
-            }
-            # Load service account key from secrets. It must be a JSON string.
-            cred = credentials.Certificate(json.loads(st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]))
-            firebase_admin.initialize_app(cred, firebase_config)
-        
-        # Return the Firestore client instance
-        db = firestore.client()
-        return db
-    except KeyError as e:
-        st.error(f"❌ Firebase initialization error: Missing secret key '{e}'.")
-        st.info("Please ensure all Firebase configuration keys (apiKey, authDomain, projectId, etc., and FIREBASE_SERVICE_ACCOUNT_KEY) are correctly set in your secrets.toml or Streamlit Cloud secrets.")
-        return None
-    except json.JSONDecodeError:
-        st.error("❌ Firebase initialization error: 'FIREBASE_SERVICE_ACCOUNT_KEY' is not a valid JSON string.")
-        st.info("Ensure the service account key in your secrets is a single-line JSON string.")
-        return None
-    except Exception as e:
-        st.error(f"❌ An unexpected error occurred during Firebase initialization: {e}")
-        st.info("Check your Firebase project settings and Streamlit secrets for any misconfigurations.")
-        return None
-
-# Get Firestore DB client globally (initialized once)
-db = initialize_firebase()
+# Removed firebase_admin imports as we are now using the REST API for fetching.
 
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
 # If running locally without this, you might need to hardcode a default or set it via env var.
 appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
+# Helper function to convert Firestore REST API format back to Python data
+def _convert_from_firestore_rest_format(field_value):
+    """
+    Converts a Firestore REST API field value (e.g., {"stringValue": "abc"})
+    back to a standard Python value.
+    """
+    if "stringValue" in field_value:
+        return field_value["stringValue"]
+    elif "integerValue" in field_value:
+        return int(field_value["integerValue"])
+    elif "doubleValue" in field_value:
+        return float(field_value["doubleValue"])
+    elif "booleanValue" in field_value:
+        return field_value["booleanValue"]
+    elif "nullValue" in field_value:
+        return None
+    elif "arrayValue" in field_value:
+        return [_convert_from_firestore_rest_format(item) for item in field_value["arrayValue"].get("values", [])]
+    elif "mapValue" in field_value:
+        return {k: _convert_from_firestore_rest_format(v) for k, v in field_value["mapValue"].get("fields", {}).items()}
+    return None # Fallback for unknown types
+
 @st.cache_data(ttl=60) # Cache data for 60 seconds to reduce Firestore reads
 def fetch_leaderboard_data():
     """
-    Fetches candidate screening results from Firestore.
+    Fetches candidate screening results from Firestore using the REST API.
     Data is fetched from a public collection path.
     """
-    if db is None:
-        st.error("Firestore is not initialized. Cannot fetch data.")
-        return pd.DataFrame()
-
     leaderboard_data = []
     try:
-        # Define the collection reference for public data
+        project_id = st.secrets["FIREBASE_PROJECT_ID"]
+        api_key = st.secrets["FIREBASE_API_KEY"]
+        
+        # Firestore collection path (using 'leaderboard' as before)
+        collection_id = "leaderboard" 
+        
+        # Firestore REST API endpoint for listing documents in a collection
         # This path adheres to the public data storage convention: /artifacts/{appId}/public/data/{your_collection_name}
-        collection_ref = db.collection(f'artifacts/{appId}/public/data/leaderboard')
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/artifacts/{appId}/public/data/{collection_id}?key={api_key}"
+
+        response = requests.get(url)
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
         
-        # Stream documents from the collection.
-        # Note: Firestore queries do not support ordering by multiple fields or on non-indexed fields
-        # without explicit index creation. For simplicity, we fetch all and sort in Python.
-        docs = collection_ref.stream()
+        response_json = response.json()
         
-        for doc in docs:
-            data = doc.to_dict()
+        # The REST API response for listing documents is a list of documents,
+        # where each document has a 'fields' key containing the actual data.
+        for doc_entry in response_json.get("documents", []):
+            data = {}
+            # Convert each field from Firestore REST format to Python native types
+            for key, value_obj in doc_entry.get("fields", {}).items():
+                data[key] = _convert_from_firestore_rest_format(value_obj)
+            
             # Append data to the list, providing default values for robustness
             leaderboard_data.append({
                 "Candidate Name": data.get("Candidate Name", "N/A"),
@@ -95,9 +83,18 @@ def fetch_leaderboard_data():
         # Sort the DataFrame by "Score (%)" in descending order
         df = df.sort_values(by="Score (%)", ascending=False).reset_index(drop=True)
         return df
+    except KeyError as e:
+        st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
+        st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
+        return pd.DataFrame()
+    except requests.exceptions.HTTPError as e:
+        st.error(f"❌ Failed to fetch leaderboard data via REST API: HTTP Error {e.response.status_code}")
+        st.error(f"Response: {e.response.text}")
+        st.warning("This often indicates an issue with Firestore security rules (e.g., read access denied) or incorrect API key/project ID.")
+        return pd.DataFrame()
     except Exception as e:
-        st.error(f"❌ Error fetching leaderboard data: {e}")
-        st.info("Ensure your Firestore security rules allow read access to 'artifacts/{appId}/public/data/leaderboard'.")
+        st.error(f"❌ An unexpected error occurred while fetching leaderboard data via REST API: {e}")
+        st.exception(e)
         return pd.DataFrame()
 
 def leaderboard_page():
@@ -109,10 +106,7 @@ def leaderboard_page():
     st.markdown("### Top Candidates by Screening Score")
     st.caption("View the highest-scoring candidates across various job descriptions.")
 
-    # Check if Firebase is initialized before proceeding
-    if db is None:
-        st.warning("Firebase is not configured. Leaderboard data cannot be displayed.")
-        return
+    # No explicit Firebase initialization check needed here as fetch_leaderboard_data handles it.
 
     # Add a refresh button to allow users to get the latest data
     if st.button("🔄 Refresh Leaderboard Data"):
