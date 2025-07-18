@@ -1057,7 +1057,8 @@ def semantic_score_calculation(jd_embedding, resume_embedding, years_exp, cgpa, 
 
     try:
         years_exp_for_model = float(years_exp) if years_exp is not None else 0.0
-        features = np.concatenate([jd_embedding, resume_embedding, [years_exp_for_overlap_score]])
+        # Corrected variable name here: years_exp_for_overlap_score -> years_exp_for_model
+        features = np.concatenate([jd_embedding, resume_embedding, [years_exp_for_model], [weighted_keyword_overlap_score]])
         predicted_score = _ml_model.predict([features])[0]
 
         blended_score = (predicted_score * 0.6) + \
