@@ -1722,4 +1722,4 @@ def generate_certificate_html(candidate_data):
     return html_content
 
 if __name__ == "__main__":
-    resume_screene_page()
+    resume_screen_page()
