@@ -18,26 +18,20 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-# from email.mime.base import MIMEBase # No longer needed without PDF attachment
 from email import encoders
 import tempfile
 import shutil
-# from weasyprint import HTML # No longer needed
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from io import BytesIO
 import traceback
 import time
 import pandas as pd
 import json
-st.image("logo.png", width=140)
+
+# Use a public URL for the logo to avoid FileNotFoundError
+st.image("https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png", width=140)
+
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-# --- OCR Specific Imports (REMOVED) ---
-# from PIL import Image
-# import pytesseract
-# import cv2
-# from pdf2image import convert_from_bytes
 
 # Global NLTK download check (should run once)
 try:
@@ -254,9 +248,9 @@ NAME_EXCLUDE_TERMS = {
     "nationality", "gender", "location", "city", "country", "pin", "zipcode", "state", "whatsapp",
     "skype", "telegram", "handle", "id", "details", "connection", "reach", "network", "www",
     "https", "http", "contactinfo", "connect", "reference", "references","fees"
-]
-EDU_MATCH_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(university|college|institute|school)[^–\n]{0{0,50}}[–\-—]?\s*(expected\s*)?\d{4})', re.IGNORECASE)
-EDU_FALLBACK_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(b\.tech|m\.tech|b\.sc|m\.sc|bca|bba|mba|ph\.d)[^–\n]{0{0,50}}\d{4})', re.IGNORECASE)
+}
+EDU_MATCH_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(university|college|institute|school)[^–\n]{0,50}[–\-—]?\s*(expected\s*)?\d{4})', re.IGNORECASE)
+EDU_FALLBACK_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(b\.tech|m\.tech|b\.sc|m\.sc|bca|bba|mba|ph\.d)[^–\n]{0,50}\d{4})', re.IGNORECASE)
 WORK_HISTORY_SECTION_PATTERN = re.compile(r'(?:experience|work history|employment history)\s*(\n|$)', re.IGNORECASE)
 JOB_BLOCK_SPLIT_PATTERN = re.compile(r'\n(?=[A-Z][a-zA-Z\s,&\.]+(?:\s(?:at|@))?\s*[A-Z][a-zA-Z\s,&\.]*\s*(?:-|\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}))', re.IGNORECASE)
 DATE_RANGE_MATCH_PATTERN = re.compile(r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})\s*[-–]\s*(present|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})', re.IGNORECASE)
@@ -271,8 +265,6 @@ FORBIDDEN_TITLE_KEYWORDS = [
 PROJECT_TITLE_START_PATTERN = re.compile(r'^[•*-]?\s*\d+[\).:-]?\s')
 LANGUAGE_SECTION_PATTERN = re.compile(r'\b(languages|language skills|linguistic abilities|known languages)\s*[:\-]?\s*\n?', re.IGNORECASE)
 
-
-# Removed preprocess_image_for_ocr as OCR is removed.
 
 def clean_text(text):
     text = re.sub(r'\n', ' ', text)
@@ -933,8 +925,6 @@ def generate_detailed_hr_assessment(candidate_name, score, years_exp, semantic_s
 
     return final_assessment
 
-# Modified semantic_score to accept pre-computed embeddings
-# Removed @st.cache_data as it will be called differently
 def semantic_score_calculation(jd_embedding, resume_embedding, years_exp, cgpa, weighted_keyword_overlap_score, _ml_model):
     score = 0.0
     semantic_similarity = cosine_similarity(jd_embedding.reshape(1, -1), resume_embedding.reshape(1, -1))[0][0]
@@ -1003,9 +993,7 @@ Best regards,
 The {sender_name}""")
     return f"mailto:{recipient_email}?subject={subject}&body={body}"
 
-# Removed generate_certificate_pdf as Weasyprint is removed.
-
-def send_certificate_email(recipient_email, candidate_name, score, gmail_address, gmail_app_password): # Removed certificate_pdf_content
+def send_certificate_email(recipient_email, candidate_name, score, gmail_address, gmail_app_password):
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
@@ -1050,8 +1038,6 @@ Have questions? Contact us at support@screenerpro.in
     
     msg.attach(msg_alternative)
 
-    # Removed PDF attachment logic
-
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(gmail_address, gmail_app_password)
@@ -1065,13 +1051,6 @@ Have questions? Contact us at support@screenerpro.in
         st.error(f"❌ Failed to send email: {e}")
     return False
 
-# Wrapper for extract_text_from_file to be used with ProcessPoolExecutor
-def _extract_text_wrapper(file_info):
-    file_data_bytes, file_name, file_type = file_info
-    text = extract_text_from_file(file_data_bytes, file_name, file_type)
-    return file_name, text
-
-# Modified _process_single_resume_for_screener_page
 def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedding, 
                                              resume_embedding, jd_name_for_results,
                                              high_priority_skills, medium_priority_skills, max_experience,
@@ -1079,7 +1058,6 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
     """
     Processes a single resume (pre-extracted text and pre-computed embeddings)
     for the main screener page and returns a dictionary of results.
-    This function is designed to be run in a ProcessPoolExecutor.
     """
     try:
         if text.startswith("[ERROR]"):
@@ -1298,8 +1276,6 @@ def resume_screener_page():
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
 
-    # Removed Tesseract check here.
-
     st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
     col1, col2 = st.columns([2, 1])
 
@@ -1333,7 +1309,6 @@ def resume_screener_page():
             with st.expander("📝 View Loaded Job Description"):
                 st.text_area("Job Description Content", jd_text, height=200, disabled=True, label_visibility="collapsed")
             
-            # Moved Word Cloud here
             st.markdown("---")
             st.markdown("## ☁️ Job Description Keyword Cloud")
             st.caption("Visualizing the most frequent and important keywords from the Job Description.")
@@ -1389,7 +1364,7 @@ def resume_screener_page():
         )
 
     # Changed to single file uploader
-    uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF)**", type=["pdf"], help="Upload your resume (text-selectable PDF only). File must be less than 1MB.") # Removed JPG, PNG
+    uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF)**", type=["pdf"], help="Upload your resume (text-selectable PDF only). File must be less than 1MB.")
     
     if jd_text and uploaded_resume_file:
         # Start overall timer
@@ -1424,6 +1399,7 @@ def resume_screener_page():
 
         # --- PHASE 3: Individual Resume Analysis ---
         with st.spinner(f"Analyzing your resume with AI models..."):
+            # Direct call to processing function (no ProcessPoolExecutor)
             result = _process_single_resume_for_screener_page(
                 file_name, resume_text, jd_text, jd_embedding, resume_embedding,
                 jd_name_for_results, high_priority_skills, medium_priority_skills, max_experience,
@@ -1514,13 +1490,11 @@ def resume_screener_page():
                     st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button")
                         
                 with col_cert_download:
-                    # Removed PDF download button
                     st.info("PDF download is not available in this version.")
                 
                 # Send email button
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
                     if st.button("📧 Send Certificate to Email", key="send_cert_email_button"):
-                        # Call send_certificate_email without PDF content
                         send_certificate_email(
                             recipient_email=candidate_data['Email'],
                             candidate_name=candidate_data['Candidate Name'],
