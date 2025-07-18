@@ -35,7 +35,9 @@ def _convert_from_firestore_rest_format(field_value):
 appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+# This is the base URL for your Streamlit app. It should be the public URL.
+# Example: "https://your-app-name.streamlit.app"
+APP_BASE_URL = "https://screenerpro-app.streamlit.app" 
 
 @st.cache_data(ttl=60) # Cache data for a short period
 def fetch_candidate_by_certificate_id_rest(certificate_id):
@@ -336,24 +338,47 @@ def certificate_verifier_page():
     st.title("✅ ScreenerPro Certificate Verification")
     st.markdown("### Verify the authenticity of a ScreenerPro Certificate.")
 
-    # Initialize session state for certificate preview
+    # Initialize session state for certificate preview and input value
     if 'certificate_html_content_verifier' not in st.session_state:
         st.session_state['certificate_html_content_verifier'] = ""
+    if 'cert_id_input_value' not in st.session_state:
+        st.session_state['cert_id_input_value'] = ""
+
+    # Check for certificate ID in URL query parameters on initial load
+    query_params = st.query_params
+    if "cert_id" in query_params and not st.session_state['cert_id_input_value']:
+        st.session_state['cert_id_input_value'] = query_params["cert_id"]
+        # Automatically trigger verification if ID found in URL
+        # This will cause a rerun, and the `if st.button` block below will not execute immediately
+        # but the `candidate_data` will be fetched on the next rerun.
+        # We need a way to trigger the display logic without button click on initial load.
+        # A simple way is to set a flag or directly call the fetch if the value is from URL.
 
     certificate_id_input = st.text_input(
         "Enter Certificate ID",
+        value=st.session_state['cert_id_input_value'], # Use session state for value
         placeholder="e.g., a1b2c3d4-e5f6-7890-1234-567890abcdef",
-        help="Paste the unique Certificate ID found on the ScreenerPro certificate."
+        help="Paste the unique Certificate ID found on the ScreenerPro certificate.",
+        key="cert_id_text_input" # Add a key for the text input
     )
 
-    # Use a button to trigger the verification process
-    if st.button("🔍 Verify Certificate"):
-        if not certificate_id_input:
-            st.warning("Please enter a Certificate ID to verify.")
-            # Clear previous certificate display if input is empty
-            st.session_state['certificate_html_content_verifier'] = ""
-            return
+    # Update session state value if user types
+    if st.session_state['cert_id_text_input'] != st.session_state['cert_id_input_value']:
+        st.session_state['cert_id_input_value'] = st.session_state['cert_id_text_input']
+        # Clear certificate content if user starts typing a new ID
+        st.session_state['certificate_html_content_verifier'] = ""
+        st.rerun() # Rerun to reflect changes and clear display
 
+    # Logic to trigger verification: either by button click or by URL parameter on initial load
+    trigger_verification = False
+    if st.button("🔍 Verify Certificate"):
+        trigger_verification = True
+    elif "cert_id" in query_params and query_params["cert_id"] == st.session_state['cert_id_input_value'] and not st.session_state['certificate_html_content_verifier']:
+        # This condition checks if there's a cert_id in URL, it matches the input,
+        # and the certificate hasn't been displayed yet (to avoid infinite loop).
+        trigger_verification = True
+
+    if trigger_verification and certificate_id_input:
         with st.spinner(f"Verifying certificate ID: {certificate_id_input}..."):
             candidate_data = fetch_candidate_by_certificate_id_rest(certificate_id_input)
             
@@ -386,7 +411,29 @@ def certificate_verifier_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content_verifier'] = certificate_html_content # Store for preview
 
-                col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3) # Adjusted columns as view button is removed
+                # Generate shareable link
+                shareable_link = f"{APP_BASE_URL}?page=certificate_verify&cert_id={urllib.parse.quote(certificate_id_input)}"
+                st.text_input("🔗 Shareable Certificate Link", value=shareable_link, disabled=True, key="share_link_display")
+                
+                # JavaScript to copy to clipboard (using st.markdown for HTML)
+                copy_js = f"""
+                <script>
+                function copyToClipboard(text) {{
+                    var dummy = document.createElement("textarea");
+                    document.body.appendChild(dummy);
+                    dummy.value = text;
+                    dummy.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(dummy);
+                    alert("Link copied to clipboard!"); // Use a custom message box in production
+                }}
+                </script>
+                <button onclick="copyToClipboard('{shareable_link}')" style="background-color:#00bcd4;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;margin-top:10px;">Copy Link</button>
+                """
+                st.markdown(copy_js, unsafe_allow_html=True)
+
+
+                col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3) 
                 
                 with col_cert_download:
                     st.download_button(
@@ -403,15 +450,17 @@ def certificate_verifier_page():
 This candidate was evaluated across multiple hiring parameters using AI-powered screening technology and scored above {candidate_data['Score (%)']:.1f}%.
 
 #resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
-🌐 Verify this certificate: {urllib.parse.quote(APP_BASE_URL)}
+🌐 Verify this certificate: {shareable_link}
 """
                 
                 # LinkedIn Share Button
-                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(APP_BASE_URL)}&title={urllib.parse.quote('ScreenerPro Certificate Verification')}&summary={urllib.parse.quote(share_message)}"
+                # LinkedIn's shareArticle does not pre-fill the user's post text directly.
+                # The 'summary' parameter is for the link preview description.
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(shareable_link)}&title={urllib.parse.quote('ScreenerPro Certificate Verification')}&summary={urllib.parse.quote(share_message)}"
                 with col_share_linkedin:
                     st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
 
-                # WhatsApp Share Button
+                # WhatsApp Share Button (pre-fills text)
                 whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
                 with col_share_whatsapp:
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
@@ -419,19 +468,17 @@ This candidate was evaluated across multiple hiring parameters using AI-powered 
                 # --- Automatic HTML Preview Display ---
                 st.markdown("---")
                 st.markdown("### Generated Certificate Preview (HTML)")
-                # Set a fixed height to ensure the entire certificate is visible
-                # A common certificate aspect ratio is around 1.4:1 (width:height).
-                # For 960px width, a height of 1200px should be sufficient.
                 st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=1200, scrolling=False) 
                 st.markdown("---")
 
             else:
-                st.error("Certificate not found. Please check the ID and try again.")
+                st.error("Certificate not found or invalid. Please check the ID and try again.")
                 st.info("The provided Certificate ID does not match any records in our system. It might be incorrect, or the certificate may not exist.")
                 # Clear previous certificate display if not found
                 st.session_state['certificate_html_content_verifier'] = ""
 
     # This block ensures the preview is hidden if the input is cleared or no verification is done yet
+    # It also handles clearing if the user manually clears the text input
     if not certificate_id_input and st.session_state['certificate_html_content_verifier']:
         st.session_state['certificate_html_content_verifier'] = ""
         st.rerun() # Rerun to clear the display immediately
