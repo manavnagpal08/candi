@@ -43,19 +43,17 @@ def fetch_candidate_by_certificate_id(certificate_id):
         project_id = st.secrets["FIREBASE_PROJECT_ID"]
         api_key = st.secrets["FIREBASE_API_KEY"]
         
-        # Corrected collection path to include appId and public/data
-        collection_id = f"artifacts/{appId}/public/data/leaderboard"
-
         # Firestore REST API endpoint for running a structured query
         url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents:runQuery?key={api_key}"
 
         # Structured query to find a document where 'Certificate ID' field matches the input
+        # Corrected: Use 'parent' field for subcollection path, 'collectionId' is just the name
         query_payload = {
             "structuredQuery": {
-                "from": [{"collectionId": collection_id}],
+                "parent": f"projects/{project_id}/databases/(default)/documents/artifacts/{appId}/public/data",
+                "from": [{"collectionId": "leaderboard"}],
                 "where": {
                     "fieldFilter": {
-                        # FIX: Enclose "Certificate ID" in backticks for the fieldPath
                         "field": {"fieldPath": "`Certificate ID`"},
                         "op": "EQUAL",
                         "value": {"stringValue": certificate_id}
@@ -101,6 +99,7 @@ def fetch_candidate_by_certificate_id(certificate_id):
         st.error(f"❌ Failed to fetch certificate details via REST API: HTTP Error {e.response.status_code}")
         st.error(f"Response: {e.response.text}")
         st.warning("Ensure Firestore security rules allow read access to the 'leaderboard' collection.")
+        return None
     except Exception as e:
         st.error(f"❌ An unexpected error occurred while verifying certificate: {e}")
         st.exception(e)
