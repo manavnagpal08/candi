@@ -6,6 +6,7 @@ import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
+# Ensure these files are in a 'pages' subdirectory relative to app.py
 from pages.resume_screen import resume_screener_page
 from pages.top_leaderboard import leaderboard_page
 from pages.about_us import about_us_page
@@ -99,6 +100,7 @@ def admin_registration_section():
             st.error("Please fill in all fields.")
         elif not is_valid_email(new_username): # Email format validation
             st.error("Please enter a valid email address for the username.")
+            st.session_state.active_login_tab_selection = "Register"
         else:
             users = load_users()
             if new_username in users:
@@ -244,29 +246,83 @@ def logout_page():
 def main():
     st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
 
-    # Initialize session state for current page and dark mode
+    # Initialize session state for current page and theme
     if "current_page" not in st.session_state:
         st.session_state.current_page = "resume_screen" # Default page after login
-    if "dark_mode_main" not in st.session_state:
-        st.session_state.dark_mode_main = False # Default to light mode
+    if "theme" not in st.session_state:
+        st.session_state.theme = "light" # Default to light mode
 
     st.sidebar.title("ScreenerPro Portal")
 
     # Dark Mode Toggle in Sidebar
     st.sidebar.markdown("---")
-    st.session_state.dark_mode_main = st.sidebar.checkbox("🌙 Dark Mode", value=st.session_state.dark_mode_main)
-    
-    # Apply theme based on dark_mode_main
-    if st.session_state.dark_mode_main:
+    dark_mode_checkbox = st.sidebar.checkbox("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
+    if dark_mode_checkbox:
+        st.session_state.theme = "dark"
+    else:
+        st.session_state.theme = "light"
+
+    # Apply global CSS based on theme
+    if st.session_state.theme == "dark":
         st.markdown(
             """
             <style>
-            body { background-color: #1a1a1a; color: #f0f0f0; }
-            .stApp { background-color: #1a1a1a; }
-            .stSidebar { background-color: #262626; }
-            .stButton>button { background-color: #00cec9; color: white; }
-            .stButton>button:hover { background-color: #00b0a8; }
-            /* Add more dark mode specific styles here if needed */
+            .stApp {
+                background-color: #1a1a1a;
+                color: #f0f0f0;
+            }
+            .stSidebar {
+                background-color: #262626;
+                color: #f0f0f0;
+            }
+            /* Text input, text area, selectbox, etc. */
+            .stTextInput>div>div>input,
+            .stTextArea>div>div>textarea,
+            .stSelectbox>div>div>div>div>span,
+            .stMultiSelect>div>div>div>div>span,
+            .stSlider .stSliderHandle,
+            .stRadio > label > div,
+            .stCheckbox > label > div {
+                background-color: #3A3A3A !important;
+                color: #f0f0f0 !important;
+                border: 1px solid #555555 !important;
+            }
+            /* Labels for inputs */
+            .stTextInput label,
+            .stTextArea label,
+            .stSelectbox label,
+            .stMultiSelect label,
+            .stSlider label,
+            .stRadio label,
+            .stCheckbox label {
+                color: #f0f0f0 !important;
+            }
+            /* Buttons */
+            .stButton>button {
+                background-color: #00cec9;
+                color: white;
+                border: none;
+            }
+            .stButton>button:hover {
+                background-color: #00b0a8;
+            }
+            /* Expander background */
+            .streamlit-expanderHeader {
+                background-color: #3A3A3A;
+                color: #f0f0f0;
+            }
+            .streamlit-expanderContent {
+                background-color: #2D2D2D;
+                color: #f0f0f0;
+            }
+            /* Info/Success/Error boxes */
+            .stAlert {
+                background-color: #3A3A3A;
+                color: #f0f0f0;
+            }
+            .stAlert > div > div > div > div {
+                color: #f0f0f0; /* Text inside alert */
+            }
             </style>
             """,
             unsafe_allow_html=True
@@ -275,12 +331,62 @@ def main():
         st.markdown(
             """
             <style>
-            body { background-color: #f0f2f6; color: #333333; }
-            .stApp { background-color: #f0f2f6; }
-            .stSidebar { background-color: #ffffff; }
-            .stButton>button { background-color: #00cec9; color: white; }
-            .stButton>button:hover { background-color: #00b0a8; }
-            /* Add more light mode specific styles here if needed */
+            .stApp {
+                background-color: #f0f2f6;
+                color: #333333;
+            }
+            .stSidebar {
+                background-color: #ffffff;
+                color: #333333;
+            }
+            /* Text input, text area, selectbox, etc. */
+            .stTextInput>div>div>input,
+            .stTextArea>div>div>textarea,
+            .stSelectbox>div>div>div>div>span,
+            .stMultiSelect>div>div>div>div>span,
+            .stSlider .stSliderHandle,
+            .stRadio > label > div,
+            .stCheckbox > label > div {
+                background-color: #ffffff !important;
+                color: #333333 !important;
+                border: 1px solid #ccc !important;
+            }
+            /* Labels for inputs */
+            .stTextInput label,
+            .stTextArea label,
+            .stSelectbox label,
+            .stMultiSelect label,
+            .stSlider label,
+            .stRadio label,
+            .stCheckbox label {
+                color: #333333 !important;
+            }
+            /* Buttons */
+            .stButton>button {
+                background-color: #00cec9;
+                color: white;
+                border: none;
+            }
+            .stButton>button:hover {
+                background-color: #00b0a8;
+            }
+            /* Expander background */
+            .streamlit-expanderHeader {
+                background-color: #f0f2f6;
+                color: #333333;
+            }
+            .streamlit-expanderContent {
+                background-color: #ffffff;
+                color: #333333;
+            }
+            /* Info/Success/Error boxes */
+            .stAlert {
+                background-color: #ffffff;
+                color: #333333;
+            }
+            .stAlert > div > div > div > div {
+                color: #333333; /* Text inside alert */
+            }
             </style>
             """,
             unsafe_allow_html=True
@@ -311,6 +417,7 @@ def main():
     st.sidebar.subheader("Navigation")
     
     # Navigation buttons
+    # These buttons explicitly control the page shown, preventing automatic Streamlit page detection
     if st.sidebar.button("📄 Resume Screen", key="nav_resume"):
         st.session_state.current_page = "resume_screen"
     if st.sidebar.button("🏆 Top Leaderboard", key="nav_leaderboard"):
