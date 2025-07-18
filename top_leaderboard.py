@@ -7,8 +7,6 @@ import requests # Import requests for REST API calls
 import matplotlib.pyplot as plt # For visualizations
 import seaborn as sns # For better looking plots
 
-# Removed firebase_admin imports as we are now using the REST API for fetching.
-
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
 # If running locally without this, you might need to hardcode a default or set it via env var.
@@ -41,55 +39,60 @@ def _convert_from_firestore_rest_format(field_value):
 @st.cache_data(ttl=60) # Cache data for 60 seconds to reduce Firestore reads
 def fetch_leaderboard_data():
     """
-    Fetches candidate screening results from Firestore using the REST API.
+    Fetches candidate screening results from Firestore using the REST API,
+    implementing pagination to retrieve all documents.
     Data is fetched from the 'leaderboard' collection at the root.
     Includes the Firestore document ID for detailed view fetching.
     """
     leaderboard_data = []
+    page_token = None
+    
     try:
         project_id = st.secrets["FIREBASE_PROJECT_ID"]
         api_key = st.secrets["FIREBASE_API_KEY"]
         
-        # Corrected: Access 'leaderboard' collection directly at the root
         collection_id = "leaderboard"
-        
-        # URL directly accessing the 'leaderboard' collection at the root
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
+        base_url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
 
-        response = requests.get(url)
-        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
-        
-        response_json = response.json()
-        
-        for doc_entry in response_json.get("documents", []):
-            data = {}
-            # Extract Firestore document ID from the 'name' field
-            # Example name: projects/your-project-id/databases/(default)/documents/leaderboard/DOC_ID
-            doc_id = doc_entry.get("name", "").split('/')[-1]
-            data["Firestore Doc ID"] = doc_id # Store the document ID
-
-            # Convert each field from Firestore REST format to Python native types
-            for key, value_obj in doc_entry.get("fields", {}).items():
-                data[key] = _convert_from_firestore_rest_format(value_obj)
+        while True:
+            url = base_url
+            if page_token:
+                url += f"&pageToken={page_token}"
             
-            # Append data to the list, providing default values for robustness
-            leaderboard_data.append({
-                "Firestore Doc ID": data.get("Firestore Doc ID", "N/A"), # Ensure ID is present
-                "Candidate Name": data.get("Candidate Name", "N/A"),
-                "Score (%)": data.get("Score (%)", 0.0), 
-                "Years Experience": data.get("Years Experience", 0.0),
-                "CGPA (4.0 Scale)": data.get("CGPA (4.0 Scale)", None),
-                "JD Used": data.get("JD Used", "N/A"),
-                # Convert date string back to datetime object for proper sorting/display
-                "Date Screened": pd.to_datetime(data.get("Date Screened", datetime.now().strftime("%Y-%m-%d"))),
-                "Certificate Rank": data.get("Certificate Rank", "N/A"),
-                "Tag": data.get("Tag", "N/A"),
-                "AI Suggestion": data.get("AI Suggestion", "N/A"), # Fetch for detailed view
-                "Detailed HR Assessment": data.get("Detailed HR Assessment", "N/A"), # Fetch for detailed view
-                "Matched Keywords (Categorized)": data.get("Matched Keywords (Categorized)", "{}"), # Fetch for detailed view
-                "Missing Skills (Categorized)": data.get("Missing Skills (Categorized)", "{}"), # Fetch for detailed view
-                "Semantic Similarity": data.get("Semantic Similarity", 0.0) # Fetch for detailed view
-            })
+            response = requests.get(url)
+            response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+            
+            response_json = response.json()
+            
+            for doc_entry in response_json.get("documents", []):
+                data = {}
+                doc_id = doc_entry.get("name", "").split('/')[-1]
+                data["Firestore Doc ID"] = doc_id # Store the document ID
+
+                for key, value_obj in doc_entry.get("fields", {}).items():
+                    data[key] = _convert_from_firestore_rest_format(value_obj)
+                
+                leaderboard_data.append({
+                    "Firestore Doc ID": data.get("Firestore Doc ID", "N/A"), # Ensure ID is present
+                    "Candidate Name": data.get("Candidate Name", "N/A"),
+                    "Score (%)": data.get("Score (%)", 0.0), 
+                    "Years Experience": data.get("Years Experience", 0.0),
+                    "CGPA (4.0 Scale)": data.get("CGPA (4.0 Scale)", None),
+                    "JD Used": data.get("JD Used", "N/A"),
+                    "Date Screened": pd.to_datetime(data.get("Date Screened", datetime.now().strftime("%Y-%m-%d"))),
+                    "Certificate Rank": data.get("Certificate Rank", "N/A"),
+                    "Tag": data.get("Tag", "N/A"),
+                    "AI Suggestion": data.get("AI Suggestion", "N/A"), # Fetch for detailed view
+                    "Detailed HR Assessment": data.get("Detailed HR Assessment", "N/A"), # Fetch for detailed view
+                    "Matched Keywords (Categorized)": data.get("Matched Keywords (Categorized)", "{}"), # Fetch for detailed view
+                    "Missing Skills (Categorized)": data.get("Missing Skills (Categorized)", "{}"), # Fetch for detailed view
+                    "Semantic Similarity": data.get("Semantic Similarity", 0.0) # Fetch for detailed view
+                })
+            
+            # Check for next page token
+            page_token = response_json.get("nextPageToken")
+            if not page_token:
+                break # No more pages, exit loop
         
         df = pd.DataFrame(leaderboard_data)
         # Sort the DataFrame by "Score (%)" in descending order
@@ -109,18 +112,11 @@ def fetch_leaderboard_data():
         st.exception(e)
         return pd.DataFrame()
 
-# Removed fetch_candidate_details as all necessary details are now fetched by fetch_leaderboard_data
-# to simplify the detailed view logic and reduce redundant API calls.
-
 def leaderboard_page():
     """
     Displays the ScreenerPro Leaderboard page in Streamlit.
     Fetches and filters candidate data from Firestore, and provides detailed view.
     """
-    # Import display_greeting_card from the main app.py file
-    # from app import display_greeting_card # Removed to avoid circular import
-    # display_greeting_card() # Removed call to avoid circular import
-
     # Personalized greeting for the logged-in user
     if st.session_state.get('authenticated', False) and st.session_state.get('username'):
         st.markdown(f"## Hello, {st.session_state.username}!")
@@ -297,7 +293,7 @@ def leaderboard_page():
                     st.write("No categorized missing skills found.")
             else:
                 st.warning("Could not load detailed information for the selected candidate.")
-        
+            
         st.markdown("---")
         st.subheader("Score Distribution")
         st.caption("Histogram showing the distribution of screening scores.")
