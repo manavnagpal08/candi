@@ -96,9 +96,15 @@ def register_section():
                         "company": new_company_name # Store company name
                     }
                     save_users(users)
-                    st.success("✅ Registration successful! You can now switch to the 'Login' option.")
-                    # Manually set the session state to switch to Login option
-                    st.session_state.active_login_tab_selection = "Login"
+                    st.success("✅ Registration successful! You are now logged in.")
+                    
+                    # Automatically log in the user
+                    st.session_state.authenticated = True
+                    st.session_state.username = new_username
+                    st.session_state.user_company = new_company_name
+                    st.session_state.current_page = "resume_screen" # Redirect to a default page
+                    st.rerun() # Rerun to apply the login and redirect
+                    
 
 def admin_registration_section():
     """Admin-driven user creation form."""
@@ -253,104 +259,6 @@ def logout_page():
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
 
-def display_greeting_card():
-    """
-    Displays a beautiful greeting card with the authenticated username.
-    This function should be called at the beginning of each page after authentication.
-    """
-    if st.session_state.get("authenticated") and st.session_state.get("username"):
-        st.markdown(
-            f"""
-            <style>
-            @keyframes fadeInScale {{
-                from {{ opacity: 0; transform: scale(0.9); }}
-                to {{ opacity: 1; transform: scale(1); }}
-            }}
-
-            .beautiful-greeting-card {{
-                background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%); /* Soft gradient background */
-                border-radius: 12px; /* More rounded corners */
-                padding: 30px;
-                margin-bottom: 25px;
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
-                text-align: center;
-                animation: fadeInScale 0.7s ease-out forwards; /* Apply animation */
-                position: relative; /* For the sparkle effect */
-                overflow: hidden; /* To contain the sparkle */
-            }}
-            /* Dark mode adjustments for greeting card */
-            .stApp.dark-mode .beautiful-greeting-card {{
-                background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            }}
-            .stApp.dark-mode .beautiful-greeting-title {{
-                color: #00cec9; /* Match sidebar title color in dark mode */
-            }}
-            .stApp.dark-mode .beautiful-welcome-text {{
-                color: #bbbbbb;
-            }}
-
-
-            .beautiful-greeting-card::before {{
-                content: '✨'; /* Add a subtle sparkle effect */
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                font-size: 2em;
-                opacity: 0.2;
-                pointer-events: none;
-            }}
-            .beautiful-greeting-card::after {{
-                content: '�'; /* Another sparkle */
-                position: absolute;
-                bottom: 10px;
-                right: 10px;
-                font-size: 2em;
-                opacity: 0.2;
-                pointer-events: none;
-            }}
-
-            .beautiful-greeting-title {{
-                font-size: 2.2em; /* Larger title */
-                font-weight: 700; /* Bolder */
-                color: #2c3e50; /* Darker, more prominent color */
-                margin-bottom: 10px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
-            }}
-
-            .beautiful-username {{
-                color: #3498db; /* Vibrant blue for username */
-                font-weight: 800; /* Extra bold */
-            }}
-
-            .beautiful-welcome-text {{
-                font-size: 1.15em; /* Slightly larger body text */
-                color: #555555; /* Softer text color */
-                line-height: 1.6;
-                margin-top: 15px;
-            }}
-
-            .beautiful-emoji {{
-                font-size: 1.6em; /* Larger, more impactful emojis */
-                vertical-align: middle;
-                margin: 0 5px;
-            }}
-            </style>
-
-            <div class="beautiful-greeting-card">
-                <h1 class="beautiful-greeting-title">
-                    Welcome, <span class="beautiful-username">{st.session_state.username}</span>!
-                </h1>
-                <p class="beautiful-welcome-text">
-                    <span class="beautiful-emoji">👋</span> We're absolutely thrilled to have you here!
-                    Your journey with us officially begins now. <span class="beautiful-emoji">🚀</span>
-                    Get ready to explore! <span class="beautiful-emoji">🎉</span>
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
 
 # --- Main Application Logic ---
 
@@ -368,27 +276,13 @@ def main():
         st.markdown(
             """
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-            html, body, .stApp {
-                font-family: 'Inter', sans-serif;
+            .stApp {
                 background-color: #1a1a1a;
                 color: #f0f0f0;
-            }
-            .stApp { /* Add dark-mode class to stApp for conditional styling */
-                background-color: #1a1a1a;
-                color: #f0f0f0;
-            }
-            .stApp.dark-mode {
-                /* This class will be added by JS below */
             }
             .stSidebar {
                 background-color: #262626;
                 color: #f0f0f0;
-                padding-top: 2rem;
-            }
-            h1, h2, h3, h4, h5, h6 {
-                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -401,7 +295,6 @@ def main():
                 background-color: #3A3A3A !important;
                 color: #f0f0f0 !important;
                 border: 1px solid #555555 !important;
-                border-radius: 0.5rem;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -412,70 +305,34 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #f0f0f0 !important;
-                font-weight: 500;
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
-                border-radius: 0.5rem;
-                padding: 0.6rem 1.2rem;
-                font-weight: 600;
-                transition: all 0.2s ease-in-out;
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
-                transform: translateY(-1px);
             }
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
-                border-radius: 0.5rem;
-                padding: 0.8rem 1rem;
             }
             .streamlit-expanderContent {
                 background-color: #2D2D2D;
                 color: #f0f0f0;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
-                border-radius: 0.5rem;
             }
             .stAlert > div > div > div > div {
                 color: #f0f0f0; /* Text inside alert */
             }
-            /* Dataframe styling */
-            .stDataFrame {
-                border-radius: 0.5rem;
-                overflow: hidden; /* Ensures rounded corners are applied */
-            }
-            /* Metric boxes */
-            .stMetric {
-                background-color: #2D2D2D;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                border: 1px solid #555555;
-            }
             </style>
-            """,
-            unsafe_allow_html=True
-        )
-        # Add JS to apply dark-mode class to stApp
-        st.markdown(
-            """
-            <script>
-            const body = window.parent.document.querySelector('.stApp');
-            if (body) {
-                body.classList.add('dark-mode');
-            }
-            </script>
             """,
             unsafe_allow_html=True
         )
@@ -483,27 +340,13 @@ def main():
         st.markdown(
             """
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-            html, body, .stApp {
-                font-family: 'Inter', sans-serif;
+            .stApp {
                 background-color: #f0f2f6;
                 color: #333333;
-            }
-            .stApp { /* Remove dark-mode class from stApp */
-                background-color: #f0f2f6;
-                color: #333333;
-            }
-            .stApp.dark-mode {
-                /* This class will be removed by JS below */
             }
             .stSidebar {
                 background-color: #ffffff;
                 color: #333333;
-                padding-top: 2rem;
-            }
-            h1, h2, h3, h4, h5, h6 {
-                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -516,7 +359,6 @@ def main():
                 background-color: #ffffff !important;
                 color: #333333 !important;
                 border: 1px solid #ccc !important;
-                border-radius: 0.5rem;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -527,70 +369,34 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #333333 !important;
-                font-weight: 500;
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
-                border-radius: 0.5rem;
-                padding: 0.6rem 1.2rem;
-                font-weight: 600;
-                transition: all 0.2s ease-in-out;
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
-                transform: translateY(-1px);
             }
             /* Expander background */
             .streamlit-expanderHeader {
-                background-color: #e0e0e0;
+                background-color: #f0f2f6;
                 color: #333333;
-                border-radius: 0.5rem;
-                padding: 0.8rem 1rem;
             }
             .streamlit-expanderContent {
-                background-color: #f8f8f8;
+                background-color: #ffffff;
                 color: #333333;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #ffffff;
                 color: #333333;
-                border-radius: 0.5rem;
             }
             .stAlert > div > div > div > div {
                 color: #333333; /* Text inside alert */
             }
-            /* Dataframe styling */
-            .stDataFrame {
-                border-radius: 0.5rem;
-                overflow: hidden; /* Ensures rounded corners are applied */
-            }
-            /* Metric boxes */
-            .stMetric {
-                background-color: #ffffff;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                border: 1px solid #ccc;
-            }
             </style>
-            """,
-            unsafe_allow_html=True
-        )
-        # Add JS to remove dark-mode class from stApp
-        st.markdown(
-            """
-            <script>
-            const body = window.parent.document.querySelector('.stApp');
-            if (body) {
-                body.classList.remove('dark-mode');
-            }
-            </script>
             """,
             unsafe_allow_html=True
         )
@@ -652,14 +458,19 @@ def main():
 
     # Render the selected page
     if st.session_state.current_page == "resume_screen":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         resume_screener_page()
     elif st.session_state.current_page == "top_leaderboard":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         leaderboard_page()
     elif st.session_state.current_page == "certificate_verify": # New page rendering
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         certificate_verification_page()
     elif st.session_state.current_page == "about_us":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         feedback_and_help_page()
     elif st.session_state.current_page == "logout":
         logout_page()
