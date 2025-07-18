@@ -27,13 +27,9 @@ import traceback
 import time
 import pandas as pd
 import json
+import requests # Import requests for REST API calls
 
-# Firebase imports for Firestore
-# Using firebase_admin for server-side Python Streamlit app
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-# Removed the st.image call for the logo as requested.
+# Removed Firebase Admin SDK imports as requested.
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -218,39 +214,114 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
-# Initialize Firebase (only once)
-@st.cache_resource
-def initialize_firebase():
-    try:
-        # Check if Firebase app is already initialized
-        if not firebase_admin._apps:
-            # Use Streamlit secrets for Firebase configuration
-            firebase_config = {
-                "apiKey": st.secrets["FIREBASE_API_KEY"],
-                "authDomain": st.secrets["FIREBASE_AUTH_DOMAIN"],
-                "projectId": st.secrets["FIREBASE_PROJECT_ID"],
-                "storageBucket": st.secrets["FIREBASE_STORAGE_BUCKET"],
-                "messagingSenderId": st.secrets["FIREBASE_MESSAGING_SENDER_ID"],
-                "appId": st.secrets["FIREBASE_APP_ID"],
-                "measurementId": st.secrets["FIREBASE_MEASUREMENT_ID"]
-            }
-            # Load service account key from secrets
-            # Ensure the service account key is correctly formatted as a JSON string
-            service_account_key_json = st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]
-            cred = credentials.Certificate(json.loads(service_account_key_json))
-            firebase_admin.initialize_app(cred, firebase_config)
-        
-        db = firestore.client()
-        st.success("✅ Firebase initialized successfully!") # Added success message
-        return db
-    except Exception as e:
-        st.error(f"❌ Error initializing Firebase: {e}")
-        st.exception(e) # Display the exception traceback directly on the frontend
-        st.info("Please ensure ALL Firebase secrets (API Key, Auth Domain, Project ID, etc., and the Service Account Key JSON) are correctly configured in your secrets.toml or Streamlit Cloud secrets.")
-        return None
+# --- Firebase REST API Functions ---
 
-# Get Firestore DB client globally
-db = initialize_firebase()
+# Helper function to convert Python data to Firestore REST API format
+def _convert_to_firestore_rest_format(data):
+    """
+    Converts a Python dictionary to the Firestore REST API document format.
+    Handles basic types (string, int, float, bool) and lists of strings.
+    Nested dictionaries are converted to mapValue.
+    """
+    fields = {}
+    for key, value in data.items():
+        if value is None:
+            fields[key] = {"nullValue": None}
+        elif isinstance(value, bool):
+            fields[key] = {"booleanValue": value}
+        elif isinstance(value, int):
+            fields[key] = {"integerValue": str(value)} # Firestore REST API expects integerValue as string
+        elif isinstance(value, float):
+            fields[key] = {"doubleValue": value}
+        elif isinstance(value, str):
+            fields[key] = {"stringValue": value}
+        elif isinstance(value, list):
+            list_values = []
+            for item in value:
+                # Recursively convert items in list if they are complex, otherwise stringValue
+                if isinstance(item, dict):
+                    list_values.append({"mapValue": {"fields": _convert_to_firestore_rest_format(item)["fields"]}})
+                elif isinstance(item, list):
+                    # Handle nested lists by stringifying for simplicity, or implement deeper recursion
+                    list_values.append({"stringValue": json.dumps(item)})
+                elif isinstance(item, (int, float)):
+                    list_values.append({"doubleValue": float(item)})
+                elif isinstance(item, bool):
+                    list_values.append({"booleanValue": item})
+                else:
+                    list_values.append({"stringValue": str(item)})
+            fields[key] = {"arrayValue": {"values": list_values}}
+        elif isinstance(value, dict):
+            fields[key] = {"mapValue": {"fields": _convert_to_firestore_rest_format(value)["fields"]}}
+        else:
+            fields[key] = {"stringValue": str(value)} # Fallback for other types
+    return {"fields": fields}
+
+def save_screening_result_to_firestore_rest(result_data):
+    """
+    Saves a single screening result to Firestore using the REST API.
+    Requires FIREBASE_PROJECT_ID and FIREBASE_API_KEY in st.secrets.
+    """
+    try:
+        project_id = st.secrets["FIREBASE_PROJECT_ID"]
+        api_key = st.secrets["FIREBASE_API_KEY"]
+        
+        # Firestore collection path (using 'leaderboard' as before)
+        # Note: For public data, your Firestore security rules must allow unauthenticated writes
+        # or you need to implement user authentication and pass an ID token.
+        collection_id = "leaderboard" 
+        
+        # Firestore REST API endpoint for creating a document with an auto-generated ID
+        # To specify an ID, you'd use PATCH /v1/projects/{project_id}/databases/(default)/documents/{collection_id}/{document_id}
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
+
+        # Prepare data for Firestore REST API
+        # Ensure 'Matched Keywords (Categorized)' and 'Missing Skills (Categorized)' are dicts, not JSON strings
+        data_to_send = result_data.copy()
+        if isinstance(data_to_send.get('Matched Keywords (Categorized)'), str):
+            try:
+                data_to_send['Matched Keywords (Categorized)'] = json.loads(data_to_send['Matched Keywords (Categorized)'])
+            except json.JSONDecodeError:
+                data_to_send['Matched Keywords (Categorized)'] = {} # Fallback
+        if isinstance(data_to_send.get('Missing Skills (Categorized)'), str):
+            try:
+                data_to_send['Missing Skills (Categorized)'] = json.loads(data_to_send['Missing Skills (Categorized)'])
+            except json.JSONDecodeError:
+                data_to_send['Missing Skills (Categorized)'] = {} # Fallback
+
+        # Convert datetime.date objects to string for JSON serialization
+        if isinstance(data_to_send.get('Date Screened'), (datetime, date)):
+            data_to_send['Date Screened'] = data_to_send['Date Screened'].strftime("%Y-%m-%d")
+
+        # Remove raw text if it's too large or not needed in leaderboard
+        data_to_send.pop('Resume Raw Text', None)
+
+        firestore_payload = _convert_to_firestore_rest_format(data_to_send)
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(firestore_payload))
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+
+        st.success(f"📈 Your score has been added to the leaderboard via REST API!")
+        st.info("Remember: For write access, your Firestore security rules must allow it. For production, consider secure authentication.")
+
+    except KeyError as e:
+        st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
+        st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
+    except requests.exceptions.HTTPError as e:
+        st.error(f"❌ Failed to save results to leaderboard via REST API: HTTP Error {e.response.status_code}")
+        st.error(f"Response: {e.response.text}")
+        st.warning("This often indicates an issue with Firestore security rules (e.g., write access denied) or incorrect API key/project ID.")
+    except Exception as e:
+        st.error(f"❌ An unexpected error occurred while saving to leaderboard via REST API: {e}")
+        st.exception(e) # Display the exception traceback directly on the frontend
+
+
+# Removed Firebase Admin SDK initialization
+# db = initialize_firebase() # No longer needed
 
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
@@ -1157,8 +1228,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         jd_raw_skills_set, jd_categorized_skills = extract_relevant_keywords(jd_text, MASTER_SKILLS)
 
         matched_keywords = list(resume_raw_skills_set.intersection(jd_raw_skills_set))
-        missing_skills = list(jd_raw_skills_set.difference(jd_raw_skills_set)) # Should be jd_raw_skills_set.difference(resume_raw_skills_set)
-
+        
         # Corrected: Missing skills should be JD skills NOT found in resume
         missing_skills = list(jd_raw_skills_set.difference(resume_raw_skills_set))
 
@@ -1585,32 +1655,9 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                 with col_share_whatsapp:
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
-                # --- Firestore Save for Leaderboard ---
-                if db: # Check if Firebase DB client is initialized
-                    try:
-                        # Prepare data for Firestore. Ensure all data types are compatible.
-                        data_to_save = candidate_data.copy()
-                        if isinstance(data_to_save.get('Date Screened'), (datetime, date)):
-                            data_to_save['Date Screened'] = data_to_save['Date Screened'].strftime("%Y-%m-%d")
-                        
-                        # Remove raw text if it's too large or not needed in leaderboard
-                        data_to_save.pop('Resume Raw Text', None)
-                        
-                        # Firestore document ID can be the Certificate ID for easy lookup
-                        doc_id = data_to_save.get('Certificate ID')
-                        if doc_id:
-                            # Use set with merge=True to update if exists, or create if new
-                            doc_ref = db.collection(f'artifacts/{appId}/public/data/leaderboard').document(doc_id)
-                            doc_ref.set(data_to_save, merge=True)
-                            st.success(f"📈 Your score has been added to the leaderboard!")
-                        else:
-                            st.warning("Could not save to leaderboard: No Certificate ID generated.")
-                    except Exception as e:
-                        st.error(f"❌ Failed to save results to leaderboard: {e}")
-                        st.exception(e) # Display the exception traceback directly on the frontend
-                        st.warning("Please check your Firebase configuration and security rules.")
-                else:
-                    st.warning("Firebase database not available to save leaderboard data.")
+                # --- Firestore Save for Leaderboard (using REST API) ---
+                # This will attempt to save the data via REST API
+                save_screening_result_to_firestore_rest(candidate_data)
                 # --- End of Firestore save section ---
 
             else:
