@@ -42,8 +42,8 @@ def fetch_leaderboard_data():
     """
     leaderboard_data = []
     try:
-        project_id = st.secrets["FIREBASE_PROJECT_ID"]
-        api_key = st.secrets["FIREBASE_API_KEY"]
+        project_id = st.secrets["FIREBASE_PROJECT_ID"] # Accessing secrets here
+        api_key = st.secrets["FIREBASE_API_KEY"]       # Accessing secrets here
         
         # Firestore collection path (using 'leaderboard' as before)
         collection_id = "leaderboard" 
@@ -68,7 +68,7 @@ def fetch_leaderboard_data():
             # Append data to the list, providing default values for robustness
             leaderboard_data.append({
                 "Candidate Name": data.get("Candidate Name", "N/A"),
-                "Score (%)": data.get("Score (%)", 0.0),
+                "Score (%)": data.get("Score (%)", 0.0), 
                 "Years Experience": data.get("Years Experience", 0.0),
                 "CGPA (4.0 Scale)": data.get("CGPA (4.0 Scale)", None),
                 "JD Used": data.get("JD Used", "N/A"),
@@ -84,6 +84,9 @@ def fetch_leaderboard_data():
         df = df.sort_values(by="Score (%)", ascending=False).reset_index(drop=True)
         return df
     except KeyError as e:
+        # This block catches the KeyError if FIREBASE_PROJECT_ID or FIREBASE_API_KEY are missing.
+        # The error message indicates that 'e' is literally ''Score (%)'' which is highly unusual
+        # and points to a potential issue with secrets configuration or an older code version.
         st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
         st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
         return pd.DataFrame()
