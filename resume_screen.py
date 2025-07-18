@@ -1173,228 +1173,173 @@ Have questions? Contact us at support@screenerpro.in
         st.error(f"❌ Failed to send email: {e}")
     return False
 
-def generate_certificate_html(candidate_data):
+def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedding, 
+                                             resume_embedding, jd_name_for_results,
+                                             high_priority_skills, medium_priority_skills, max_experience,
+                                             _global_ml_model):
     """
-    Generates the HTML content for the ScreenerPro certificate.
+    Processes a single resume (pre-extracted text and pre-computed embeddings)
+    for the main screener page and returns a dictionary of results.
     """
-    candidate_name = candidate_data.get('Candidate Name', 'Candidate')
-    score = candidate_data.get('Score (%)', 0)
-    certificate_rank = candidate_data.get('Certificate Rank', 'Participation')
-    certificate_id = candidate_data.get('Certificate ID', 'N/A')
-    date_screened = candidate_data.get('Date Screened', date.today()).strftime("%B %d, %Y")
+    try:
+        if text.startswith("[ERROR]"):
+            return {
+                "File Name": file_name,
+                "Candidate Name": file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title(),
+                "Score (%)": 0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
+                "Email": "Not Found", "Phone Number": "Not Found", "Location": "Not Found",
+                "Languages": "Not Found", "Education Details": "Not Found",
+                "Work History": "Not Found", "Project Details": "Not Found",
+                "AI Suggestion": f"Error: {text.replace('[ERROR] ', '')}",
+                "Detailed HR Assessment": f"Error processing resume: {text.replace('[ERROR] ', '')}",
+                "Matched Keywords": "", "Missing Skills": "",
+                "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
+                "Missing Skills (Categorized)": "{}", # Store as empty JSON string
+                "Semantic Similarity": 0.0, "Resume Raw Text": "",
+                "JD Used": jd_name_for_results, "Date Screened": datetime.now().date(),
+                "Certificate ID": str(uuid.uuid4()), "Certificate Rank": "Not Applicable",
+                "Tag": "❌ Text Extraction Error"
+            }
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ScreenerPro Certificate of Excellence</title>
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-        <style>
-            body {{
-                font-family: 'Open Sans', sans-serif;
-                background-color: #f0f2f5;
-                margin: 0;
-                padding: 20px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                box-sizing: border-box;
-            }}
-            .certificate-container {{
-                width: 100%;
-                max-width: 800px;
-                background: linear-gradient(135deg, #ffffff, #f0f0f0);
-                border: 10px solid #ffd700; /* Gold border */
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-                padding: 40px;
-                text-align: center;
-                position: relative;
-                overflow: hidden;
-                box-sizing: border-box;
-            }}
-            .certificate-container::before {{
-                content: '';
-                position: absolute;
-                top: -50px;
-                left: -50px;
-                right: -50px;
-                bottom: -50px;
-                background: url('https://placehold.co/800x600/E0E0E0/FFFFFF?text=ScreenerPro+Watermark') no-repeat center center;
-                background-size: cover;
-                opacity: 0.1;
-                z-index: 0;
-                transform: rotate(-15deg);
-            }}
-            .content {{
-                position: relative;
-                z-index: 1;
-            }}
-            .logo {{
-                width: 150px;
-                height: auto;
-                margin-bottom: 20px;
-            }}
-            h1 {{
-                font-family: 'Playfair Display', serif;
-                font-size: 2.8em;
-                color: #333;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-            }}
-            h2 {{
-                font-family: 'Playfair Display', serif;
-                font-size: 2em;
-                color: #555;
-                margin-bottom: 20px;
-            }}
-            p {{
-                font-size: 1.1em;
-                line-height: 1.6;
-                color: #666;
-                margin-bottom: 10px;
-            }}
-            .award-text {{
-                font-size: 1.3em;
-                margin: 30px 0;
-                color: #444;
-            }}
-            .candidate-name {{
-                font-family: 'Playfair Display', serif;
-                font-size: 2.5em;
-                color: #0056b3; /* Blue for name */
-                margin: 20px 0;
-                border-bottom: 2px solid #0056b3;
-                display: inline-block;
-                padding-bottom: 5px;
-            }}
-            .score {{
-                font-size: 2.2em;
-                font-weight: bold;
-                color: #28a745; /* Green for score */
-                margin: 20px 0;
-            }}
-            .date {{
-                font-size: 1em;
-                color: #888;
-                margin-top: 30px;
-            }}
-            .signature-block {{
-                margin-top: 50px;
-                display: flex;
-                justify-content: space-around;
-                align-items: flex-end;
-                flex-wrap: wrap;
-            }}
-            .signature-item {{
-                text-align: center;
-                margin: 10px 20px;
-            }}
-            .signature-line {{
-                border-top: 1px solid #999;
-                width: 180px;
-                margin-top: 10px;
-                margin-bottom: 5px;
-            }}
-            .signature-name {{
-                font-size: 0.9em;
-                color: #777;
-            }}
-            .footer-links {{
-                margin-top: 40px;
-                font-size: 0.9em;
-                color: #888;
-            }}
-            .footer-links a {{
-                color: #007bff;
-                text-decoration: none;
-                margin: 0 10px;
-            }}
-            .footer-links a:hover {{
-                text-decoration: underline;
-            }}
-            .certificate-id {{
-                font-size: 0.8em;
-                color: #aaa;
-                margin-top: 20px;
-            }}
+        exp = extract_years_of_experience(text)
+        email = extract_email(text)
+        phone = extract_phone_number(text)
+        location = extract_location(text)
+        languages = extract_languages(text) 
+        
+        education_details_text = extract_education_text(text)
+        work_history_raw = extract_work_history(text)
+        project_details_raw = extract_project_details(text, MASTER_SKILLS)
+        
+        education_details_formatted = education_details_text
+        work_history_formatted = format_work_history(work_history_raw)
+        project_details_formatted = format_project_details(project_details_raw)
 
-            /* Responsive adjustments */
-            @media (max-width: 600px) {{
-                .certificate-container {{
-                    padding: 20px;
-                    border-width: 5px;
-                }}
-                h1 {{
-                    font-size: 1.8em;
-                }}
-                h2 {{
-                    font-size: 1.5em;
-                }}
-                .award-text {{
-                    font-size: 1em;
-                }}
-                .candidate-name {{
-                    font-size: 1.8em;
-                }}
-                .score {{
-                    font-size: 1.8em;
-                }}
-                .signature-block {{
-                    flex-direction: column;
-                    align-items: center;
-                }}
-                .signature-item {{
-                    margin: 10px 0;
-                }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="certificate-container">
-            <div class="content">
-                <img src="https://placehold.co/150x50/000000/FFFFFF?text=ScreenerPro+Logo" alt="ScreenerPro Logo" class="logo">
-                <h1>Certificate of Excellence</h1>
-                <p class="award-text">This certifies that</p>
-                <div class="candidate-name">{candidate_name}</div>
-                <p class="award-text">has successfully demonstrated outstanding proficiency in our AI-powered resume screening, achieving a score of</p>
-                <div class="score">{score:.1f}%</div>
-                <p class="award-text">and is hereby awarded the title of</p>
-                <h2>{certificate_rank}</h2>
-                <p class="date">Issued on: {date_screened}</p>
+        candidate_name = extract_name(text) or file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title()
+        cgpa = extract_cgpa(text)
 
-                <div class="signature-block">
-                    <div class="signature-item">
-                        <img src="https://placehold.co/180x50/E0E0E0/FFFFFF?text=AI+Signature" alt="AI Signature" style="width: 150px; height: auto; display: block; margin: 0 auto;">
-                        <div class="signature-line"></div>
-                        <div class="signature-name">AI Screening Lead</div>
-                        <div class="signature-name">ScreenerPro</div>
-                    </div>
-                    <div class="signature-item">
-                        <img src="https://placehold.co/180x50/E0E0E0/FFFFFF?text=HR+Signature" alt="HR Signature" style="width: 150px; height: auto; display: block; margin: 0 auto;">
-                        <div class="signature-line"></div>
-                        <div class="signature-name">Head of HR</div>
-                        <div class="signature-name">ScreenerPro</div>
-                    </div>
-                </div>
+        resume_raw_skills_set, resume_categorized_skills = extract_relevant_keywords(text, MASTER_SKILLS)
+        jd_raw_skills_set, jd_categorized_skills = extract_relevant_keywords(jd_text, MASTER_SKILLS)
 
-                <div class="certificate-id">
-                    Certificate ID: {certificate_id}
-                </div>
-                <div class="footer-links">
-                    <p>Verify this certificate at: <a href="{APP_BASE_URL}" target="_blank">{APP_BASE_URL}</a></p>
-                    <p>&copy; {datetime.now().year} ScreenerPro. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return html_content
+        matched_keywords = list(resume_raw_skills_set.intersection(jd_raw_skills_set))
+        
+        # Corrected: Missing skills should be JD skills NOT found in resume
+        missing_skills = list(jd_raw_skills_set.difference(resume_raw_skills_set))
 
+
+        # Calculate weighted keyword overlap score
+        weighted_keyword_overlap_score = 0
+        total_jd_skill_weight = 0
+        WEIGHT_HIGH = 3
+        WEIGHT_MEDIUM = 2
+        WEIGHT_BASE = 1
+
+        for jd_skill in jd_raw_skills_set:
+            current_weight = WEIGHT_BASE
+            if jd_skill in [s.lower() for s in high_priority_skills]:
+                current_weight = WEIGHT_HIGH
+            elif jd_skill in [s.lower() for s in medium_priority_skills]:
+                current_weight = WEIGHT_MEDIUM
+            
+            total_jd_skill_weight += current_weight
+            
+            if jd_skill in resume_raw_skills_set:
+                weighted_keyword_overlap_score += current_weight
+
+        # Call the semantic score calculation with pre-computed embeddings
+        score, semantic_similarity = semantic_score_calculation(
+            jd_embedding, resume_embedding, exp, cgpa, weighted_keyword_overlap_score, _global_ml_model
+        )
+        
+        concise_ai_suggestion = generate_concise_ai_suggestion(
+            candidate_name=candidate_name,
+            score=score,
+            years_exp=exp,
+            semantic_similarity=semantic_similarity,
+            cgpa=cgpa
+        )
+
+        detailed_hr_assessment = generate_detailed_hr_assessment(
+            candidate_name=candidate_name,
+            score=score,
+            years_exp=exp,
+            semantic_similarity=semantic_similarity,
+            cgpa=cgpa,
+            jd_text=jd_text,
+            resume_text=text,
+            matched_keywords=matched_keywords,
+            missing_skills=missing_skills,
+            max_exp_cutoff=max_experience
+        )
+
+        certificate_id = str(uuid.uuid4())
+        certificate_rank = "Not Applicable"
+
+        if score >= 90:
+            certificate_rank = "🏅 Elite Match"
+        elif score >= 80:
+            certificate_rank = "⭐ Strong Match"
+        elif score >= 75:
+            certificate_rank = "✅ Good Fit"
+        
+        # Determine Tag
+        tag = "❌ Limited Match"
+        if score >= 90 and exp >= 5 and exp <= max_experience and semantic_similarity >= 0.85 and (cgpa is None or cgpa >= 3.5):
+            tag = "👑 Exceptional Match"
+        elif score >= 80 and exp >= 3 and exp <= max_experience and semantic_similarity >= 0.7 and (cgpa is None or cgpa >= 3.0):
+            tag = "🔥 Strong Candidate"
+        elif score >= 60 and exp >= 1 and exp <= max_experience and (cgpa is None or cgpa >= 2.5):
+            tag = "✨ Promising Fit"
+        elif score >= 40:
+            tag = "⚠️ Needs Review"
+
+        return {
+            "File Name": file_name,
+            "Candidate Name": candidate_name,
+            "Score (%)": score,
+            "Years Experience": exp,
+            "CGPA (4.0 Scale)": cgpa,
+            "Email": email or "Not Found",
+            "Phone Number": phone or "Not Found",
+            "Location": location or "Not Found",
+            "Languages": languages,
+            "Education Details": education_details_formatted,
+            "Work History": work_history_formatted,
+            "Project Details": project_details_formatted,
+            "AI Suggestion": concise_ai_suggestion,
+            "Detailed HR Assessment": detailed_hr_assessment,
+            "Matched Keywords": ", ".join(matched_keywords),
+            "Missing Skills": ", ".join(missing_skills),
+            "Matched Keywords (Categorized)": json.dumps(dict(resume_categorized_skills)), # Convert to JSON string
+            "Missing Skills (Categorized)": json.dumps(dict(jd_categorized_skills)),     # Convert to JSON string
+            "Semantic Similarity": semantic_similarity,
+            "Resume Raw Text": text,
+            "JD Used": jd_name_for_results,
+            "Date Screened": datetime.now().date(),
+            "Certificate ID": str(uuid.uuid4()),
+            "Certificate Rank": certificate_rank,
+            "Tag": tag
+        }
+    except Exception as e:
+        print(f"CRITICAL ERROR: Unhandled exception processing {file_name}: {e}")
+        traceback.print_exc()
+        return {
+            "File Name": file_name,
+            "Candidate Name": file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title(),
+            "Score (%)": 0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
+            "Email": "Not Found", "Phone Number": "Not Found", "Location": "Not Found",
+            "Languages": "Not Found", "Education Details": "Not Found",
+            "Work History": "Not Found", "Project Details": "Not Found",
+            "AI Suggestion": f"Critical Error: {e}",
+            "Detailed HR Assessment": f"Critical Error processing resume: {e}",
+            "Matched Keywords": "", "Missing Skills": "",
+            "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
+            "Missing Skills (Categorized)": "{}", # Store as empty JSON string
+            "Semantic Similarity": 0.0, "Resume Raw Text": "",
+            "JD Used": jd_name_for_results, "Date Screened": datetime.now().date(),
+            "Certificate ID": str(uuid.uuid4()), "Certificate Rank": "Not Applicable",
+            "Tag": "❌ Critical Processing Error"
+        }
 
 def suggest_courses_for_skills(missing_skills_list):
     """
@@ -1440,6 +1385,208 @@ def suggest_courses_for_skills(missing_skills_list):
         st.info("We couldn't find specific course suggestions for all missing skills, but continuous learning is key!")
         st.markdown("Consider exploring platforms like Coursera, Udemy, or edX for relevant courses.")
 
+@st.cache_data
+def generate_certificate_html(candidate_data):
+    html_template = """
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScreenerPro Certificate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f6f8;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .certificate {
+  background-color: #ffffff;
+  width: 960px;
+  max-width: 960px;
+  padding: 60px 50px;
+  border: 10px solid #00bcd4;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.certificate img.logo {
+  width: 260px;         /* Large logo */
+  max-height: 100px;    /* Limit height */
+  object-fit: contain;  /* Keep it proportional */
+  margin-bottom: 15px;
+}
+
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: #003049;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin: 5px 0 30px;
+      color: #007c91;
+      font-weight: normal;
+    }
+
+    .candidate-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: #00bcd4;
+      margin: 20px 0 10px;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .subtext {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .score-rank {
+      display: inline-block;
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+      background: #e0f7fa;
+      color: #2e7d32;
+      padding: 8px 20px;
+      border-radius: 8px;
+    }
+
+    .description {
+      font-size: 16px;
+      color: #555;
+      margin: 25px auto;
+      line-height: 1.6;
+      max-width: 750px;
+    }
+
+    .footer-details {
+      font-size: 14px;
+      color: #666;
+      margin-top: 40px;
+    }
+
+    .signature-block {
+      text-align: left;
+      margin-top: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .signature {
+      text-align: left;
+    }
+
+    .signature .name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .signature .title {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .signature img {
+      width: 160px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    .stamp {
+      font-size: 42px;
+      color: #4caf50;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .certificate {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <!-- Local logo image -->
+    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="ScreenerPro Logo" />
+
+
+    <h1>CERTIFICATE OF EXCELLENCE</h1>
+    <h2>Presented by ScreenerPro</h2>
+
+    <div class="subtext">This is to certify that</div>
+    <div class="candidate-name">{{CANDIDATE_NAME}}</div>
+
+    <div class="subtext">has successfully completed the AI-powered resume screening process</div>
+
+    <div class="score-rank">Score: {{SCORE}}% | Rank: {{CERTIFICATE_RANK}}</div>
+
+    <div class="description">
+      This certificate acknowledges the candidate’s exceptional qualifications, industry-aligned skills, and readiness to contribute effectively in challenging roles. Evaluated and validated by ScreenerPro’s advanced screening engine.
+    </div>
+
+    <div class="footer-details">
+      Awarded on: {{DATE_SCREENED}}<br>
+      Certificate ID: {{CERTIFICATE_ID}}
+    </div>
+
+    <div class="signature-block">
+  <div class="signature">
+    <img src="https://see.fontimg.com/api/rf5/DOLnW/ZTAyODAyZDM3MWUyNDVjNjg0ZWRmYTRjMjNlOTE3ODUub3Rm/U2NyZWVuZXJQcm8/autography.png?r=fs&h=81&w=1250&fg=000000&bg=FFFFFF&tb=1&s=65" alt="Signature" />
+    <div class="title">Founder & Product Head, ScreenerPro</div>
+  </div>
+  <div class="stamp">✔️</div>
+</div>
+
+
+    
+  </div>
+</body>
+</html>
+
+
+    """
+
+    candidate_name = candidate_data.get('Candidate Name', 'Candidate Name')
+    score = candidate_data.get('Score (%)', 0.0)
+    certificate_rank = candidate_data.get('Certificate Rank', 'Not Applicable')
+    date_screened = candidate_data.get('Date Screened', datetime.now().date()).strftime("%B %d, %Y")
+    certificate_id = candidate_data.get('Certificate ID', 'N/A')
+    
+    html_content = html_template.replace("{{CANDIDATE_NAME}}", candidate_name)
+    html_content = html_content.replace("{{SCORE}}", f"{score:.1f}")
+    html_content = html_content.replace("{{CERTIFICATE_RANK}}", certificate_rank)
+    html_content = html_content.replace("{{DATE_SCREENED}}", date_screened)
+    html_content = html_content.replace("{{CERTIFICATE_ID}}", certificate_id)
+
+    return html_content
 
 def resume_screener_page():
     # Display the greeting card at the top of the page
