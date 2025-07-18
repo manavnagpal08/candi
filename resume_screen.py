@@ -209,8 +209,8 @@ SKILL_CATEGORIES = {
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
-CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/"
+APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
 # --- Firebase REST API Functions ---
 
@@ -264,13 +264,14 @@ def save_screening_result_to_firestore_rest(result_data):
         project_id = st.secrets["FIREBASE_PROJECT_ID"]
         api_key = st.secrets["FIREBASE_API_KEY"]
         
-        # Firestore collection path aligned with top_leaderboard.py
-        # This will save to /artifacts/{appId}/public/data/leaderboard
-        appId = os.environ.get('__app_id', 'default-screener-pro-app') # Ensure appId is accessible
-        collection_path = f"artifacts/{appId}/public/data/leaderboard"
+        # Firestore collection path (using 'leaderboard' as before)
+        # Note: For public data, your Firestore security rules must allow unauthenticated writes
+        # or you need to implement user authentication and pass an ID token.
+        collection_id = "leaderboard" 
         
         # Firestore REST API endpoint for creating a document with an auto-generated ID
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_path}?key={api_key}"
+        # To specify an ID, you'd use PATCH /v1/projects/{project_id}/databases/(default)/documents/{collection_id}/{document_id}
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
 
         # Prepare data for Firestore REST API
         # Ensure 'Matched Keywords (Categorized)' and 'Missing Skills (Categorized)' are dicts, not JSON strings
@@ -517,8 +518,23 @@ def extract_years_of_experience(text):
     return 0.0
 
 def extract_email(text):
-    match = EMAIL_PATTERN.search(text.lower()) # Use pre-compiled pattern
-    return match.group(0) if match else None
+    text = text.lower()
+
+    text = text.replace("gmaill.com", "gmail.com").replace("gmai.com", "gmail.com")
+    text = text.replace("yah00", "yahoo").replace("outiook", "outlook")
+    text = text.replace("coim", "com").replace("hotmai", "hotmail")
+
+    text = re.sub(r'[^\w\s@._+-]', ' ', text)
+
+    possible_emails = EMAIL_PATTERN.findall(text) # Use pre-compiled pattern
+
+    if possible_emails:
+        for email in possible_emails:
+            if "gmail" in email or "manav" in email: # Specific filter, consider removing or making configurable
+                return email
+        return possible_emails[0]
+    
+    return None
 
 def extract_phone_number(text):
     match = PHONE_PATTERN.search(text) # Use pre-compiled pattern
@@ -829,8 +845,8 @@ def extract_languages(text):
     if section_match:
         start_index = section_match.end()
         # Optional: stop at next known section
-        stop_words = ['education', 'experience', 'skills', 'certifications', 'awards', 'publications', 'interests', 'hobbies']
         end_index = len(cleaned_full_text)
+        stop_words = ['education', 'experience', 'skills', 'certifications', 'awards', 'publications', 'interests', 'hobbies']
         for stop in stop_words:
             m = re.search(r'\b' + stop + r'\b', cleaned_full_text[start_index:], re.IGNORECASE)
             if m:
@@ -1354,7 +1370,7 @@ def suggest_courses_for_skills(missing_skills_list):
     st.write("Based on the skills missing from your resume compared to the Job Description, here are some suggested courses or learning resources:")
     
     found_suggestions = False
-    for skill in missing_skills_list:
+    for skill in missing_skills: # Changed to use the missing_skills parameter
         # Normalize skill name for lookup (e.g., "python" -> "Python")
         normalized_skill = skill.title() 
         if normalized_skill in course_suggestions:
@@ -1365,6 +1381,222 @@ def suggest_courses_for_skills(missing_skills_list):
         st.info("We couldn't find specific course suggestions for all missing skills, but continuous learning is key!")
         st.markdown("Consider exploring platforms like Coursera, Udemy, edX, or LinkedIn Learning for relevant courses.")
 
+@st.cache_data
+def generate_certificate_html(candidate_data):
+    html_template = """
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScreenerPro Certificate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f6f8;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .certificate {
+  background-color: #ffffff;
+  width: 960px;
+  max-width: 960px;
+  padding: 60px 50px;
+  border: 10px solid #00bcd4;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.certificate img.logo {
+  width: 260px;         /* Large logo */
+  max-height: 100px;    /* Limit height */
+  object-fit: contain;  /* Keep it proportional */
+  margin-bottom: 15px;
+}
+
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: #003049;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin: 5px 0 30px;
+      color: #007c91;
+      font-weight: normal;
+    }
+
+    .candidate-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: #00bcd4;
+      margin: 20px 0 10px;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .subtext {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .score-rank {
+      display: inline-block;
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+      background: #e0f7fa;
+      color: #2e7d32;
+      padding: 8px 20px;
+      border-radius: 8px;
+    }
+
+    .description {
+      font-size: 16px;
+      color: #555;
+      margin: 25px auto;
+      line-height: 1.6;
+      max-width: 750px;
+    }
+
+    .footer-details {
+      font-size: 14px;
+      color: #666;
+      margin-top: 40px;
+    }
+
+    .signature-block {
+      text-align: left;
+      margin-top: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .signature {
+      text-align: left;
+    }
+
+    .signature .name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .signature .title {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .signature img {
+      width: 160px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    .stamp {
+      font-size: 42px;
+      color: #4caf50;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .certificate {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <!-- Local logo image -->
+    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="ScreenerPro Logo" />
+
+
+    <h1>CERTIFICATE OF EXCELLENCE</h1>
+    <h2>Presented by ScreenerPro</h2>
+
+    <div class="subtext">This is to certify that</div>
+    <div class="candidate-name">{{CANDIDATE_NAME}}</div>
+
+    <div class="subtext">has successfully completed the AI-powered resume screening process</div>
+
+    <div class="score-rank">Score: {{SCORE}}% | Rank: {{CERTIFICATE_RANK}}</div>
+
+    <div class="description">
+      This certificate acknowledges the candidate’s exceptional qualifications, industry-aligned skills, and readiness to contribute effectively in challenging roles. Evaluated and validated by ScreenerPro’s advanced screening engine.
+    </div>
+
+    <div class="footer-details">
+      Awarded on: {{DATE_SCREENED}}<br>
+      Certificate ID: {{CERTIFICATE_ID}}
+    </div>
+
+    <div class="signature-block">
+  <div class="signature">
+    <img src="https://see.fontimg.com/api/rf5/DOLnW/ZTAyODAyZDM3MWUyNDVjNjg0ZWRmYTRjMjNlOTE3ODUub3Rm/U2NyZWVuZXJQcm8/autography.png?r=fs&h=81&w=1250&fg=000000&bg=FFFFFF&tb=1&s=65" alt="Signature" />
+    <div class="title">Founder & Product Head, ScreenerPro</div>
+  </div>
+  <div class="stamp">✔️</div>
+</div>
+
+
+    
+  </div>
+</body>
+</html>
+
+
+    """
+
+    candidate_name = candidate_data.get('Candidate Name', 'Candidate Name')
+    score = candidate_data.get('Score (%)', 0.0)
+    certificate_rank = candidate_data.get('Certificate Rank', 'Not Applicable')
+    
+    # Ensure Date Screened is a datetime object before formatting
+    date_screened_raw = candidate_data.get('Date Screened', datetime.now().strftime("%Y-%m-%d"))
+    if isinstance(date_screened_raw, str):
+        try:
+            date_screened = pd.to_datetime(date_screened_raw).strftime("%B %d, %Y")
+        except:
+            date_screened = date_screened_raw # Fallback if parsing fails
+    elif isinstance(date_screened_raw, datetime):
+        date_screened = date_screened_raw.strftime("%B %d, %Y")
+    elif isinstance(date_screened_raw, date): # Handle date objects
+        date_screened = date_screened_raw.strftime("%B %d, %Y")
+    else:
+        date_screened = str(date_screened_raw) # Last resort
+
+    certificate_id = candidate_data.get('Certificate ID', 'N/A')
+    
+    html_content = html_template.replace("{{CANDIDATE_NAME}}", candidate_name)
+    html_content = html_content.replace("{{SCORE}}", f"{score:.1f}")
+    html_content = html_content.replace("{{CERTIFICATE_RANK}}", certificate_rank)
+    html_content = html_content.replace("{{DATE_SCREENED}}", date_screened)
+    html_content = html_content.replace("{{CERTIFICATE_ID}}", certificate_id)
+
+    return html_content
 
 def resume_screener_page():
     # Display the greeting card at the top of the page
@@ -1392,6 +1624,10 @@ def resume_screener_page():
     
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
+    # Initialize 'show_certificate_preview' in session state
+    if 'show_certificate_preview' not in st.session_state:
+        st.session_state['show_certificate_preview'] = False
+
 
     st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
     col1, col2 = st.columns([2, 1])
