@@ -5,6 +5,7 @@ import json
 import os
 import requests # Import requests for REST API calls
 import traceback # Import traceback for detailed error logging
+import urllib.parse # For URL encoding for sharing buttons
 
 # Helper function to convert Firestore REST API format back to Python data
 def _convert_from_firestore_rest_format(field_value):
@@ -32,6 +33,9 @@ def _convert_from_firestore_rest_format(field_value):
 
 # Global variable for app ID (not directly used in this query path as 'leaderboard' is root)
 appId = os.environ.get('__app_id', 'default-screener-pro-app')
+
+# IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
+APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
 
 @st.cache_data(ttl=60) # Cache data for a short period
 def fetch_candidate_by_certificate_id_rest(certificate_id):
@@ -109,12 +113,232 @@ def fetch_candidate_by_certificate_id_rest(certificate_id):
         st.exception(e)
         return None
 
+@st.cache_data
+def generate_certificate_html(candidate_data):
+    # This function is copied directly from resume-screen-page-py to ensure consistency
+    # and avoid circular imports.
+    html_template = """
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScreenerPro Certificate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f6f8;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .certificate {
+  background-color: #ffffff;
+  width: 960px;
+  max-width: 960px;
+  padding: 60px 50px;
+  border: 10px solid #00bcd4;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.certificate img.logo {
+  width: 260px;         /* Large logo */
+  max-height: 100px;    /* Limit height */
+  object-fit: contain;  /* Keep it proportional */
+  margin-bottom: 15px;
+}
+
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: #003049;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin: 5px 0 30px;
+      color: #007c91;
+      font-weight: normal;
+    }
+
+    .candidate-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: #00bcd4;
+      margin: 20px 0 10px;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .subtext {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .score-rank {
+      display: inline-block;
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+      background: #e0f7fa;
+      color: #2e7d32;
+      padding: 8px 20px;
+      border-radius: 8px;
+    }
+
+    .description {
+      font-size: 16px;
+      color: #555;
+      margin: 25px auto;
+      line-height: 1.6;
+      max-width: 750px;
+    }
+
+    .footer-details {
+      font-size: 14px;
+      color: #666;
+      margin-top: 40px;
+    }
+
+    .signature-block {
+      text-align: left;
+      margin-top: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .signature {
+      text-align: left;
+    }
+
+    .signature .name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .signature .title {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .signature img {
+      width: 160px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    .stamp {
+      font-size: 42px;
+      color: #4caf50;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .certificate {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <!-- Local logo image -->
+    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="ScreenerPro Logo" />
+
+
+    <h1>CERTIFICATE OF EXCELLENCE</h1>
+    <h2>Presented by ScreenerPro</h2>
+
+    <div class="subtext">This is to certify that</div>
+    <div class="candidate-name">{{CANDIDATE_NAME}}</div>
+
+    <div class="subtext">has successfully completed the AI-powered resume screening process</div>
+
+    <div class="score-rank">Score: {{SCORE}}% | Rank: {{CERTIFICATE_RANK}}</div>
+
+    <div class="description">
+      This certificate acknowledges the candidate’s exceptional qualifications, industry-aligned skills, and readiness to contribute effectively in challenging roles. Evaluated and validated by ScreenerPro’s advanced screening engine.
+    </div>
+
+    <div class="footer-details">
+      Awarded on: {{DATE_SCREENED}}<br>
+      Certificate ID: {{CERTIFICATE_ID}}
+    </div>
+
+    <div class="signature-block">
+  <div class="signature">
+    <img src="https://see.fontimg.com/api/rf5/DOLnW/ZTAyODAyZDM3MWUyNDVjNjg0ZWRmYTRjMjNlOTE3ODUub3Rm/U2NyZWVuZXJQcm8/autography.png?r=fs&h=81&w=1250&fg=000000&bg=FFFFFF&tb=1&s=65" alt="Signature" />
+    <div class="title">Founder & Product Head, ScreenerPro</div>
+  </div>
+  <div class="stamp">✔️</div>
+</div>
+
+
+    
+  </div>
+</body>
+</html>
+
+
+    """
+
+    candidate_name = candidate_data.get('Candidate Name', 'Candidate Name')
+    score = candidate_data.get('Score (%)', 0.0)
+    certificate_rank = candidate_data.get('Certificate Rank', 'Not Applicable')
+    
+    # Ensure Date Screened is a datetime object before formatting
+    date_screened_raw = candidate_data.get('Date Screened', datetime.now().strftime("%Y-%m-%d"))
+    if isinstance(date_screened_raw, str):
+        try:
+            date_screened = pd.to_datetime(date_screened_raw).strftime("%B %d, %Y")
+        except:
+            date_screened = date_screened_raw # Fallback if parsing fails
+    elif isinstance(date_screened_raw, datetime):
+        date_screened = date_screened_raw.strftime("%B %d, %Y")
+    else:
+        date_screened = str(date_screened_raw) # Last resort
+
+    certificate_id = candidate_data.get('Certificate ID', 'N/A')
+    
+    html_content = html_template.replace("{{CANDIDATE_NAME}}", candidate_name)
+    html_content = html_content.replace("{{SCORE}}", f"{score:.1f}")
+    html_content = html_content.replace("{{CERTIFICATE_RANK}}", certificate_rank)
+    html_content = html_content.replace("{{DATE_SCREENED}}", date_screened)
+    html_content = html_content.replace("{{CERTIFICATE_ID}}", certificate_id)
+
+    return html_content
+
 def certificate_verifier_page():
     st.title("✅ ScreenerPro Certificate Verification")
     st.markdown("### Verify the authenticity of a ScreenerPro Certificate.")
 
-    # No longer need to check for 'db' as firebase_admin is removed.
-    # The REST API functions will handle their own error messages if secrets are missing.
+    # Initialize session state for certificate preview if not already present
+    if 'show_certificate_preview_verifier' not in st.session_state:
+        st.session_state['show_certificate_preview_verifier'] = False
+    if 'certificate_html_content_verifier' not in st.session_state:
+        st.session_state['certificate_html_content_verifier'] = ""
 
     certificate_id_input = st.text_input(
         "Enter Certificate ID",
@@ -125,10 +349,12 @@ def certificate_verifier_page():
     if st.button("🔍 Verify Certificate"):
         if not certificate_id_input:
             st.warning("Please enter a Certificate ID to verify.")
+            # Reset preview state if input is empty
+            st.session_state['show_certificate_preview_verifier'] = False
+            st.session_state['certificate_html_content_verifier'] = ""
             return
 
         with st.spinner(f"Verifying certificate ID: {certificate_id_input}..."):
-            # Call the REST API function to fetch data
             candidate_data = fetch_candidate_by_certificate_id_rest(certificate_id_input)
             
             if candidate_data:
@@ -140,7 +366,6 @@ def certificate_verifier_page():
                 st.write(f"**Score (%):** {candidate_data.get('Score (%)', 0.0):.2f}%")
                 st.write(f"**Years Experience:** {candidate_data.get('Years Experience', 0.0):.1f} years")
                 
-                # Handle CGPA display, ensuring it's formatted only if a valid number
                 cgpa_value = candidate_data.get('CGPA (4.0 Scale)', None)
                 cgpa_display = f"{cgpa_value:.2f}" if pd.notna(cgpa_value) and isinstance(cgpa_value, (int, float)) else "N/A"
                 st.write(f"**CGPA (4.0 Scale):** {cgpa_display}")
@@ -153,9 +378,71 @@ def certificate_verifier_page():
 
                 st.markdown("---")
                 st.info("This certificate is authentic and was issued by ScreenerPro.")
+
+                # --- Certificate Display and Download ---
+                st.subheader("View & Share Certificate")
+                
+                # Generate HTML content for the certificate
+                certificate_html_content = generate_certificate_html(candidate_data)
+                st.session_state['certificate_html_content_verifier'] = certificate_html_content # Store for preview
+
+                col_cert_view, col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(4)
+                
+                with col_cert_view:
+                    if st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button_verifier"):
+                        st.session_state['show_certificate_preview_verifier'] = True
+                    else:
+                        # If the button is clicked again (or another button on the page is clicked),
+                        # and this button is not, ensure the preview state is reset.
+                        # This ensures the preview only shows when explicitly requested.
+                        if st.session_state.get('show_certificate_preview_verifier', False) and st.session_state.get('last_clicked_button') != "view_cert_button_verifier":
+                             st.session_state['show_certificate_preview_verifier'] = False
+
+
+                with col_cert_download:
+                    st.download_button(
+                        label="⬇️ Download Certificate (HTML)",
+                        data=certificate_html_content,
+                        file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.html",
+                        mime="text/html",
+                        key="download_cert_button_verifier",
+                        help="Download the certificate as an HTML file. You can open it in your browser and print to PDF."
+                    )
+                
+                # Share message for social media
+                share_message = f"""I just verified a Certificate of Screening Excellence from ScreenerPro! 🏆
+This candidate was evaluated across multiple hiring parameters using AI-powered screening technology and scored above {candidate_data['Score (%)']:.1f}%.
+
+#resume #jobsearch #ai #careergrowth #certified #ResumeScreenerPro #LinkedIn
+🌐 Verify your own certificates or learn more about the tool: {urllib.parse.quote(APP_BASE_URL)}
+"""
+                
+                # LinkedIn Share Button
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(APP_BASE_URL)}&title={urllib.parse.quote('ScreenerPro Certificate Verification')}&summary={urllib.parse.quote(share_message)}"
+                with col_share_linkedin:
+                    st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
+
+                # WhatsApp Share Button
+                whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
+                with col_share_whatsapp:
+                    st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
+
+                # Only show the HTML preview if the button was clicked
+                if st.session_state.get('show_certificate_preview_verifier', False) and st.session_state['certificate_html_content_verifier']:
+                    st.markdown("---")
+                    st.markdown("### Generated Certificate Preview (HTML)")
+                    st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=600, scrolling=True)
+                    st.markdown("---")
+
             else:
                 st.error("Certificate not found. Please check the ID and try again.")
                 st.info("The provided Certificate ID does not match any records in our system. It might be incorrect, or the certificate may not exist.")
+
+    # This ensures the preview is hidden if no certificate is found or input is cleared
+    if not certificate_id_input and st.session_state.get('show_certificate_preview_verifier', False):
+        st.session_state['show_certificate_preview_verifier'] = False
+        st.session_state['certificate_html_content_verifier'] = ""
+
 
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Certificate Verification", layout="wide")
