@@ -14,3 +14,4 @@ Pillow
 pytesseract
 opencv-python
 pdf2image
+firebase-admin
