@@ -570,7 +570,7 @@ def main():
         leaderboard_page()
     elif st.session_state.current_page == "certificate_verify": # New page rendering
         st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
-        certificate_verification_page()
+        certificate_verifier_page()
     elif st.session_state.current_page == "about_us":
         st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         about_us_page()
