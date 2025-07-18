@@ -235,13 +235,17 @@ def initialize_firebase():
                 "measurementId": st.secrets["FIREBASE_MEASUREMENT_ID"]
             }
             # Load service account key from secrets
-            cred = credentials.Certificate(json.loads(st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]))
+            # Ensure the service account key is correctly formatted as a JSON string
+            service_account_key_json = st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]
+            cred = credentials.Certificate(json.loads(service_account_key_json))
             firebase_admin.initialize_app(cred, firebase_config)
         
         db = firestore.client()
         return db
     except Exception as e:
-        st.error(f"❌ Error initializing Firebase: {e}. Please ensure your Firebase secrets are correctly configured.")
+        st.error(f"❌ Error initializing Firebase: {e}")
+        st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
+        st.info("Please ensure ALL Firebase secrets (API Key, Auth Domain, Project ID, etc., and the Service Account Key JSON) are correctly configured in your secrets.toml or Streamlit Cloud secrets.")
         return None
 
 # Get Firestore DB client globally
@@ -1573,20 +1577,6 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                 with col_share_whatsapp:
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
-                # Automatically send email if candidate qualifies and email is found
-                if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
-                    # Pass None for certificate_pdf_content as PDF generation is not supported in this environment
-                    send_certificate_email(
-                        recipient_email=candidate_data['Email'],
-                        candidate_name=candidate_data['Candidate Name'],
-                        score=candidate_data['Score (%)'],
-                        certificate_pdf_content=None, # PDF content is not generated here
-                        gmail_address=st.secrets.get("GMAIL_ADDRESS"),
-                        gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
-                    )
-                else:
-                    st.info(f"No email address found for {candidate_data['Candidate Name']}. Certificate could not be sent automatically.")
-                
                 # --- Firestore Save for Leaderboard ---
                 if db: # Check if Firebase DB client is initialized
                     try:
@@ -1609,6 +1599,7 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                             st.warning("Could not save to leaderboard: No Certificate ID generated.")
                     except Exception as e:
                         st.error(f"❌ Failed to save results to leaderboard: {e}")
+                        st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
                         st.warning("Please check your Firebase configuration and security rules.")
                 else:
                     st.warning("Firebase database not available to save leaderboard data.")
