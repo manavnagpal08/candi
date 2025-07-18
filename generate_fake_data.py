@@ -99,10 +99,36 @@ def save_screening_result_to_firestore_rest(result_data):
 
 def generate_dummy_candidate_data(index):
     """Generates a single dictionary of dummy candidate data."""
-    names = ["Alice Smith", "Bob Johnson", "Charlie Brown", "Diana Prince", "Eve Adams", "Frank White", "Grace Lee", "Henry Davis", "Ivy Chen", "Jack Wilson"]
+    # Updated names list to include Indian names
+    names = [
+    "Priya Sharma", "Rahul Singh", "Ananya Gupta", "Aryan Kumar", "Diya Patel",
+    "Rohan Mehta", "Ishita Verma", "Kabir Khan", "Sanya Reddy", "Vivaan Joshi",
+    "Aisha Rahman", "Arjun Nair", "Meera Devi", "Siddharth Rao", "Zara Ali",
+    "Dev Sharma", "Kavya Singh", "Neil Gupta", "Riya Patel", "Samar Mehta",
+    "Shreya Verma", "Veer Khan", "Aditi Reddy", "Dhruv Joshi", "Naina Rahman",
+    "Om Nair", "Tara Devi", "Vihaan Rao", "Zoya Ali", "Amit Kumar",
+    "Bhavna Singh", "Chetan Gupta", "Deepa Patel", "Eshan Mehta", "Falguni Verma",
+    "Gaurav Khan", "Hina Reddy", "Inder Joshi", "Jaya Rahman", "Karan Nair",
+    "Lata Devi", "Manoj Rao", "Nisha Ali", "Omkar Sharma", "Pooja Singh",
+    "Qasim Gupta", "Renu Patel", "Sanjay Mehta", "Tina Verma", "Uday Khan",
+    "Vani Reddy", "Waseem Joshi", "Xena Rahman", "Yash Nair", "Zainab Devi",
+    
+    # Newly added (50 more)
+    "Aarav Kapoor", "Sneha Desai", "Harsh Vardhan", "Nikita Iyer", "Tanmay Dubey",
+    "Lavanya Pillai", "Raghav Bansal", "Chitra Nair", "Ibrahim Shaikh", "Pranavi Sharma",
+    "Aniket Choudhary", "Simran Lamba", "Yuvraj Sethi", "Reetika Das", "Abhinav Malhotra",
+    "Myra Menon", "Rajeev Tripathi", "Shruti Kaul", "Tejas Chopra", "Gayatri Sen",
+    "Ritvik Bhattacharya", "Nandita Joshi", "Krishna Yadav", "Pallavi Mishra", "Atharv Jain",
+    "Niharika Mohanty", "Farhan Syed", "Avantika Kulkarni", "Sahil Arora", "Tanvi Rawat",
+    "Varun Agrawal", "Ila Dey", "Parthiv Shetty", "Mahira Noor", "Shivam Tiwari",
+    "Divya Chauhan", "Aditya Ghosh", "Roshni Kalra", "Arnav Deshmukh", "Trisha George",
+    "Rehan Qureshi", "Mehul Dutta", "Srishti Anand", "Vivaan Bhatt", "Nausheen Fatima",
+    "Darshan Vora", "Juhi Jain", "Kunal Sengupta", "Anaya Kaur", "Zuber Lakhani"
+]
+
     jds = ["Software Engineer JD", "Data Scientist JD", "HR Manager JD", "Product Manager JD", "Marketing Specialist JD"]
-    locations = ["Bengaluru", "New York", "London", "Hyderabad", "San Francisco", "Mumbai", "Toronto"]
-    languages = ["English", "English, Hindi", "English, Spanish", "English, French"]
+    locations = ["Bengaluru", "New York", "London", "Hyderabad", "San Francisco", "Mumbai", "Toronto", "Chennai", "Delhi", "Pune", "Kolkata", "Ahmedabad"]
+    languages = ["English", "English, Hindi", "English, Spanish", "English, French", "English, Marathi", "English, Bengali", "English, Tamil"]
     tags = ["👑 Exceptional Match", "🔥 Strong Candidate", "✨ Promising Fit", "⚠️ Needs Review", "❌ Limited Match"]
     
     candidate_name = random.choice(names) + f" {index}"
@@ -110,7 +136,7 @@ def generate_dummy_candidate_data(index):
     years_exp = round(random.uniform(0, 15), 1)
     cgpa = round(random.uniform(2.0, 4.0), 2) if random.random() > 0.2 else None # 80% chance of having CGPA
     email = f"{candidate_name.lower().replace(' ', '.')}{random.randint(1,100)}@example.com"
-    phone = f"+1-{random.randint(100,999)}-{random.randint(100,999)}-{random.randint(1000,9999)}"
+    phone = f"+91-{random.randint(70000,99999)}-{random.randint(10000,99999)}" # Indian phone number format
     location = random.choice(locations)
     langs = random.choice(languages)
 
@@ -182,7 +208,8 @@ def generate_fake_data_page():
     st.warning("⚠️ **Caution:** This tool will add dummy entries to your live Firestore database. Use it for testing and demonstration purposes only.")
     st.markdown("---")
 
-    num_entries = st.number_input("Number of fake entries to generate:", min_value=1, max_value=100, value=10, step=1)
+    # Increased max_value to 500 and default value to 50
+    num_entries = st.number_input("Number of fake entries to generate:", min_value=1, max_value=500, value=50, step=1)
 
     if st.button("🚀 Generate and Upload Fake Data"):
         st.info(f"Generating and uploading {num_entries} fake entries to Firestore...")
