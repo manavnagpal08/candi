@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from resume_screen import resume_screener_page
-from top_leaderboard import leaderboard_page
-from about_us import about_us_page
-from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from pages.resume_screen import resume_screener_page
+from pages.top_leaderboard import leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -541,6 +541,19 @@ def main():
     if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
         st.session_state.current_page = "feedback_form"
     
+    st.sidebar.markdown("---")
+    # New button for HR Portal
+    st.sidebar.markdown(
+        """
+        <a href="https://screenerpro.streamlit.app/" target="_blank">
+            <button style="background-color:#4CAF50;color:white;border:none;border-radius:0.5rem;padding:0.8rem 1.5rem;font-weight:600;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <img src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="HR Portal Logo" style="height:20px;"/>
+                Open HR Portal
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
     st.sidebar.markdown("---")
     if st.sidebar.button("➡️ Logout", key="nav_logout"):
         st.session_state.current_page = "logout"
