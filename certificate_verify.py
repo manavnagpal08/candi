@@ -337,7 +337,6 @@ def certificate_verifier_page():
     # Initialize session state for certificate preview
     if 'certificate_html_content_verifier' not in st.session_state:
         st.session_state['certificate_html_content_verifier'] = ""
-    # No longer need 'show_certificate_preview_verifier' as it will be automatic
 
     certificate_id_input = st.text_input(
         "Enter Certificate ID",
@@ -418,7 +417,7 @@ This candidate was evaluated across multiple hiring parameters using AI-powered 
                 # --- Automatic HTML Preview Display ---
                 st.markdown("---")
                 st.markdown("### Generated Certificate Preview (HTML)")
-                st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=600, scrolling=True)
+                st.components.v1.html(st.session_state['certificate_html_content_verifier'], scrolling=False) # Removed height
                 st.markdown("---")
 
             else:
