@@ -11,6 +11,7 @@ from pages.resume_screen import resume_screener_page
 from pages.top_leaderboard import leaderboard_page
 from pages.about_us import about_us_page
 from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -100,7 +101,6 @@ def admin_registration_section():
             st.error("Please fill in all fields.")
         elif not is_valid_email(new_username): # Email format validation
             st.error("Please enter a valid email address for the username.")
-            st.session_state.active_login_tab_selection = "Register"
         else:
             users = load_users()
             if new_username in users:
@@ -191,7 +191,7 @@ def login_section():
     )
 
     if tab_selection == "Login":
-        st.subheader("🔐 Candidate Login") # Changed from HR Login
+        st.subheader("🔐 HR Login")
         st.info("If you don't have an account, please go to the 'Register' option first.") # Added instructional message
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username", key="username_login")
@@ -251,16 +251,6 @@ def main():
         st.session_state.current_page = "resume_screen" # Default page after login
     if "theme" not in st.session_state:
         st.session_state.theme = "light" # Default to light mode
-
-    st.sidebar.title("ScreenerPro Portal")
-
-    # Dark Mode Toggle in Sidebar
-    st.sidebar.markdown("---")
-    dark_mode_checkbox = st.sidebar.checkbox("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
-    if dark_mode_checkbox:
-        st.session_state.theme = "dark"
-    else:
-        st.session_state.theme = "light"
 
     # Apply global CSS based on theme
     if st.session_state.theme == "dark":
@@ -402,13 +392,27 @@ def main():
             st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
     save_users(users)
 
-    # Authentication section (from your login.py)
-    if not login_section():
+    # Authentication section
+    # This must run first to determine authentication status
+    is_authenticated = login_section()
+
+    if not is_authenticated:
+        # Only show this message if not authenticated
         st.sidebar.write("---")
         st.sidebar.info("Please log in or register to access the portal features.")
         return # Stop execution if not authenticated
 
-    # If authenticated, display welcome and navigation
+    # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
+    st.sidebar.title("ScreenerPro Portal") # Moved inside authenticated block
+
+    # Dark Mode Toggle in Sidebar (Moved inside authenticated block)
+    st.sidebar.markdown("---")
+    dark_mode_checkbox = st.sidebar.checkbox("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
+    if dark_mode_checkbox:
+        st.session_state.theme = "dark"
+    else:
+        st.session_state.theme = "light"
+
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
     if st.session_state.get('user_company'):
         st.sidebar.info(f"Company: {st.session_state.user_company}")
@@ -416,12 +420,13 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.subheader("Navigation")
     
-    # Navigation buttons
-    # These buttons explicitly control the page shown, preventing automatic Streamlit page detection
+    # Navigation buttons (already conditional by being after the return)
     if st.sidebar.button("📄 Resume Screen", key="nav_resume"):
         st.session_state.current_page = "resume_screen"
     if st.sidebar.button("🏆 Top Leaderboard", key="nav_leaderboard"):
         st.session_state.current_page = "top_leaderboard"
+    if st.sidebar.button("✅ Verify Certificate", key="nav_certificate_verify"): # New button
+        st.session_state.current_page = "certificate_verify"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
     if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
@@ -437,6 +442,8 @@ def main():
         resume_screener_page()
     elif st.session_state.current_page == "top_leaderboard":
         leaderboard_page()
+    elif st.session_state.current_page == "certificate_verify": # New page rendering
+        certificate_verification_page()
     elif st.session_state.current_page == "about_us":
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
