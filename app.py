@@ -290,7 +290,7 @@ def main():
 
     # Render the selected page
     if st.session_state.current_page == "resume_screen":
-        resume_screen_page()
+        resume_screener_page()
     elif st.session_state.current_page == "top_leaderboard":
         top_leaderboard_page()
     elif st.session_state.current_page == "about_us":
