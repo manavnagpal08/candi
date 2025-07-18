@@ -1915,3 +1915,4 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
     resume_screener_page()
+
