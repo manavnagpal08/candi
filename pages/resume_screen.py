@@ -1483,15 +1483,43 @@ def resume_screener_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for preview
 
-                col_cert_view, col_cert_download = st.columns(2)
+                col_cert_view, col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(4)
+                
                 with col_cert_view:
-                    # This button just triggers the preview, content is already generated
                     st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button")
                         
                 with col_cert_download:
-                    # Removed the PDF download message as it's a broader environmental limitation.
-                    pass 
+                    # Re-added the download button for HTML certificate
+                    st.download_button(
+                        label="⬇️ Download Certificate (HTML)",
+                        data=certificate_html_content,
+                        file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.html",
+                        mime="text/html",
+                        key="download_cert_button",
+                        help="Download the certificate as an HTML file. You can open it in your browser and print to PDF."
+                    )
                 
+                # Share message for social media
+                share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
+After uploading my resume, I was evaluated across multiple hiring parameters using AI-powered screening technology.
+
+I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}, which reflects the strength of my profile in today's job market.
+Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
+
+#resume #jobsearch #ai #careergrowth #certified #ResumeScreenerPro #LinkedIn
+🌐 Learn more about the tool: For candidate login: https://candidate-screenerpro.streamlit.app/ and for HR login: https://screenerpro.streamlit.app/
+"""
+                
+                # LinkedIn Share Button
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote('https://screenerpro.streamlit.app/')}&title={urllib.parse.quote('ScreenerPro Certificate of Excellence')}&summary={urllib.parse.quote(share_message)}"
+                with col_share_linkedin:
+                    st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
+
+                # WhatsApp Share Button
+                whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
+                with col_share_whatsapp:
+                    st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
+
                 # Automatically send email if candidate qualifies and email is found
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
                     send_certificate_email(
