@@ -101,37 +101,34 @@ def generate_dummy_candidate_data(index):
     """Generates a single dictionary of dummy candidate data."""
     # Updated names list to include Indian names
     names = [
-    "Priya Sharma", "Rahul Singh", "Ananya Gupta", "Aryan Kumar", "Diya Patel",
-    "Rohan Mehta", "Ishita Verma", "Kabir Khan", "Sanya Reddy", "Vivaan Joshi",
-    "Aisha Rahman", "Arjun Nair", "Meera Devi", "Siddharth Rao", "Zara Ali",
-    "Dev Sharma", "Kavya Singh", "Neil Gupta", "Riya Patel", "Samar Mehta",
-    "Shreya Verma", "Veer Khan", "Aditi Reddy", "Dhruv Joshi", "Naina Rahman",
-    "Om Nair", "Tara Devi", "Vihaan Rao", "Zoya Ali", "Amit Kumar",
-    "Bhavna Singh", "Chetan Gupta", "Deepa Patel", "Eshan Mehta", "Falguni Verma",
-    "Gaurav Khan", "Hina Reddy", "Inder Joshi", "Jaya Rahman", "Karan Nair",
-    "Lata Devi", "Manoj Rao", "Nisha Ali", "Omkar Sharma", "Pooja Singh",
-    "Qasim Gupta", "Renu Patel", "Sanjay Mehta", "Tina Verma", "Uday Khan",
-    "Vani Reddy", "Waseem Joshi", "Xena Rahman", "Yash Nair", "Zainab Devi",
-    
-    # Newly added (50 more)
-    "Aarav Kapoor", "Sneha Desai", "Harsh Vardhan", "Nikita Iyer", "Tanmay Dubey",
-    "Lavanya Pillai", "Raghav Bansal", "Chitra Nair", "Ibrahim Shaikh", "Pranavi Sharma",
-    "Aniket Choudhary", "Simran Lamba", "Yuvraj Sethi", "Reetika Das", "Abhinav Malhotra",
-    "Myra Menon", "Rajeev Tripathi", "Shruti Kaul", "Tejas Chopra", "Gayatri Sen",
-    "Ritvik Bhattacharya", "Nandita Joshi", "Krishna Yadav", "Pallavi Mishra", "Atharv Jain",
-    "Niharika Mohanty", "Farhan Syed", "Avantika Kulkarni", "Sahil Arora", "Tanvi Rawat",
-    "Varun Agrawal", "Ila Dey", "Parthiv Shetty", "Mahira Noor", "Shivam Tiwari",
-    "Divya Chauhan", "Aditya Ghosh", "Roshni Kalra", "Arnav Deshmukh", "Trisha George",
-    "Rehan Qureshi", "Mehul Dutta", "Srishti Anand", "Vivaan Bhatt", "Nausheen Fatima",
-    "Darshan Vora", "Juhi Jain", "Kunal Sengupta", "Anaya Kaur", "Zuber Lakhani"
-]
-
+       "Aarohi Kulkarni", "Nikhil Rathi", "Sanya Kapoor", "Raj Malhotra", "Tisha Menon",
+    "Harshit Sinha", "Lavina Fernandes", "Ritik Saluja", "Aayushi Agarwal", "Tanishq Roy",
+    "Muskan Batra", "Devansh Tiwari", "Neha Saxena", "Yuvan Shah", "Radhika Ramaswamy",
+    "Imran Laskar", "Jivika Bhandari", "Nakul Dey", "Ameera Sheikh", "Harveer Chauhan",
+    "Sakshi Wadhwa", "Zayan Merchant", "Kanika Puri", "Mehul Sethi", "Ishaan Purohit",
+    "Vaidehi Deshpande", "Ronit Bedi", "Ankita Chauhan", "Samarpreet Gill", "Deepika Mahajan",
+    "Adil Khan", "Shanaya Modi", "Ravishankar Nayak", "Suhani Kothari", "Atharva Rane",
+    "Prisha Bhatt", "Reyansh Kaul", "Karishma Dev", "Kiaan Bakshi", "Shanvika Shah",
+    "Hriday Joshi", "Esha Sharma", "Kushagra Luthra", "Mahika Arora", "Daksh Mittal",
+    "Aleena Rizvi", "Ronak Parekh", "Kripa Nathan", "Jatin Bansal", "Palak Shekhawat",
+    "Zohra Irani", "Aarush Vyas", "Nysa Bharadwaj", "Siddhant Hegde", "Reeva Nambiar",
+    "Anvay Jain", "Shraddha Kohli", "Sarvesh Varma", "Myra Sodhi", "Vedant Kapoor",
+    "Aarzoo Mehra", "Moksh Acharya", "Diya Kaushik", "Rohan Rajput", "Naina Kapoor",
+    "Rishabh Sawant", "Bhavya Bhaskar", "Shayan D’Souza", "Charvi Singh", "Anshul Pandey",
+    "Tara Sood", "Om Prakash", "Nayra Dholakia", "Chirag Solanki", "Alisha Kataria",
+    "Sanket Pawar", "Kritika Nair", "Anirudh Das", "Ira Sehgal", "Viraj Kulshreshtha",
+    "Sana Qureshi", "Ritvik Nanda", "Tanaya Raje", "Manan Joshi", "Richa Lodha",
+    "Zaid Ansari", "Trisha Mathew", "Kabir Bahl", "Shreya Dey", "Aman Khurana",
+    "Rutuja More", "Devvrat Sahni", "Pia Lobo", "Keshav Ahuja", "Anika Rathi",
+    "Rohanth Murthy", "Nimisha Khatri", "Sarfaraz Khan", "Bhumi Parekh", "Arjit Borkar"
+    ]
     jds = ["Software Engineer JD", "Data Scientist JD", "HR Manager JD", "Product Manager JD", "Marketing Specialist JD"]
     locations = ["Bengaluru", "New York", "London", "Hyderabad", "San Francisco", "Mumbai", "Toronto", "Chennai", "Delhi", "Pune", "Kolkata", "Ahmedabad"]
     languages = ["English", "English, Hindi", "English, Spanish", "English, French", "English, Marathi", "English, Bengali", "English, Tamil"]
     tags = ["👑 Exceptional Match", "🔥 Strong Candidate", "✨ Promising Fit", "⚠️ Needs Review", "❌ Limited Match"]
     
-    candidate_name = random.choice(names) + f" {index}"
+    # Modified this line to remove the index
+    candidate_name = random.choice(names)
     score = round(random.uniform(30, 100), 2)
     years_exp = round(random.uniform(0, 15), 1)
     cgpa = round(random.uniform(2.0, 4.0), 2) if random.random() > 0.2 else None # 80% chance of having CGPA
@@ -229,7 +226,7 @@ def generate_fake_data_page():
                 failed_entries.append(f"Entry {i+1} ({dummy_data.get('Candidate Name', 'N/A')}): {message}")
             
             progress_bar.progress((i + 1) / num_entries)
-            time.sleep(0.1) # Small delay to show progress
+            time.sleep(0.001) # Small delay to show progress
 
         st.markdown("---")
         if success_count > 0:
