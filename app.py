@@ -296,7 +296,7 @@ def main():
     elif st.session_state.current_page == "about_us":
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
-        feedback_form_page()
+        feedback_and_help_page()
     elif st.session_state.current_page == "logout":
         logout_page()
 
