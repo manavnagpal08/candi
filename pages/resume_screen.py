@@ -215,8 +215,8 @@ SKILL_CATEGORIES = {
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
-CERTIFICATE_HOSTING_URL = "https://manavnagpal08.github.io/screenerpro-certs"
+APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
 # Initialize Firebase (only once)
 @st.cache_resource
@@ -241,10 +241,11 @@ def initialize_firebase():
             firebase_admin.initialize_app(cred, firebase_config)
         
         db = firestore.client()
+        st.success("✅ Firebase initialized successfully!") # Added success message
         return db
     except Exception as e:
         st.error(f"❌ Error initializing Firebase: {e}")
-        st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
+        st.exception(e) # Display the exception traceback directly on the frontend
         st.info("Please ensure ALL Firebase secrets (API Key, Auth Domain, Project ID, etc., and the Service Account Key JSON) are correctly configured in your secrets.toml or Streamlit Cloud secrets.")
         return None
 
@@ -1606,7 +1607,7 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                             st.warning("Could not save to leaderboard: No Certificate ID generated.")
                     except Exception as e:
                         st.error(f"❌ Failed to save results to leaderboard: {e}")
-                        st.error(f"Traceback: {traceback.format_exc()}") # Print full traceback for debugging
+                        st.exception(e) # Display the exception traceback directly on the frontend
                         st.warning("Please check your Firebase configuration and security rules.")
                 else:
                     st.warning("Firebase database not available to save leaderboard data.")
