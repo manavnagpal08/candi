@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from resume_screen import resume_screener_page
-from top_leaderboard import leaderboard_page
-from about_us import about_us_page
-from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from pages.resume_screen import resume_screener_page
+from pages.top_leaderboard import leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -276,13 +276,21 @@ def main():
         st.markdown(
             """
             <style>
-            .stApp {
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+            html, body, .stApp {
+                font-family: 'Inter', sans-serif;
                 background-color: #1a1a1a;
                 color: #f0f0f0;
             }
             .stSidebar {
                 background-color: #262626;
                 color: #f0f0f0;
+                padding-top: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Playfair Display', serif;
+                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -295,6 +303,8 @@ def main():
                 background-color: #3A3A3A !important;
                 color: #f0f0f0 !important;
                 border: 1px solid #555555 !important;
+                border-radius: 0.5rem;
+                padding: 0.75rem; /* Added padding */
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -305,32 +315,67 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #f0f0f0 !important;
+                font-weight: 500;
+                margin-bottom: 0.5rem; /* Added margin */
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1.5rem; /* Increased padding */
+                font-weight: 600;
+                transition: all 0.2s ease-in-out;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Added shadow */
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
+                transform: translateY(-2px); /* More noticeable lift */
+                box-shadow: 0 6px 12px rgba(0,0,0,0.3); /* Darker shadow on hover */
             }
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1rem;
+                font-weight: 600;
             }
             .streamlit-expanderContent {
                 background-color: #2D2D2D;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #3A3A3A;
                 color: #f0f0f0;
+                border-radius: 0.5rem;
+                padding: 1rem;
             }
             .stAlert > div > div > div > div {
                 color: #f0f0f0; /* Text inside alert */
+            }
+            /* Dataframe styling */
+            .stDataFrame {
+                border-radius: 0.5rem;
+                overflow: hidden; /* Ensures rounded corners are applied */
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Added shadow */
+            }
+            /* Metric boxes */
+            .stMetric {
+                background-color: #2D2D2D;
+                border-radius: 0.5rem;
+                padding: 1.2rem; /* Increased padding */
+                border: 1px solid #555555;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Added shadow */
+            }
+            /* Radio buttons and checkboxes */
+            .stRadio div[role="radiogroup"] label, .stCheckbox label {
+                padding: 0.5rem 0;
             }
             </style>
             """,
@@ -340,13 +385,21 @@ def main():
         st.markdown(
             """
             <style>
-            .stApp {
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+            html, body, .stApp {
+                font-family: 'Inter', sans-serif;
                 background-color: #f0f2f6;
                 color: #333333;
             }
             .stSidebar {
                 background-color: #ffffff;
                 color: #333333;
+                padding-top: 2rem;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Playfair Display', serif;
+                color: #00cec9; /* Accent color for headers */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -359,6 +412,8 @@ def main():
                 background-color: #ffffff !important;
                 color: #333333 !important;
                 border: 1px solid #ccc !important;
+                border-radius: 0.5rem;
+                padding: 0.75rem; /* Added padding */
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -369,32 +424,67 @@ def main():
             .stRadio label,
             .stCheckbox label {
                 color: #333333 !important;
+                font-weight: 500;
+                margin-bottom: 0.5rem; /* Added margin */
             }
             /* Buttons */
             .stButton>button {
                 background-color: #00cec9;
                 color: white;
                 border: none;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1.5rem; /* Increased padding */
+                font-weight: 600;
+                transition: all 0.2s ease-in-out;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Added shadow */
             }
             .stButton>button:hover {
                 background-color: #00b0a8;
+                transform: translateY(-2px); /* More noticeable lift */
+                box-shadow: 0 6px 12px rgba(0,0,0,0.15); /* Darker shadow on hover */
             }
             /* Expander background */
             .streamlit-expanderHeader {
-                background-color: #f0f2f6;
+                background-color: #e0e0e0;
                 color: #333333;
+                border-radius: 0.5rem;
+                padding: 0.8rem 1rem;
+                font-weight: 600;
             }
             .streamlit-expanderContent {
-                background-color: #ffffff;
+                background-color: #f8f8f8;
                 color: #333333;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: -0.5rem; /* Overlap with header border-radius */
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: #ffffff;
                 color: #333333;
+                border-radius: 0.5rem;
+                padding: 1rem;
             }
             .stAlert > div > div > div > div {
                 color: #333333; /* Text inside alert */
+            }
+            /* Dataframe styling */
+            .stDataFrame {
+                border-radius: 0.5rem;
+                overflow: hidden; /* Ensures rounded corners are applied */
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Added shadow */
+            }
+            /* Metric boxes */
+            .stMetric {
+                background-color: #ffffff;
+                border-radius: 0.5rem;
+                padding: 1.2rem; /* Increased padding */
+                border: 1px solid #ccc;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Added shadow */
+            }
+            /* Radio buttons and checkboxes */
+            .stRadio div[role="radiogroup"] label, .stCheckbox label {
+                padding: 0.5rem 0;
             }
             </style>
             """,
