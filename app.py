@@ -292,7 +292,7 @@ def main():
     if st.session_state.current_page == "resume_screen":
         resume_screener_page()
     elif st.session_state.current_page == "top_leaderboard":
-        top_leaderboard_page()
+        leaderboard_page()
     elif st.session_state.current_page == "about_us":
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
