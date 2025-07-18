@@ -3,7 +3,7 @@ import requests
 import json
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date # Added 'date' to the import
 import random
 import traceback
 import time # Added import for the 'time' module
