@@ -18,11 +18,11 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
+# from email.mime.base import MIMEBase # No longer needed without PDF attachment
 from email import encoders
 import tempfile
 import shutil
-from weasyprint import HTML
+# from weasyprint import HTML # No longer needed
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from io import BytesIO
 import traceback
@@ -33,11 +33,11 @@ st.image("logo.png", width=140)
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# --- OCR Specific Imports (Moved to top) ---
-from PIL import Image
-import pytesseract
-import cv2
-from pdf2image import convert_from_bytes
+# --- OCR Specific Imports (REMOVED) ---
+# from PIL import Image
+# import pytesseract
+# import cv2
+# from pdf2image import convert_from_bytes
 
 # Global NLTK download check (should run once)
 try:
@@ -220,13 +220,7 @@ APP_BASE_URL = "https://screenerpro-app.streamlit.app"
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
 
-@st.cache_resource
-def get_tesseract_cmd():
-    tesseract_path = shutil.which("tesseract")
-    if tesseract_path:
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
-        return tesseract_path
-    return None
+# Removed get_tesseract_cmd as Tesseract is no longer used.
 
 # Load ML models once using st.cache_resource
 @st.cache_resource
@@ -260,7 +254,7 @@ NAME_EXCLUDE_TERMS = {
     "nationality", "gender", "location", "city", "country", "pin", "zipcode", "state", "whatsapp",
     "skype", "telegram", "handle", "id", "details", "connection", "reach", "network", "www",
     "https", "http", "contactinfo", "connect", "reference", "references","fees"
-}
+]
 EDU_MATCH_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(university|college|institute|school)[^–\n]{0,50}[–\-—]?\s*(expected\s*)?\d{4})', re.IGNORECASE)
 EDU_FALLBACK_PATTERN = re.compile(r'([A-Za-z0-9.,()&\-\s]+?(b\.tech|m\.tech|b\.sc|m\.sc|bca|bba|mba|ph\.d)[^–\n]{0,50}\d{4})', re.IGNORECASE)
 WORK_HISTORY_SECTION_PATTERN = re.compile(r'(?:experience|work history|employment history)\s*(\n|$)', re.IGNORECASE)
@@ -278,12 +272,7 @@ PROJECT_TITLE_START_PATTERN = re.compile(r'^[•*-]?\s*\d+[\).:-]?\s')
 LANGUAGE_SECTION_PATTERN = re.compile(r'\b(languages|language skills|linguistic abilities|known languages)\s*[:\-]?\s*\n?', re.IGNORECASE)
 
 
-def preprocess_image_for_ocr(image):
-    img_cv = np.array(image)
-    img_cv = cv2.cvtColor(img_cv, cv2.COLOR_RGB2GRAY)
-    img_processed = cv2.adaptiveThreshold(img_cv, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                          cv2.THRESH_BINARY, 11, 2)
-    return Image.fromarray(img_processed)
+# Removed preprocess_image_for_ocr as OCR is removed.
 
 def clean_text(text):
     text = re.sub(r'\n', ' ', text)
@@ -347,48 +336,26 @@ def extract_relevant_keywords(text, filter_set):
 
 def extract_text_from_file(file_bytes, file_name, file_type):
     full_text = ""
-    # Tesseract configuration for speed and common resume layout
-    tesseract_config = "--oem 1 --psm 3" 
-
+    
     if "pdf" in file_type:
         try:
             with pdfplumber.open(BytesIO(file_bytes)) as pdf:
-                pdf_text = ''.join(page.extract_text() or '' for page in pdf.pages)
+                full_text = ''.join(page.extract_text() or '' for page in pdf.pages)
             
-            if len(pdf_text.strip()) < 50: # Heuristic for potentially scanned PDF
-                images = convert_from_bytes(file_bytes)
-                for img in images:
-                    processed_img = preprocess_image_for_ocr(img)
-                    full_text += pytesseract.image_to_string(processed_img, lang='eng', config=tesseract_config) + "\n"
-            else:
-                full_text = pdf_text
+            if not full_text.strip():
+                return f"[ERROR] No readable text extracted from PDF. It might be a scanned PDF. Please upload a text-selectable PDF."
 
         except Exception as e:
-            # Fallback to OCR directly if pdfplumber fails or for any other PDF error
-            try:
-                images = convert_from_bytes(file_bytes)
-                for img in images:
-                    processed_img = preprocess_image_for_ocr(img)
-                    full_text += pytesseract.image_to_string(processed_img, lang='eng', config=tesseract_config) + "\n"
-            except Exception as e_ocr:
-                print(f"ERROR: Failed to extract text from PDF via OCR for {file_name}: {str(e_ocr)}")
-                return f"[ERROR] Failed to extract text from PDF via OCR: {str(e_ocr)}"
+            print(f"ERROR: Failed to extract text from PDF for {file_name}: {str(e)}")
+            return f"[ERROR] Failed to extract text from PDF: {str(e)}. Ensure it's a text-selectable PDF, not a scanned image."
 
     elif "image" in file_type:
-        try:
-            img = Image.open(BytesIO(file_bytes)).convert("RGB")
-            processed_img = preprocess_image_for_ocr(img)
-            full_text = pytesseract.image_to_string(processed_img, lang='eng', config=tesseract_config)
-        except Exception as e:
-            print(f"ERROR: Failed to extract text from image for {file_name}: {str(e)}")
-            return f"[ERROR] Failed to extract text from image: {str(e)}"
+        return f"[ERROR] Image files are not supported for text extraction in this version. Please upload a PDF."
     else:
-        print(f"ERROR: Unsupported file type for {file_name}: {file_type}")
-        return f"[ERROR] Unsupported file type: {file_type}. Please upload a PDF or an image (JPG, PNG)."
+        return f"[ERROR] Unsupported file type: {file_type}. Please upload a PDF."
 
     if not full_text.strip():
-        print(f"ERROR: No readable text extracted from {file_name}. It might be a very low-quality scan or an empty document.")
-        return "[ERROR] No readable text extracted from the file. It might be a very low-quality scan or an empty document."
+        return "[ERROR] No readable text extracted from the file. It might be an empty document."
     
     return full_text
 
@@ -1036,17 +1003,9 @@ Best regards,
 The {sender_name}""")
     return f"mailto:{recipient_email}?subject={subject}&body={body}"
 
-@st.cache_data
-def generate_certificate_pdf(html_content):
-    """Converts HTML content to PDF bytes."""
-    try:
-        pdf_bytes = HTML(string=html_content).write_pdf()
-        return pdf_bytes
-    except Exception as e:
-        st.error(f"❌ Failed to generate PDF certificate: {e}")
-        return None
+# Removed generate_certificate_pdf as Weasyprint is removed.
 
-def send_certificate_email(recipient_email, candidate_name, score, certificate_pdf_content, gmail_address, gmail_app_password):
+def send_certificate_email(recipient_email, candidate_name, score, gmail_address, gmail_app_password): # Removed certificate_pdf_content
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
@@ -1062,7 +1021,7 @@ Congratulations on successfully clearing the ScreenerPro resume screening proces
 
 We’re proud to award you an official certificate recognizing your skills and employability.
 
-You can add this to your resume, LinkedIn, or share it with employers to stand out.
+You can view your certificate by returning to the ScreenerPro app.
 
 Have questions? Contact us at support@screenerpro.in
 
@@ -1077,7 +1036,7 @@ Have questions? Contact us at support@screenerpro.in
             <p>Hi {candidate_name},</p>
             <p>Congratulations on successfully clearing the ScreenerPro resume screening process with a score of <strong>{score:.1f}%</strong>!</p>
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
-            <p>You can add this to your resume, LinkedIn, or share it with employers to stand out.</p>
+            <p>You can view your certificate by returning to the ScreenerPro app.</p>
             <p>Have questions? Contact us at support@screenerpro.in</p>
             <p>🚀 Keep striving. Keep growing.</p>
             <p>– Team ScreenerPro</p>
@@ -1091,18 +1050,7 @@ Have questions? Contact us at support@screenerpro.in
     
     msg.attach(msg_alternative)
 
-    if certificate_pdf_content:
-        try:
-            attachment = MIMEBase('application', 'pdf')
-            attachment.set_payload(certificate_pdf_content)
-            encoders.encode_base64(attachment)
-            attachment.add_header('Content-Disposition', 'attachment', filename=f'ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.pdf')
-            msg.attach(attachment)
-            st.info(f"Attached certificate PDF to email for {candidate_name}.")
-        except Exception as e:
-            st.error(f"Failed to attach certificate PDF: {e}")
-    else:
-        st.warning("No PDF content generated to attach to email.")
+    # Removed PDF attachment logic
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -1350,12 +1298,7 @@ def resume_screener_page():
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
 
-    # Initial check for Tesseract (main process only)
-    tesseract_cmd_path = get_tesseract_cmd()
-    if not tesseract_cmd_path:
-        st.error("Tesseract OCR engine not found. Please ensure it's installed and in your system's PATH.")
-        st.info("On Streamlit Community Cloud, ensure you have a `packages.txt` file in your repository's root with `tesseract-ocr` and `tesseract-ocr-eng` listed.")
-        st.stop()
+    # Removed Tesseract check here.
 
     st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
     col1, col2 = st.columns([2, 1])
@@ -1446,8 +1389,8 @@ def resume_screener_page():
         )
 
     # Changed to single file uploader
-    uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF, JPG, PNG)**", type=["pdf", "jpg", "jpeg", "png"], help="Upload your resume (PDF or image). File must be less than 1MB.")
-
+    uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF)**", type=["pdf"], help="Upload your resume (text-selectable PDF only). File must be less than 1MB.") # Removed JPG, PNG
+    
     if jd_text and uploaded_resume_file:
         # Start overall timer
         total_screening_start_time = time.time()
@@ -1558,48 +1501,33 @@ def resume_screener_page():
             st.markdown("---")
 
             st.markdown("## 🏆 Your ScreenerPro Certificate")
-            st.caption("View or download your certificate, and have it sent to your email.")
+            st.caption("View your certificate, and have it sent to your email.")
 
             if candidate_data.get('Certificate Rank') != "Not Applicable":
-                # Generate HTML content for the certificate (for preview and PDF conversion)
+                # Generate HTML content for the certificate (for preview)
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for preview
 
-                # Generate PDF content
-                certificate_pdf_content = generate_certificate_pdf(certificate_html_content)
-
                 col_cert_view, col_cert_download = st.columns(2)
                 with col_cert_view:
-                    if st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button"):
-                        # This button just triggers the preview, content is already generated
-                        pass 
+                    # This button just triggers the preview, content is already generated
+                    st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button")
                         
                 with col_cert_download:
-                    if certificate_pdf_content:
-                        st.download_button(
-                            label="⬇️ Download Certificate (PDF)",
-                            data=certificate_pdf_content,
-                            file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.pdf",
-                            mime="application/pdf",
-                            key="download_cert_pdf_button"
-                        )
-                    else:
-                        st.warning("PDF generation failed, cannot provide download.")
+                    # Removed PDF download button
+                    st.info("PDF download is not available in this version.")
                 
                 # Send email button
                 if candidate_data.get('Email') and candidate_data['Email'] != "Not Found":
                     if st.button("📧 Send Certificate to Email", key="send_cert_email_button"):
-                        if certificate_pdf_content:
-                            send_certificate_email(
-                                recipient_email=candidate_data['Email'],
-                                candidate_name=candidate_data['Candidate Name'],
-                                score=candidate_data['Score (%)'],
-                                certificate_pdf_content=certificate_pdf_content,
-                                gmail_address=st.secrets.get("GMAIL_ADDRESS"),
-                                gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
-                            )
-                        else:
-                            st.error("Cannot send email: Certificate PDF content is not available.")
+                        # Call send_certificate_email without PDF content
+                        send_certificate_email(
+                            recipient_email=candidate_data['Email'],
+                            candidate_name=candidate_data['Candidate Name'],
+                            score=candidate_data['Score (%)'],
+                            gmail_address=st.secrets.get("GMAIL_ADDRESS"),
+                            gmail_app_password=st.secrets.get("GMAIL_APP_PASSWORD")
+                        )
                 else:
                     st.info(f"No email address found for {candidate_data['Candidate Name']}. Certificate could not be sent automatically.")
                 
