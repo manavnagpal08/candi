@@ -11,7 +11,7 @@ from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
 from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from certificate_verify import certificate_verifier_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
