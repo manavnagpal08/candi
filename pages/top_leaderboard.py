@@ -48,9 +48,8 @@ def fetch_leaderboard_data():
         # Firestore collection path (using 'leaderboard' as before)
         collection_id = "leaderboard" 
         
-        # Firestore REST API endpoint for listing documents in a collection
-        # This path adheres to the public data storage convention: /artifacts/{appId}/public/data/{your_collection_name}
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/artifacts/{appId}/public/data/{collection_id}?key={api_key}"
+        # UPDATED URL: Now directly accessing the 'leaderboard' collection at the root
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
 
         response = requests.get(url)
         response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
@@ -85,8 +84,6 @@ def fetch_leaderboard_data():
         return df
     except KeyError as e:
         # This block catches the KeyError if FIREBASE_PROJECT_ID or FIREBASE_API_KEY are missing.
-        # The error message indicates that 'e' is literally ''Score (%)'' which is highly unusual
-        # and points to a potential issue with secrets configuration or an older code version.
         st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
         st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
         return pd.DataFrame()
