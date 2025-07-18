@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timedelta
 import random
 import traceback
+import time # Added import for the 'time' module
 
 # --- Helper functions copied from resume_screen.py for self-containment ---
 
