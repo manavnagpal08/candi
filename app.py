@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from resume_screen import resume_screener_page
-from top_leaderboard import leaderboard_page
-from about_us import about_us_page
-from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from pages.resume_screen import resume_screener_page
+from pages.top_leaderboard import leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -537,11 +537,6 @@ def main():
     )
     st.sidebar.markdown("---")
 
-    st.sidebar.success(f"Logged in as: {st.session_state.username}")
-    if st.session_state.get('user_company'):
-        st.sidebar.info(f"Company: {st.session_state.user_company}")
-
-    st.sidebar.markdown("---")
     st.sidebar.subheader("Navigation")
     
     # Navigation buttons (already conditional by being after the return)
@@ -560,6 +555,11 @@ def main():
     if st.sidebar.button("➡️ Logout", key="nav_logout"):
         st.session_state.current_page = "logout"
         # Logout logic handled by logout_page function
+
+    # Moved "Logged in as:" and "Company:" below navigation buttons
+    st.sidebar.success(f"Logged in as: {st.session_state.username}")
+    if st.session_state.get('user_company'):
+        st.sidebar.info(f"Company: {st.session_state.user_company}")
 
     # Render the selected page
     if st.session_state.current_page == "resume_screen":
