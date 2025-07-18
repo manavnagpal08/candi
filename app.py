@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from resume_screen import resume_screener_page
-from top_leaderboard import leaderboard_page
-from about_us import about_us_page
-from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from pages.resume_screen import resume_screener_page
+from pages.top_leaderboard import leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -253,6 +253,104 @@ def logout_page():
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
 
+def display_greeting_card():
+    """
+    Displays a beautiful greeting card with the authenticated username.
+    This function should be called at the beginning of each page after authentication.
+    """
+    if st.session_state.get("authenticated") and st.session_state.get("username"):
+        st.markdown(
+            f"""
+            <style>
+            @keyframes fadeInScale {{
+                from {{ opacity: 0; transform: scale(0.9); }}
+                to {{ opacity: 1; transform: scale(1); }}
+            }}
+
+            .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%); /* Soft gradient background */
+                border-radius: 12px; /* More rounded corners */
+                padding: 30px;
+                margin-bottom: 25px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
+                text-align: center;
+                animation: fadeInScale 0.7s ease-out forwards; /* Apply animation */
+                position: relative; /* For the sparkle effect */
+                overflow: hidden; /* To contain the sparkle */
+            }}
+            /* Dark mode adjustments for greeting card */
+            .stApp.dark-mode .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            }}
+            .stApp.dark-mode .beautiful-greeting-title {{
+                color: #00cec9; /* Match sidebar title color in dark mode */
+            }}
+            .stApp.dark-mode .beautiful-welcome-text {{
+                color: #bbbbbb;
+            }}
+
+
+            .beautiful-greeting-card::before {{
+                content: '✨'; /* Add a subtle sparkle effect */
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+            .beautiful-greeting-card::after {{
+                content: '�'; /* Another sparkle */
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+
+            .beautiful-greeting-title {{
+                font-size: 2.2em; /* Larger title */
+                font-weight: 700; /* Bolder */
+                color: #2c3e50; /* Darker, more prominent color */
+                margin-bottom: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
+            }}
+
+            .beautiful-username {{
+                color: #3498db; /* Vibrant blue for username */
+                font-weight: 800; /* Extra bold */
+            }}
+
+            .beautiful-welcome-text {{
+                font-size: 1.15em; /* Slightly larger body text */
+                color: #555555; /* Softer text color */
+                line-height: 1.6;
+                margin-top: 15px;
+            }}
+
+            .beautiful-emoji {{
+                font-size: 1.6em; /* Larger, more impactful emojis */
+                vertical-align: middle;
+                margin: 0 5px;
+            }}
+            </style>
+
+            <div class="beautiful-greeting-card">
+                <h1 class="beautiful-greeting-title">
+                    Welcome, <span class="beautiful-username">{st.session_state.username}</span>!
+                </h1>
+                <p class="beautiful-welcome-text">
+                    <span class="beautiful-emoji">👋</span> We're absolutely thrilled to have you here!
+                    Your journey with us officially begins now. <span class="beautiful-emoji">🚀</span>
+                    Get ready to explore! <span class="beautiful-emoji">🎉</span>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
 # --- Main Application Logic ---
 
@@ -276,6 +374,13 @@ def main():
                 font-family: 'Inter', sans-serif;
                 background-color: #1a1a1a;
                 color: #f0f0f0;
+            }
+            .stApp { /* Add dark-mode class to stApp for conditional styling */
+                background-color: #1a1a1a;
+                color: #f0f0f0;
+            }
+            .stApp.dark-mode {
+                /* This class will be added by JS below */
             }
             .stSidebar {
                 background-color: #262626;
@@ -362,6 +467,18 @@ def main():
             """,
             unsafe_allow_html=True
         )
+        # Add JS to apply dark-mode class to stApp
+        st.markdown(
+            """
+            <script>
+            const body = window.parent.document.querySelector('.stApp');
+            if (body) {
+                body.classList.add('dark-mode');
+            }
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
     else:
         st.markdown(
             """
@@ -372,6 +489,13 @@ def main():
                 font-family: 'Inter', sans-serif;
                 background-color: #f0f2f6;
                 color: #333333;
+            }
+            .stApp { /* Remove dark-mode class from stApp */
+                background-color: #f0f2f6;
+                color: #333333;
+            }
+            .stApp.dark-mode {
+                /* This class will be removed by JS below */
             }
             .stSidebar {
                 background-color: #ffffff;
@@ -455,6 +579,18 @@ def main():
                 border: 1px solid #ccc;
             }
             </style>
+            """,
+            unsafe_allow_html=True
+        )
+        # Add JS to remove dark-mode class from stApp
+        st.markdown(
+            """
+            <script>
+            const body = window.parent.document.querySelector('.stApp');
+            if (body) {
+                body.classList.remove('dark-mode');
+            }
+            </script>
             """,
             unsafe_allow_html=True
         )
