@@ -44,6 +44,7 @@ def fetch_candidate_by_certificate_id(certificate_id):
         api_key = st.secrets["FIREBASE_API_KEY"]
         
         # Corrected: Parent path is part of the URL for runQuery when querying a subcollection
+        # The URL should point to the parent document of the collection you want to query.
         parent_path = f"projects/{project_id}/databases/(default)/documents/artifacts/{appId}/public/data"
         url = f"https://firestore.googleapis.com/v1/{parent_path}:runQuery?key={api_key}"
 
@@ -51,7 +52,7 @@ def fetch_candidate_by_certificate_id(certificate_id):
         # 'collectionId' is now just the immediate collection name relative to the parent_path
         query_payload = {
             "structuredQuery": {
-                "from": [{"collectionId": "leaderboard"}],
+                "from": [{"collectionId": "leaderboard"}], # Only the immediate collection name here
                 "where": {
                     "fieldFilter": {
                         "field": {"fieldPath": "`Certificate ID`"},
