@@ -29,8 +29,6 @@ import pandas as pd
 import json
 import requests # Import requests for REST API calls
 
-# Removed Firebase Admin SDK imports as requested.
-
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -317,11 +315,8 @@ def save_screening_result_to_firestore_rest(result_data):
         st.warning("This often indicates an issue with Firestore security rules (e.g., write access denied) or incorrect API key/project ID.")
     except Exception as e:
         st.error(f"❌ An unexpected error occurred while saving to leaderboard via REST API: {e}")
-        st.exception(e) # Display the exception traceback directly on the frontend
+        st.exception(e)
 
-
-# Removed Firebase Admin SDK initialization
-# db = initialize_firebase() # No longer needed
 
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
