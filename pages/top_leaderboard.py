@@ -106,7 +106,7 @@ def leaderboard_page():
     st.markdown("### Top Candidates by Screening Score")
     st.caption("View the highest-scoring candidates across various job descriptions.")
 
-    # No explicit Firebase initialization check needed here as fetch_leaderboard_data handles it.
+    st.info("💡 Data is being loaded using the Firebase REST API.") # Added this line for clarity
 
     # Add a refresh button to allow users to get the latest data
     if st.button("🔄 Refresh Leaderboard Data"):
