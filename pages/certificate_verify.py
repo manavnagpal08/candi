@@ -3,6 +3,7 @@ import requests
 import json
 import os
 import pandas as pd # For displaying data
+from datetime import datetime # Import datetime for pd.to_datetime
 
 # Helper function to convert Firestore REST API format back to Python data
 # (Copied from top_leaderboard.py to ensure consistency)
@@ -49,7 +50,8 @@ def fetch_candidate_by_certificate_id(certificate_id):
                 "from": [{"collectionId": collection_id}],
                 "where": {
                     "fieldFilter": {
-                        "field": {"fieldPath": "Certificate ID"},
+                        # FIX: Enclose "Certificate ID" in backticks for the fieldPath
+                        "field": {"fieldPath": "`Certificate ID`"},
                         "op": "EQUAL",
                         "value": {"stringValue": certificate_id}
                     }
@@ -65,6 +67,7 @@ def fetch_candidate_by_certificate_id(certificate_id):
         response_json = response.json()
 
         # The response for runQuery is an array of results, each containing a 'document' field
+        # Note: If no document matches, response_json might be empty or not contain 'document'
         if response_json and len(response_json) > 0 and "document" in response_json[0]:
             doc_entry = response_json[0]["document"]
             details = {}
@@ -130,7 +133,12 @@ def certificate_verification_page():
                     st.write(f"**CGPA (4.0 Scale):** {candidate_details.get('CGPA (4.0 Scale)', 'N/A')}")
                 with col_info_2:
                     st.write(f"**JD Used:** {candidate_details.get('JD Used', 'N/A')}")
-                    st.write(f"**Date Screened:** {pd.to_datetime(candidate_details.get('Date Screened', datetime.now().strftime('%Y-%m-%d'))).strftime('%Y-%m-%d')}")
+                    # Ensure Date Screened is formatted correctly for display
+                    date_screened_str = candidate_details.get('Date Screened', datetime.now().strftime('%Y-%m-%d'))
+                    if isinstance(date_screened_str, str):
+                        st.write(f"**Date Screened:** {pd.to_datetime(date_screened_str).strftime('%Y-%m-%d')}")
+                    else:
+                        st.write(f"**Date Screened:** {date_screened_str}") # Fallback if not string
                     st.write(f"**Certificate Rank:** {candidate_details.get('Certificate Rank', 'N/A')}")
                     st.write(f"**Tag:** {candidate_details.get('Tag', 'N/A')}")
                 
