@@ -215,8 +215,8 @@ SKILL_CATEGORIES = {
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
-CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
+APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+CERTIFICATE_HOSTING_URL = "https://manavnagpal08.github.io/screenerpro-certs"
 
 # Initialize Firebase (only once)
 @st.cache_resource
