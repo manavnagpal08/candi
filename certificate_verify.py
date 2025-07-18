@@ -101,7 +101,6 @@ def fetch_candidate_by_certificate_id(certificate_id):
         st.error(f"❌ Failed to fetch certificate details via REST API: HTTP Error {e.response.status_code}")
         st.error(f"Response: {e.response.text}")
         st.warning("Ensure Firestore security rules allow read access to the 'leaderboard' collection.")
-        return None
     except Exception as e:
         st.error(f"❌ An unexpected error occurred while verifying certificate: {e}")
         st.exception(e)
@@ -327,9 +326,9 @@ def certificate_verification_page():
     Displays the Certificate Verification page in Streamlit.
     Allows users to input a Certificate ID and view candidate details.
     """
-    # Import display_greeting_card from the main app.py file
-    from app import display_greeting_card
-    display_greeting_card()
+    # Personalized greeting for the logged-in user
+    if st.session_state.get('authenticated', False) and st.session_state.get('username'):
+        st.markdown(f"## Hello, {st.session_state.username}!")
 
     st.title("✅ Certificate Verification")
     st.markdown("### Verify the authenticity of ScreenerPro Certificates.")
