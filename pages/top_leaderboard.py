@@ -82,10 +82,12 @@ def fetch_leaderboard_data():
                 # Convert date string back to datetime object for proper sorting/display
                 "Date Screened": pd.to_datetime(data.get("Date Screened", datetime.now().strftime("%Y-%m-%d"))),
                 "Certificate Rank": data.get("Certificate Rank", "N/A"),
-                "Tag": data.get("Tag", "N/A")
-                # Note: Detailed fields like AI Suggestion, Matched/Missing Skills (Categorized)
-                # are NOT fetched here to keep the initial leaderboard load fast.
-                # They will be fetched on demand by fetch_candidate_details.
+                "Tag": data.get("Tag", "N/A"),
+                "AI Suggestion": data.get("AI Suggestion", "N/A"), # Fetch for detailed view
+                "Detailed HR Assessment": data.get("Detailed HR Assessment", "N/A"), # Fetch for detailed view
+                "Matched Keywords (Categorized)": data.get("Matched Keywords (Categorized)", "{}"), # Fetch for detailed view
+                "Missing Skills (Categorized)": data.get("Missing Skills (Categorized)", "{}"), # Fetch for detailed view
+                "Semantic Similarity": data.get("Semantic Similarity", 0.0) # Fetch for detailed view
             })
         
         df = pd.DataFrame(leaderboard_data)
@@ -106,52 +108,8 @@ def fetch_leaderboard_data():
         st.exception(e)
         return pd.DataFrame()
 
-@st.cache_data(ttl=60) # Cache detailed data for a short period
-def fetch_candidate_details(doc_id):
-    """
-    Fetches full details for a single candidate document from Firestore using the REST API.
-    """
-    try:
-        project_id = st.secrets["FIREBASE_PROJECT_ID"]
-        api_key = st.secrets["FIREBASE_API_KEY"]
-        collection_id = "leaderboard"
-
-        # URL to fetch a specific document by its ID
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}/{doc_id}?key={api_key}"
-        
-        response = requests.get(url)
-        response.raise_for_status()
-        response_json = response.json()
-
-        details = {}
-        for key, value_obj in response_json.get("fields", {}).items():
-            details[key] = _convert_from_firestore_rest_format(value_obj)
-        
-        # Ensure categorized skills are parsed from JSON strings if they come as such
-        if isinstance(details.get('Matched Keywords (Categorized)'), str):
-            try:
-                details['Matched Keywords (Categorized)'] = json.loads(details['Matched Keywords (Categorized)'])
-            except json.JSONDecodeError:
-                details['Matched Keywords (Categorized)'] = {}
-        if isinstance(details.get('Missing Skills (Categorized)'), str):
-            try:
-                details['Missing Skills (Categorized)'] = json.loads(details['Missing Skills (Categorized)'])
-            except json.JSONDecodeError:
-                details['Missing Skills (Categorized)'] = {}
-
-        return details
-    except KeyError as e:
-        st.error(f"❌ Firebase REST API configuration error for details: Missing secret key '{e}'.")
-        return None
-    except requests.exceptions.HTTPError as e:
-        st.error(f"❌ Failed to fetch candidate details via REST API: HTTP Error {e.response.status_code}")
-        st.error(f"Response: {e.response.text}")
-        st.warning("Ensure Firestore security rules allow read access to individual documents.")
-        return None
-    except Exception as e:
-        st.error(f"❌ An unexpected error occurred while fetching candidate details: {e}")
-        st.exception(e)
-        return None
+# Removed fetch_candidate_details as all necessary details are now fetched by fetch_leaderboard_data
+# to simplify the detailed view logic and reduce redundant API calls.
 
 def leaderboard_page():
     """
@@ -160,7 +118,7 @@ def leaderboard_page():
     """
     st.title("🏆 ScreenerPro Leaderboard")
     st.markdown("### Top Candidates by Screening Score")
-    st.caption("View the highest-scoring candidates across various job descriptions.")
+    st.caption("This page is publicly accessible and displays all candidates who have used the ScreenerPro app.")
 
     st.info("💡 Data is being loaded using the Firebase REST API.")
 
@@ -188,6 +146,14 @@ def leaderboard_page():
     unique_jds = ["All"] + sorted(leaderboard_df["JD Used"].unique())
     selected_jd = st.sidebar.selectbox("Filter by Job Description", unique_jds)
 
+    # Filter by Tag
+    unique_tags = ["All"] + sorted(leaderboard_df["Tag"].unique())
+    selected_tag = st.sidebar.selectbox("Filter by Tag", unique_tags)
+
+    # Filter by Certificate Rank
+    unique_cert_ranks = ["All"] + sorted(leaderboard_df["Certificate Rank"].unique())
+    selected_cert_rank = st.sidebar.selectbox("Filter by Certificate Rank", unique_cert_ranks)
+
     # Filter by Minimum Score
     min_score_filter = st.sidebar.slider("Minimum Score (%)", 0, 100, 0)
 
@@ -206,8 +172,24 @@ def leaderboard_page():
     if selected_jd != "All":
         filtered_df = filtered_df[filtered_df["JD Used"] == selected_jd]
     
+    if selected_tag != "All":
+        filtered_df = filtered_df[filtered_df["Tag"] == selected_tag]
+
+    if selected_cert_rank != "All":
+        filtered_df = filtered_df[filtered_df["Certificate Rank"] == selected_cert_rank]
+
     filtered_df = filtered_df[filtered_df["Score (%)"] >= min_score_filter]
     filtered_df = filtered_df[filtered_df["Years Experience"] >= min_exp_filter]
+
+    # Add Rank column to the filtered DataFrame
+    if not filtered_df.empty:
+        filtered_df['Rank'] = filtered_df['Score (%)'].rank(ascending=False, method='min').astype(int)
+        filtered_df = filtered_df.sort_values(by="Rank").reset_index(drop=True)
+
+    # Display Average Score
+    if not filtered_df.empty:
+        avg_score = filtered_df["Score (%)"].mean()
+        st.metric(label="Average Score (Filtered Candidates)", value=f"{avg_score:.2f}%")
 
     # Display the filtered data
     if filtered_df.empty:
@@ -228,9 +210,9 @@ def leaderboard_page():
         )
         
         # Display the dataframe with selection enabled
-        # We need to explicitly pass the key and on_select to use the selection feature
         st.dataframe(
             filtered_df[[
+                "Rank", # Include Rank column
                 "Candidate Name", 
                 "Score (%)", 
                 "Years Experience", 
@@ -256,23 +238,28 @@ def leaderboard_page():
         selected_rows = st.session_state.leaderboard_table.get("selection", {}).get("rows", [])
         if selected_rows:
             selected_index = selected_rows[0] # Get the index of the first selected row
-            selected_candidate_summary = filtered_df.iloc[selected_index]
-            selected_doc_id = selected_candidate_summary["Firestore Doc ID"]
+            selected_candidate_data = filtered_df.iloc[selected_index] # Get the full row data from filtered_df
 
             st.markdown("---")
-            st.subheader(f"Detailed Assessment for {selected_candidate_summary['Candidate Name']}")
+            st.subheader(f"Detailed Assessment for {selected_candidate_data['Candidate Name']}")
             
-            # Fetch full details for the selected candidate
-            detailed_candidate_data = fetch_candidate_details(selected_doc_id)
-
-            if detailed_candidate_data:
-                st.markdown(f"**Score:** {detailed_candidate_data.get('Score (%)', 0.0):.2f}% | **Experience:** {detailed_candidate_data.get('Years Experience', 0.0):.1f} years | **CGPA:** {detailed_candidate_data.get('CGPA (4.0 Scale)', 'N/A')} (4.0 Scale) | **Semantic Similarity:** {detailed_candidate_data.get('Semantic Similarity', 0.0):.2f}")
-                st.markdown(f"**AI Suggestion:** {detailed_candidate_data.get('AI Suggestion', 'N/A')}")
+            # All detailed data is now available in selected_candidate_data
+            # No need for a separate fetch_candidate_details call
+            if selected_candidate_data is not None:
+                st.markdown(f"**Score:** {selected_candidate_data.get('Score (%)', 0.0):.2f}% | **Experience:** {selected_candidate_data.get('Years Experience', 0.0):.1f} years | **CGPA:** {selected_candidate_data.get('CGPA (4.0 Scale)', 'N/A')} (4.0 Scale) | **Semantic Similarity:** {selected_candidate_data.get('Semantic Similarity', 0.0):.2f}")
+                st.markdown(f"**AI Suggestion:** {selected_candidate_data.get('AI Suggestion', 'N/A')}")
                 st.markdown(f"**Detailed HR Assessment:**")
-                st.markdown(detailed_candidate_data.get('Detailed HR Assessment', 'N/A'))
+                st.markdown(selected_candidate_data.get('Detailed HR Assessment', 'N/A'))
 
                 st.markdown("#### Matched Skills Breakdown:")
-                matched_kws_categorized_dict = detailed_candidate_data.get('Matched Keywords (Categorized)', {})
+                # Ensure categorized skills are parsed from JSON strings if they come as such
+                matched_kws_categorized_dict = selected_candidate_data.get('Matched Keywords (Categorized)', '{}')
+                if isinstance(matched_kws_categorized_dict, str):
+                    try:
+                        matched_kws_categorized_dict = json.loads(matched_kws_categorized_dict)
+                    except json.JSONDecodeError:
+                        matched_kws_categorized_dict = {}
+                
                 if matched_kws_categorized_dict:
                     for category, skills in matched_kws_categorized_dict.items():
                         st.write(f"**{category}:** {', '.join(skills)}")
@@ -280,7 +267,13 @@ def leaderboard_page():
                     st.write("No categorized matched skills found.")
 
                 st.markdown("#### Missing Skills Breakdown (from JD):")
-                missing_kws_categorized_dict = detailed_candidate_data.get('Missing Skills (Categorized)', {})
+                missing_kws_categorized_dict = selected_candidate_data.get('Missing Skills (Categorized)', '{}')
+                if isinstance(missing_kws_categorized_dict, str):
+                    try:
+                        missing_kws_categorized_dict = json.loads(missing_kws_categorized_dict)
+                    except json.JSONDecodeError:
+                        missing_kws_categorized_dict = {}
+
                 if missing_kws_categorized_dict:
                     for category, skills in missing_kws_categorized_dict.items():
                         st.write(f"**{category}:** {', '.join(skills)}")
