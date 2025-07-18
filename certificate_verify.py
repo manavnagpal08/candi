@@ -402,8 +402,8 @@ def certificate_verifier_page():
                 share_message = f"""I just verified a Certificate of Screening Excellence from ScreenerPro! 🏆
 This candidate was evaluated across multiple hiring parameters using AI-powered screening technology and scored above {candidate_data['Score (%)']:.1f}%.
 
-#resume #jobsearch #ai #careergrowth #certified #ResumeScreenerPro #LinkedIn
-🌐 Verify your own certificates or learn more about the tool: {urllib.parse.quote(APP_BASE_URL)}
+#resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
+🌐 Verify this certificate: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
                 # LinkedIn Share Button
@@ -419,8 +419,10 @@ This candidate was evaluated across multiple hiring parameters using AI-powered 
                 # --- Automatic HTML Preview Display ---
                 st.markdown("---")
                 st.markdown("### Generated Certificate Preview (HTML)")
-                # Removed height and set scrolling to False to allow full display
-                st.components.v1.html(st.session_state['certificate_html_content_verifier'], scrolling=False) 
+                # Set a fixed height to ensure the entire certificate is visible
+                # A common certificate aspect ratio is around 1.4:1 (width:height).
+                # For 960px width, a height of 1200px should be sufficient.
+                st.components.v1.html(st.session_state['certificate_html_content_verifier'], height=1200, scrolling=False) 
                 st.markdown("---")
 
             else:
