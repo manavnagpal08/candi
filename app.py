@@ -9,7 +9,7 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 from pages.resume_screen import resume_screener_page
 from pages.top_leaderboard import leaderboard_page
 from pages.about_us import about_us_page
-from pages.feedback_form import feedback_and_help_page # Corrected function name here
+from pages.feedback_form import feedback_and_help_page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -224,7 +224,7 @@ def is_current_user_admin():
     return st.session_state.get("authenticated", False) and st.session_state.get("username") in ADMIN_USERNAME
 
 # --- Candidate Portal Pages (now imported) ---
-# The functions resume_screen_page, top_leaderboard_page, about_us_page, feedback_form_page
+# The functions resume_screener_page, leaderboard_page, about_us_page, feedback_and_help_page
 # are now imported from their respective files in the 'pages' directory.
 
 def logout_page():
@@ -244,11 +244,48 @@ def logout_page():
 def main():
     st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
 
-    # Initialize session state for current page if not already set
+    # Initialize session state for current page and dark mode
     if "current_page" not in st.session_state:
         st.session_state.current_page = "resume_screen" # Default page after login
+    if "dark_mode_main" not in st.session_state:
+        st.session_state.dark_mode_main = False # Default to light mode
 
     st.sidebar.title("ScreenerPro Portal")
+
+    # Dark Mode Toggle in Sidebar
+    st.sidebar.markdown("---")
+    st.session_state.dark_mode_main = st.sidebar.checkbox("🌙 Dark Mode", value=st.session_state.dark_mode_main)
+    
+    # Apply theme based on dark_mode_main
+    if st.session_state.dark_mode_main:
+        st.markdown(
+            """
+            <style>
+            body { background-color: #1a1a1a; color: #f0f0f0; }
+            .stApp { background-color: #1a1a1a; }
+            .stSidebar { background-color: #262626; }
+            .stButton>button { background-color: #00cec9; color: white; }
+            .stButton>button:hover { background-color: #00b0a8; }
+            /* Add more dark mode specific styles here if needed */
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            """
+            <style>
+            body { background-color: #f0f2f6; color: #333333; }
+            .stApp { background-color: #f0f2f6; }
+            .stSidebar { background-color: #ffffff; }
+            .stButton>button { background-color: #00cec9; color: white; }
+            .stButton>button:hover { background-color: #00b0a8; }
+            /* Add more light mode specific styles here if needed */
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     # Ensure all admin users exist for testing/initial setup
     users = load_users()
