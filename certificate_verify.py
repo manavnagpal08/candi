@@ -150,6 +150,8 @@ def generate_certificate_html(candidate_data):
   text-align: center;
   position: relative;
   overflow: hidden;
+  min-height: 800px; /* Added min-height to ensure enough space */
+  height: auto; /* Ensure height adjusts to content */
 }
 
 .certificate img.logo {
@@ -417,7 +419,8 @@ This candidate was evaluated across multiple hiring parameters using AI-powered 
                 # --- Automatic HTML Preview Display ---
                 st.markdown("---")
                 st.markdown("### Generated Certificate Preview (HTML)")
-                st.components.v1.html(st.session_state['certificate_html_content_verifier'], scrolling=False) # Removed height
+                # Removed height and set scrolling to False to allow full display
+                st.components.v1.html(st.session_state['certificate_html_content_verifier'], scrolling=False) 
                 st.markdown("---")
 
             else:
