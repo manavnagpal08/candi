@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from resume_screen import resume_screener_page
-from top_leaderboard import leaderboard_page
-from about_us import about_us_page
-from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verification_page # New import
+from pages.resume_screen import resume_screener_page
+from pages.top_leaderboard import leaderboard_page
+from pages.about_us import about_us_page
+from pages.feedback_form import feedback_and_help_page
+from pages.certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -21,21 +21,34 @@ USER_DB_FILE = "users.json"
 ADMIN_USERNAME = ("admin@forscreenerpro", "admin@forscreenerpro2", "manav.nagpal2005@gmail.com") 
 
 def load_users():
-    """Loads user data from the JSON file."""
+    """Loads user data from the JSON file, handling potential corruption or emptiness."""
     if not os.path.exists(USER_DB_FILE):
         with open(USER_DB_FILE, "w") as f:
             json.dump({}, f)
-    with open(USER_DB_FILE, "r") as f:
-        users = json.load(f)
-        # Ensure each user has a 'status' key and 'company' key for backward compatibility
-        for username, data in users.items():
-            if isinstance(data, str): # Old format: "username": "hashed_password"
-                users[username] = {"password": data, "status": "active", "company": "N/A"}
-            elif "status" not in data:
-                data["status"] = "active"
-            if "company" not in data: # Add company field if missing
-                data["company"] = "N/A"
-        return users
+        return {} # Return empty dict if file was just created
+
+    try:
+        with open(USER_DB_FILE, "r") as f:
+            users = json.load(f)
+            # Ensure each user has a 'status' key and 'company' key for backward compatibility
+            for username, data in users.items():
+                if isinstance(data, str): # Old format: "username": "hashed_password"
+                    users[username] = {"password": data, "status": "active", "company": "N/A"}
+                elif "status" not in data:
+                    data["status"] = "active"
+                if "company" not in data: # Add company field if missing
+                    data["company"] = "N/A"
+            return users
+    except json.JSONDecodeError:
+        # If the file is empty or malformed JSON, re-initialize it
+        st.warning(f"⚠️ '{USER_DB_FILE}' is empty or corrupted. Re-initializing with an empty user database.")
+        with open(USER_DB_FILE, "w") as f:
+            json.dump({}, f)
+        return {}
+    except Exception as e:
+        st.error(f"❌ An unexpected error occurred while loading users: {e}")
+        return {}
+
 
 def save_users(users):
     """Saves user data to the JSON file."""
@@ -101,8 +114,6 @@ def admin_registration_section():
             st.error("Please fill in all fields.")
         elif not is_valid_email(new_username): # Email format validation
             st.error("Please enter a valid email address for the username.")
-            # No need to set active_login_tab_selection here, it's an admin function.
-            # The previous code had a redundant line here.
         else:
             users = load_users()
             if new_username in users:
