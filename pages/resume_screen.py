@@ -28,6 +28,11 @@ import time
 import pandas as pd
 import json
 
+# Firebase imports for Firestore
+# Using firebase_admin for server-side Python Streamlit app
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 # Removed the st.image call for the logo as requested.
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
@@ -212,6 +217,40 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
 APP_BASE_URL = "https://screenerpro-app.streamlit.app"
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
+
+# Initialize Firebase (only once)
+@st.cache_resource
+def initialize_firebase():
+    try:
+        # Check if Firebase app is already initialized
+        if not firebase_admin._apps:
+            # Use Streamlit secrets for Firebase configuration
+            firebase_config = {
+                "apiKey": st.secrets["FIREBASE_API_KEY"],
+                "authDomain": st.secrets["FIREBASE_AUTH_DOMAIN"],
+                "projectId": st.secrets["FIREBASE_PROJECT_ID"],
+                "storageBucket": st.secrets["FIREBASE_STORAGE_BUCKET"],
+                "messagingSenderId": st.secrets["FIREBASE_MESSAGING_SENDER_ID"],
+                "appId": st.secrets["FIREBASE_APP_ID"],
+                "measurementId": st.secrets["FIREBASE_MEASUREMENT_ID"]
+            }
+            # Load service account key from secrets
+            cred = credentials.Certificate(json.loads(st.secrets["FIREBASE_SERVICE_ACCOUNT_KEY"]))
+            firebase_admin.initialize_app(cred, firebase_config)
+        
+        db = firestore.client()
+        return db
+    except Exception as e:
+        st.error(f"❌ Error initializing Firebase: {e}. Please ensure your Firebase secrets are correctly configured.")
+        return None
+
+# Get Firestore DB client globally
+db = initialize_firebase()
+
+# Global variable for app ID (as provided by the environment)
+# This assumes __app_id is available in the Streamlit environment.
+# If running locally without this, you might need to hardcode a default or set it via env var.
+appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
 
 # Removed get_tesseract_cmd as Tesseract is no longer used.
@@ -1548,6 +1587,33 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                 else:
                     st.info(f"No email address found for {candidate_data['Candidate Name']}. Certificate could not be sent automatically.")
                 
+                # --- Firestore Save for Leaderboard ---
+                if db: # Check if Firebase DB client is initialized
+                    try:
+                        # Prepare data for Firestore. Ensure all data types are compatible.
+                        data_to_save = candidate_data.copy()
+                        if isinstance(data_to_save.get('Date Screened'), (datetime, date)):
+                            data_to_save['Date Screened'] = data_to_save['Date Screened'].strftime("%Y-%m-%d")
+                        
+                        # Remove raw text if it's too large or not needed in leaderboard
+                        data_to_save.pop('Resume Raw Text', None)
+                        
+                        # Firestore document ID can be the Certificate ID for easy lookup
+                        doc_id = data_to_save.get('Certificate ID')
+                        if doc_id:
+                            # Use set with merge=True to update if exists, or create if new
+                            doc_ref = db.collection(f'artifacts/{appId}/public/data/leaderboard').document(doc_id)
+                            doc_ref.set(data_to_save, merge=True)
+                            st.success(f"📈 Your score has been added to the leaderboard!")
+                        else:
+                            st.warning("Could not save to leaderboard: No Certificate ID generated.")
+                    except Exception as e:
+                        st.error(f"❌ Failed to save results to leaderboard: {e}")
+                        st.warning("Please check your Firebase configuration and security rules.")
+                else:
+                    st.warning("Firebase database not available to save leaderboard data.")
+                # --- End of Firestore save section ---
+
             else:
                 st.info(f"{candidate_data['Candidate Name']} does not qualify for a ScreenerPro Certificate at this time.")
         else:
