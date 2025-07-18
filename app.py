@@ -7,11 +7,11 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in a 'pages' subdirectory relative to app.py
-from pages.resume_screen import resume_screener_page
-from pages.top_leaderboard import leaderboard_page
-from pages.about_us import about_us_page
-from pages.feedback_form import feedback_and_help_page
-from pages.certificate_verify import certificate_verification_page # New import
+from resume_screen import resume_screener_page
+from top_leaderboard import leaderboard_page
+from about_us import about_us_page
+from feedback_form import feedback_and_help_page
+from certificate_verify import certificate_verification_page # New import
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
