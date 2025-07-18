@@ -50,7 +50,8 @@ def fetch_leaderboard_data():
         project_id = st.secrets["FIREBASE_PROJECT_ID"]
         api_key = st.secrets["FIREBASE_API_KEY"]
         
-        collection_id = "leaderboard" 
+        # Corrected: Access 'leaderboard' collection directly at the root
+        collection_id = "leaderboard"
         
         # URL directly accessing the 'leaderboard' collection at the root
         url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
@@ -116,6 +117,14 @@ def leaderboard_page():
     Displays the ScreenerPro Leaderboard page in Streamlit.
     Fetches and filters candidate data from Firestore, and provides detailed view.
     """
+    # Import display_greeting_card from the main app.py file
+    # from app import display_greeting_card # Removed to avoid circular import
+    # display_greeting_card() # Removed call to avoid circular import
+
+    # Personalized greeting for the logged-in user
+    if st.session_state.get('authenticated', False) and st.session_state.get('username'):
+        st.markdown(f"## Hello, {st.session_state.username}!")
+
     st.title("🏆 ScreenerPro Leaderboard")
     st.markdown("### Top Candidates by Screening Score")
     st.caption("This page is publicly accessible and displays all candidates who have used the ScreenerPro app.")
@@ -139,26 +148,33 @@ def leaderboard_page():
         st.info("No candidate data available yet. Upload resumes on the main Screener page to populate the leaderboard.")
         return
 
-    # Sidebar filters for the leaderboard
-    st.sidebar.header("📊 Filter Leaderboard")
+    # --- Filters moved to main content area ---
+    st.markdown("---")
+    st.subheader("📊 Filter Leaderboard")
     
-    # Filter by Job Description
-    unique_jds = ["All"] + sorted(leaderboard_df["JD Used"].unique())
-    selected_jd = st.sidebar.selectbox("Filter by Job Description", unique_jds)
+    filter_cols = st.columns(3)
+    with filter_cols[0]:
+        # Filter by Job Description
+        unique_jds = ["All"] + sorted(leaderboard_df["JD Used"].unique())
+        selected_jd = st.selectbox("Filter by Job Description", unique_jds)
 
-    # Filter by Tag
-    unique_tags = ["All"] + sorted(leaderboard_df["Tag"].unique())
-    selected_tag = st.sidebar.selectbox("Filter by Tag", unique_tags)
+    with filter_cols[1]:
+        # Filter by Tag
+        unique_tags = ["All"] + sorted(leaderboard_df["Tag"].unique())
+        selected_tag = st.selectbox("Filter by Tag", unique_tags)
 
-    # Filter by Certificate Rank
-    unique_cert_ranks = ["All"] + sorted(leaderboard_df["Certificate Rank"].unique())
-    selected_cert_rank = st.sidebar.selectbox("Filter by Certificate Rank", unique_cert_ranks)
+    with filter_cols[2]:
+        # Filter by Certificate Rank
+        unique_cert_ranks = ["All"] + sorted(leaderboard_df["Certificate Rank"].unique())
+        selected_cert_rank = st.selectbox("Filter by Certificate Rank", unique_cert_ranks)
 
-    # Filter by Minimum Score
-    min_score_filter = st.sidebar.slider("Minimum Score (%)", 0, 100, 0)
-
-    # Filter by Minimum Experience
-    min_exp_filter = st.sidebar.slider("Minimum Experience (Years)", 0, 15, 0)
+    filter_cols_2 = st.columns(2)
+    with filter_cols_2[0]:
+        # Filter by Minimum Score
+        min_score_filter = st.slider("Minimum Score (%)", 0, 100, 0)
+    with filter_cols_2[1]:
+        # Filter by Minimum Experience
+        min_exp_filter = st.slider("Minimum Experience (Years)", 0, 15, 0)
 
     # Apply filters to the DataFrame
     filtered_df = leaderboard_df.copy()
@@ -244,7 +260,6 @@ def leaderboard_page():
             st.subheader(f"Detailed Assessment for {selected_candidate_data['Candidate Name']}")
             
             # All detailed data is now available in selected_candidate_data
-            # No need for a separate fetch_candidate_details call
             if selected_candidate_data is not None:
                 st.markdown(f"**Score:** {selected_candidate_data.get('Score (%)', 0.0):.2f}% | **Experience:** {selected_candidate_data.get('Years Experience', 0.0):.1f} years | **CGPA:** {selected_candidate_data.get('CGPA (4.0 Scale)', 'N/A')} (4.0 Scale) | **Semantic Similarity:** {selected_candidate_data.get('Semantic Similarity', 0.0):.2f}")
                 st.markdown(f"**AI Suggestion:** {selected_candidate_data.get('AI Suggestion', 'N/A')}")
@@ -252,31 +267,32 @@ def leaderboard_page():
                 st.markdown(selected_candidate_data.get('Detailed HR Assessment', 'N/A'))
 
                 st.markdown("#### Matched Skills Breakdown:")
-                # Ensure categorized skills are parsed from JSON strings if they come as such
-                matched_kws_categorized_dict = selected_candidate_data.get('Matched Keywords (Categorized)', '{}')
-                if isinstance(matched_kws_categorized_dict, str):
+                matched_kws_categorized_str = selected_candidate_data['Matched Keywords (Categorized)']
+                if matched_kws_categorized_str and isinstance(matched_kws_categorized_str, str):
                     try:
-                        matched_kws_categorized_dict = json.loads(matched_kws_categorized_dict)
+                        matched_kws_categorized_dict = json.loads(matched_kws_categorized_str)
+                        if matched_kws_categorized_dict:
+                            for category, skills in matched_kws_categorized_dict.items():
+                                st.write(f"**{category}:** {', '.join(skills)}")
+                        else:
+                            st.write("No categorized matched skills found.")
                     except json.JSONDecodeError:
-                        matched_kws_categorized_dict = {}
-                
-                if matched_kws_categorized_dict:
-                    for category, skills in matched_kws_categorized_dict.items():
-                        st.write(f"**{category}:** {', '.join(skills)}")
+                        st.write(f"Error parsing matched skills data.")
                 else:
                     st.write("No categorized matched skills found.")
 
                 st.markdown("#### Missing Skills Breakdown (from JD):")
-                missing_kws_categorized_dict = selected_candidate_data.get('Missing Skills (Categorized)', '{}')
-                if isinstance(missing_kws_categorized_dict, str):
+                missing_kws_categorized_str = selected_candidate_data['Missing Skills (Categorized)']
+                if missing_kws_categorized_str and isinstance(missing_kws_categorized_str, str):
                     try:
-                        missing_kws_categorized_dict = json.loads(missing_kws_categorized_dict)
+                        missing_kws_categorized_dict = json.loads(missing_kws_categorized_str)
+                        if missing_kws_categorized_dict:
+                            for category, skills in missing_kws_categorized_dict.items():
+                                st.write(f"**{category}:** {', '.join(skills)}")
+                        else:
+                            st.write("No categorized missing skills found.")
                     except json.JSONDecodeError:
-                        missing_kws_categorized_dict = {}
-
-                if missing_kws_categorized_dict:
-                    for category, skills in missing_kws_categorized_dict.items():
-                        st.write(f"**{category}:** {', '.join(skills)}")
+                        st.write(f"Error parsing missing skills data.")
                 else:
                     st.write("No categorized missing skills found.")
             else:
