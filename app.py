@@ -6,7 +6,7 @@ import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
-from pages.resume_screen import resume_screen_page
+from pages.resume_screen import resume_screener_page
 from pages.top_leaderboard import top_leaderboard_page
 from pages.about_us import about_us_page
 from pages.feedback_form import feedback_form_page
