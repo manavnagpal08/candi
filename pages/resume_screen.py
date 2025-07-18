@@ -215,7 +215,7 @@ SKILL_CATEGORIES = {
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://screenerpro-app.streamlit.app"
+APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
 # Initialize Firebase (only once)
@@ -1156,7 +1156,11 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         jd_raw_skills_set, jd_categorized_skills = extract_relevant_keywords(jd_text, MASTER_SKILLS)
 
         matched_keywords = list(resume_raw_skills_set.intersection(jd_raw_skills_set))
-        missing_skills = list(jd_raw_skills_set.difference(resume_raw_skills_set)) 
+        missing_skills = list(jd_raw_skills_set.difference(jd_raw_skills_set)) # Should be jd_raw_skills_set.difference(resume_raw_skills_set)
+
+        # Corrected: Missing skills should be JD skills NOT found in resume
+        missing_skills = list(jd_raw_skills_set.difference(resume_raw_skills_set))
+
 
         # Calculate weighted keyword overlap score
         weighted_keyword_overlap_score = 0
@@ -1543,10 +1547,13 @@ def resume_screener_page():
                 col_cert_view, col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(4)
                 
                 with col_cert_view:
-                    st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button")
+                    # Added a button to trigger the HTML preview
+                    if st.button("👁️ View Certificate (HTML Preview)", key="view_cert_button"):
+                        st.session_state['show_certificate_preview'] = True
+                    else:
+                        st.session_state['show_certificate_preview'] = False # Reset if button not pressed
                         
                 with col_cert_download:
-                    # Re-added the download button for HTML certificate
                     st.download_button(
                         label="⬇️ Download Certificate (HTML)",
                         data=certificate_html_content,
@@ -1560,15 +1567,15 @@ def resume_screener_page():
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
 After uploading my resume, I was evaluated across multiple hiring parameters using AI-powered screening technology.
 
-I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}, which reflects the strength of my profile in today's job market.
+I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}%, which reflects the strength of my profile in today's job market.
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
 #resume #jobsearch #ai #careergrowth #certified #ResumeScreenerPro #LinkedIn
-🌐 Learn more about the tool: For candidate login: https://candidate-screenerpro.streamlit.app/ and for HR login: https://screenerpro.streamlit.app/
+🌐 Learn more about the tool: For candidate login: {urllib.parse.quote(APP_BASE_URL)} and for HR login: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
                 # LinkedIn Share Button
-                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote('https://screenerpro.streamlit.app/')}&title={urllib.parse.quote('ScreenerPro Certificate of Excellence')}&summary={urllib.parse.quote(share_message)}"
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(APP_BASE_URL)}&title={urllib.parse.quote('ScreenerPro Certificate of Excellence')}&summary={urllib.parse.quote(share_message)}"
                 with col_share_linkedin:
                     st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
 
@@ -1610,11 +1617,15 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
         else:
             st.info("No results to display for the candidate.")
 
-    if st.session_state['certificate_html_content']:
+    # Only show the HTML preview if the button was clicked
+    if st.session_state.get('show_certificate_preview', False) and st.session_state['certificate_html_content']:
         st.markdown("---")
         st.markdown("### Generated Certificate Preview (HTML)")
         st.components.v1.html(st.session_state['certificate_html_content'], height=600, scrolling=True)
         st.markdown("---")
+    elif not st.session_state.get('show_certificate_preview', False) and st.session_state['certificate_html_content']:
+        # This branch ensures the preview doesn't show up until explicitly requested
+        pass
     else:
         st.info("Please upload a Job Description and your Resume to begin the screening process.")
 
