@@ -1606,32 +1606,34 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     influenced by a provided Job Description.
     """
     first_names = [
-     "Akshay", "Bhanu", "Chandresh", "Dhananjay", "Eklavya", "Farhan", "Gauransh", "Hemraj", "Ishwar", "Jayesh",
-    "Kiran", "Lakshay", "Madhav", "Naman", "Omkar", "Pankaj", "Quamar", "Ravish", "Saket", "Tushant",
-    "Utkarsh", "Vansh", "Waseem", "Yogesh", "Zaid", "Anubhav", "Bhavin", "Chinmay", "Dilip", "Eshan",
-    "Faizan", "Gopalakrishnan", "Harjeet", "Inder", "Jaidev", "Kamlesh", "Lalitendra", "Manan", "Narayan", "Onkar",
-    "Prabhat", "Ranjeet", "Sahil", "Tanmay", "Umesh", "Vishwas", "Wasim", "Yatindra", "Zubair", "Ashutosh",
+        "Abhinav", "Bhargav", "Chirantan", "Deepesh", "Eshanpreet", "Feroz", "Gokul", "Harshvardhan", "Indrajit", "Jatin",
+    "Karthik", "Lokesh", "Mihir", "Nikhilesh", "Onir", "Pradyumna", "Qasim", "Ritvik", "Sharvil", "Tarak",
+    "Udayveer", "Vikrant", "Waman", "Yagnesh", "Zayan", "Aaryan", "Brahma", "Chiranjeevi", "Divyansh", "Ekagra",
+    "Faiyaz", "Gurdeep", "Hemendra", "Irfan", "Jaskaran", "Kush", "Luv", "Mahesh", "Namish", "Omveer",
+    "Prithviraj", "Ravikant", "Sankalp", "Tanraj", "Upendra", "Vibhor", "Wasimuddin", "Yogin", "Zubairuddin", "Ajinkya",
 
     # Indian Female (50)
-    "Amrita", "Bhagyashree", "Chahak", "Damayanti", "Ekisha", "Faria", "Gungun", "Harleen", "Ishleen", "Jaspreet",
-    "Khusboo", "Lavina", "Monika", "Namrata", "Oindrila", "Pranita", "Quintisha", "Ragini", "Sushmita", "Tanisha",
-    "Urja", "Vibha", "Warda", "Yuvika", "Zulekha", "Arpita", "Bindiya", "Chitra", "Deepali", "Elisha",
-    "Fathima", "Garima", "Himani", "Indu", "Jaya", "Kasturi", "Leela", "Meghna", "Nikita", "Oorvashi",
-    "Purnima", "Ritika", "Sharvani", "Triparna", "Upasana", "Vaidehi", "Wamita", "Yoshita", "Zeenia", "Shanvika"]
+    "Ankita", "Bhoomi", "Chanchal", "Damini", "Elina", "Farzana", "Gauri", "Haripriya", "Iraja", "Jinal",
+    "Kavitha", "Lajja", "Mallika", "Nirmala", "Ojaswini", "Pankhuri", "Qamra", "Rashmi", "Sharvani", "Triveni",
+    "Urmila", "Vidya", "Winnie", "Yamika", "Zaina", "Ambika", "Bharati", "Chandrika", "Devika", "Eshaana",
+    "Falguni", "Geetika", "Hemlata", "Ishwari", "Jayanti", "Krupali", "Lakshmi", "Mahima", "Neelam", "Oorja",
+    "Padma", "Rajshree", "Shambhavi", "Tara", "Urvashi", "Vaishali", "Warishta", "Yukti", "Zeba", "Anvitha"
+      ]
 
 
     last_names = [
     # Common Indian Last Names (75)
-    "Ambani", "Bachchan", "Chatterji", "Dhamija", "Elhance", "Faujdar", "Gajjar", "Haksar", "Inamdar", "Jaisingh",
-    "Kamble", "Lohana", "Mahadevan", "Nayak", "Ojwani", "Phadke", "Qadri", "Ramaswamy", "Sardesai", "Tikoo",
-    "Uppal", "Vaswani", "Wasan", "Yerram", "Zuberi", "Ansal", "Bhide", "Chheda", "Dhoot", "Eshpuniyani",
-    "Fattepurkar", "Gadre", "Hiremath", "Irani", "Jambhulkar", "Karandikar", "Lankesh", "Mankad", "Naik", "Pachauri",
-    "Qureshi", "Rajguru", "Sachan", "Talnikar", "Udasi", "Varde", "Wadhwani", "Yagnik", "Zain", "Baraskar",
-    "Bhonsle", "Chandok", "Desai", "Erande", "Firodia", "Gadhvi", "Hingne", "Ismail", "Jhaveri", "Kamble",
-    "Londhe", "Meher", "Nayyar", "Oswal", "Panja", "Qureishi", "Rohira", "Sankhla", "Thombre", "Upadhyaya",
-    "Vemuri", "Wankhede", "Yendrembam", "Zariwala", "Alagh", "Bajpai", "Chitre", "Devkar", "Ekbote", "Ghatge",
-    "Halder", "Ikhar", "Jagatramka", "Korgaonkar", "Lalchandani", "Mirchandani", "Nanavati", "Pagaria", "Ranka", "Samra",
-    "Tamhankar", "Udhwani", "Vidyarthi", "Waghmare", "Yellanki", "Zingade", "Bhutada", "Chelani", "Deotale", "Gidwani"]
+        "Abrol", "Bansod", "Chitale", "Dani", "Ekambaram", "Fattehpuria", "Ganwani", "Hasija", "Ingle", "Jadhav",
+    "Karnik", "Londhekar", "Madhwani", "Nagori", "Ojari", "Pansare", "Qazi", "Rajput", "Sawlani", "Tiwade",
+    "Ubhaykar", "Valmiki", "Wadhera", "Yellamraju", "Zende", "Ashar", "Baghel", "Chauke", "Dangar", "Eknath",
+    "Funkar", "Gharat", "Hatkar", "Iqubal", "Jakhotia", "Khetan", "Lokre", "Malkani", "Nanda", "Ojariwala",
+    "Pipara", "Rachh", "Sambrekar", "Tapkir", "Upasani", "Virk", "Warke", "Yelagond", "Zore", "Attal",
+    "Bapat", "Chavan", "Dalvi", "Edla", "Fatnani", "Gavaskar", "Hussain", "Idnani", "Jhala", "Kalra",
+    "Lele", "Mendiratta", "Nerurkar", "Patankar", "Qutbuddin", "Rajani", "Sampat", "Tandel", "Uchil", "Vaghani",
+    "Wadhwani", "Yennam", "Zutshi", "Adani", "Bhoir", "Chougle", "Dubal", "Ekka", "Fouzdar", "Ganatra",
+    "Hingorani", "Ismaili", "Jagtap", "Kansara", "Lunkad", "Mahadik", "Nehra", "Odekar", "Pacharne", "Ravoori",
+    "Sahani", "Talwar", "Ujwal", "Varghese", "Wable", "Yarlagadda", "Zulfi", "Agrawal", "Bhutani", "Chokhani"
+        ]
 
     email_domains = ["example.com", "mail.com", "techcorp.org", "devs.net"]
 
