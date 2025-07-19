@@ -502,15 +502,7 @@ def main():
 
             # Logo and Name as seen in image (This seems redundant if the clickable logo is always there,
             # but keeping it as per your original structure, assuming it's for the "ScreenerPro" text)
-            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-            logo_path = "logo.png" # Assuming logo is in the same directory
-            if os.path.exists(logo_path):
-                # This st.image is for the smaller logo next to "ScreenerPro" text
-                st.image(logo_path, width=35) # Adjusted width to be smaller
-            else:
-                st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
-            st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+
 
             st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
