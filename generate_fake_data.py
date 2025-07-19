@@ -9,6 +9,7 @@ import traceback
 import time
 import pandas as pd
 import collections # Import collections for defaultdict
+from sentence_transformers import SentenceTransformer
 
 # --- Constants copied from resume_screen.py for self-containment ---
 # This is necessary because generate_dummy_candidate_data needs these for realistic data generation
