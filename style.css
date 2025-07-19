@@ -1,4 +1,3 @@
-
 /* Base Imports & Global Resets */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -417,8 +416,10 @@ html[data-theme="dark"] h6 {
     cursor: pointer;
     padding: 0.8rem 1.2rem;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
-    /* Changed background to a light blue */
-    background: rgba(0, 206, 201, 0.1); /* Light blue from teal accent */
+    /* Changed background to black */
+    background: black !important;
+    /* Added: Ensure text color is white for direct children, including the input text */
+    color: white !important;
 }
 
 .stSelectbox > div > div:hover {
@@ -456,24 +457,15 @@ html[data-theme="dark"] h6 {
 /* This targets the span that holds the selected value in the display box */
 .stSelectbox > div > div > div[data-baseweb="select"] > div > span,
 .stSelectbox > div > div > div[data-baseweb="select"] > div > div > span {
-    color: #333333 !important; /* Explicitly set to a dark color for visibility */
-}
-
-/* NEW: Styling for the dropdown options of selectbox */
-/* Target the actual text within the option items (p tag) */
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] p {
-    color: #333333 !important; /* Explicitly set to a dark color for visibility */
-}
-
-/* Target the actual text within the option items (span tag, as a fallback/additional specificity) */
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] span {
-    color: #333333 !important; /* Explicitly set to a dark color for visibility */
+    color: #FFFFFF !important; /* Explicitly set to white for visibility on black background */
 }
 
 /* NEW: Force text color for the input field itself within the selectbox */
 .stSelectbox input[type="text"] {
-    color: #333333 !important; /* Force dark text color for visibility */
-    -webkit-text-fill-color: #333333 !important; /* For Safari/Chrome autocomplete */
+    color: #FFFFFF !important; /* Force white text color for visibility on black background */
+    -webkit-text-fill-color: #FFFFFF !important; /* For Safari/Chrome autocomplete */
+    background-color: transparent !important; /* Ensure no conflicting background on the input itself */
+    opacity: 1 !important; /* Ensure full visibility */
 }
 
 /* Background for the dropdown options and hover state */
