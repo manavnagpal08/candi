@@ -2,47 +2,40 @@ import streamlit as st
 import json
 import bcrypt
 import os
-import re # Import regex for email validation
-import pandas as pd # Ensure pandas is imported for DataFrame display
+import re
+import pandas as pd
+import time # For simulation of delays
 
 # Import your page functions
-# Ensure these files are in the same directory as app.py or adjust paths
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
 from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verifier_page # New import
-from total_screened_page import total_screened_page # NEW: Import the total screened page
-
+from certificate_verify import certificate_verifier_page
+from total_screened_page import total_screened_page
+from generate_fake_data import generate_fake_data_page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
-
-# File to store user credentials
 USER_DB_FILE = "users.json"
-# Define your admin usernames here as a tuple of strings
 ADMIN_USERNAME = ("admin@forscreenerpro", "admin@forscreenerpro2", "manav.nagpal2005@gmail.com") 
 
 def load_users():
-    """Loads user data from the JSON file, handling potential corruption or emptiness."""
     if not os.path.exists(USER_DB_FILE):
         with open(USER_DB_FILE, "w") as f:
             json.dump({}, f)
-        return {} # Return empty dict if file was just created
-
+        return {}
     try:
         with open(USER_DB_FILE, "r") as f:
             users = json.load(f)
-            # Ensure each user has a 'status' key and 'company' key for backward compatibility
             for username, data in users.items():
-                if isinstance(data, str): # Old format: "username": "hashed_password"
+                if isinstance(data, str):
                     users[username] = {"password": data, "status": "active", "company": "N/A"}
                 elif "status" not in data:
                     data["status"] = "active"
-                if "company" not in data: # Add company field if missing
+                if "company" not in data:
                     data["company"] = "N/A"
             return users
     except json.JSONDecodeError:
-        # If the file is empty or malformed JSON, re-initialize it
         st.warning(f"⚠️ '{USER_DB_FILE}' is empty or corrupted. Re-initializing with an empty user database.")
         with open(USER_DB_FILE, "w") as f:
             json.dump({}, f)
@@ -51,31 +44,24 @@ def load_users():
         st.error(f"❌ An unexpected error occurred while loading users: {e}")
         return {}
 
-
 def save_users(users):
-    """Saves user data to the JSON file."""
     with open(USER_DB_FILE, "w") as f:
         json.dump(users, f, indent=4)
 
 def hash_password(password):
-    """Hashes a password using bcrypt."""
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def check_password(password, hashed_password):
-    """Checks a password against its bcrypt hash."""
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def is_valid_email(email):
-    """Basic validation for email format."""
-    # Regex for a simple email check (covers @ and at least one . after @)
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 def register_section():
-    """Public self-registration form."""
     st.subheader("📝 Create New Account")
     with st.form("registration_form", clear_on_submit=True):
         new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
-        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public") # New field
+        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public")
         new_password = st.text_input("Choose Password", type="password", key="new_password_reg_public")
         confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password_reg_public")
         register_button = st.form_submit_button("Register New Account")
@@ -83,7 +69,7 @@ def register_section():
         if register_button:
             if not new_username or not new_password or not confirm_password or not new_company_name:
                 st.error("Please fill in all fields.")
-            elif not is_valid_email(new_username): # Email format validation
+            elif not is_valid_email(new_username):
                 st.error("Please enter a valid email address for the username.")
             elif new_password != confirm_password:
                 st.error("Passwords do not match.")
@@ -95,32 +81,29 @@ def register_section():
                     users[new_username] = {
                         "password": hash_password(new_password),
                         "status": "active",
-                        "company": new_company_name # Store company name
+                        "company": new_company_name
                     }
                     save_users(users)
                     st.success("✅ Registration successful! You are now logged in.")
                     
-                    # Automatically log in the user
                     st.session_state.authenticated = True
                     st.session_state.username = new_username
                     st.session_state.user_company = new_company_name
-                    st.session_state.current_page = "resume_screen" # Redirect to a default page
-                    st.rerun() # Rerun to apply the login and redirect
+                    st.session_state.current_page = "resume_screen"
+                    st.rerun()
                     
-
 def admin_registration_section():
-    """Admin-driven user creation form."""
     st.subheader("➕ Create New User Account (Admin Only)")
     with st.form("admin_registration_form", clear_on_submit=True):
         new_username = st.text_input("New User's Username (Email)", key="new_username_admin_reg")
-        new_company_name = st.text_input("New User's Company Name", key="new_company_name_admin_reg") # New field
+        new_company_name = st.text_input("New User's Company Name", key="new_company_name_admin_reg")
         new_password = st.text_input("New User's Password", type="password", key="new_password_admin_reg")
         admin_register_button = st.form_submit_button("Add New User")
 
     if admin_register_button:
         if not new_username or not new_password or not new_company_name:
             st.error("Please fill in all fields.")
-        elif not is_valid_email(new_username): # Email format validation
+        elif not is_valid_email(new_username):
             st.error("Please enter a valid email address for the username.")
         else:
             users = load_users()
@@ -136,10 +119,8 @@ def admin_registration_section():
                 st.success(f"✅ User '{new_username}' added successfully!")
 
 def admin_password_reset_section():
-    """Admin-driven password reset form."""
     st.subheader("🔑 Reset User Password (Admin Only)")
     users = load_users()
-    # Exclude all admin usernames from the list of users whose passwords can be reset
     user_options = [user for user in users.keys() if user not in ADMIN_USERNAME] 
     
     if not user_options:
@@ -160,17 +141,15 @@ def admin_password_reset_section():
                 st.success(f"✅ Password for '{selected_user}' has been reset.")
 
 def admin_disable_enable_user_section():
-    """Admin-driven user disable/enable form."""
     st.subheader("⛔ Toggle User Status (Admin Only)")
     users = load_users()
-    # Exclude all admin usernames from the list of users whose status can be toggled
     user_options = [user for user in users.keys() if user not in ADMIN_USERNAME] 
 
     if not user_options:
         st.info("No other users to manage status for.")
         return
         
-    with st.form("admin_toggle_user_status_form", clear_on_submit=False): # Keep values after submit for easier toggling
+    with st.form("admin_toggle_user_status_form", clear_on_submit=False):
         selected_user = st.selectbox("Select User to Toggle Status", user_options, key="toggle_user_select")
         
         current_status = users[selected_user]["status"]
@@ -181,29 +160,23 @@ def admin_disable_enable_user_section():
             users[selected_user]["status"] = new_status
             save_users(users)
             st.success(f"✅ User '{selected_user}' status set to **{new_status.upper()}**.")
-            st.rerun() # Rerun to update the displayed status immediately
-
+            st.rerun()
 
 def login_section():
-    """Handles user login and public registration."""
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
     if "username" not in st.session_state:
         st.session_state.username = None
     
-    # Initialize active_login_tab_selection if not present
     if "active_login_tab_selection" not in st.session_state:
-        # Default to 'Register' if no users, otherwise 'Login'
         if not os.path.exists(USER_DB_FILE) or len(load_users()) == 0:
             st.session_state.active_login_tab_selection = "Register"
         else:
             st.session_state.active_login_tab_selection = "Login"
 
-
     if st.session_state.authenticated:
         return True
 
-    # Use st.radio to simulate tabs if st.tabs() default_index is not supported
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -213,7 +186,7 @@ def login_section():
 
     if tab_selection == "Login":
         st.subheader("🔐 HR Login")
-        st.info("If you don't have an account, please go to the 'Register' option first.") # Added instructional message
+        st.info("If you don't have an account, please go to the 'Register' option first.")
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
@@ -230,20 +203,18 @@ def login_section():
                     elif check_password(password, user_data["password"]):
                         st.session_state.authenticated = True
                         st.session_state.username = username
-                        st.session_state.user_company = user_data.get("company", "N/A") # Store company name
+                        st.session_state.user_company = user_data.get("company", "N/A")
                         st.success("✅ Login successful!")
                         st.rerun()
                     else:
                         st.error("❌ Invalid username or password.")
     
-    elif tab_selection == "Register": # This will be the initially selected option for new users
+    elif tab_selection == "Register":
         register_section()
 
     return st.session_state.authenticated
 
-# Helper function to check if the current user is an admin
 def is_current_user_admin():
-    # Check if the current username is in the ADMIN_USERNAME tuple
     return st.session_state.get("authenticated", False) and st.session_state.get("username") in ADMIN_USERNAME
 
 def logout_page():
@@ -253,21 +224,17 @@ def logout_page():
         st.session_state.authenticated = False
         st.session_state.pop('username', None)
         st.session_state.pop('user_company', None)
-        st.session_state.active_login_tab_selection = "Login" # Reset to login tab
+        st.session_state.active_login_tab_selection = "Login"
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
-
-
-# --- Main Application Logic ---
 
 def main():
     st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
 
-    # Initialize session state for current page and theme
     if "current_page" not in st.session_state:
-        st.session_state.current_page = "resume_screen" # Default page after login
+        st.session_state.current_page = "resume_screen"
     if "theme" not in st.session_state:
-        st.session_state.theme = "light" # Default to light mode
+        st.session_state.theme = "light"
 
     # Apply global CSS based on theme
     if st.session_state.theme == "dark":
@@ -277,34 +244,39 @@ def main():
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
 
             :root {
-                --primary-color: #00cec9;
-                --secondary-color: #00b0a8;
+                --primary-color: #00cec9; /* Teal */
+                --secondary-color: #00b0a8; /* Darker Teal */
+                --accent-color: #ffd700; /* Gold for highlights */
                 --background-color-dark: #1a1a1a;
-                --surface-color-dark: #262626;
-                --card-background-dark: #2D2D2D;
-                --input-background-dark: #3A3A3A;
+                --surface-color-dark: #262626; /* Sidebar, even table rows */
+                --card-background-dark: #2D2D2D; /* Metrics, expander content */
+                --input-background-dark: #3A3A3A; /* Input fields, alerts */
                 --text-color-dark: #f0f0f0;
+                --text-secondary-dark: #b0b0b0; /* Lighter text for info/secondary */
                 --border-color-dark: #555555;
                 --shadow-light: rgba(0,0,0,0.2);
-                --shadow-dark: rgba(0,0,0,0.3);
+                --shadow-dark: rgba(0,0,0,0.4); /* Stronger shadow for lift effect */
             }
 
-            html, body, .stApp {
+            html, body, [data-testid="stAppViewContainer"] { /* Target stAppViewContainer for broader styling */
                 font-family: 'Inter', sans-serif;
                 background-color: var(--background-color-dark);
                 color: var(--text-color-dark);
+                transition: background-color 0.5s ease-in-out; /* Smooth theme transition */
             }
-            .stSidebar {
+            [data-testid="stSidebar"] {
                 background-color: var(--surface-color-dark);
                 color: var(--text-color-dark);
-                padding: 2rem 1rem; /* Added horizontal padding */
-                box-shadow: 2px 0 5px rgba(0,0,0,0.2); /* Subtle shadow for sidebar */
+                padding: 2rem 1rem;
+                box-shadow: 2px 0 10px var(--shadow-light); /* More prominent shadow for sidebar */
+                transition: background-color 0.5s ease-in-out, box-shadow 0.3s ease;
             }
             h1, h2, h3, h4, h5, h6 {
                 font-family: 'Playfair Display', serif;
                 color: var(--primary-color);
                 margin-top: 1.5rem;
                 margin-bottom: 1rem;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Subtle text shadow for depth */
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -317,9 +289,19 @@ def main():
                 background-color: var(--input-background-dark) !important;
                 color: var(--text-color-dark) !important;
                 border: 1px solid var(--border-color-dark) !important;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem; /* Slightly more rounded */
                 padding: 0.75rem;
-                box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow for depth */
+                box-shadow: inset 0 1px 4px rgba(0,0,0,0.2); /* Deeper inner shadow */
+                transition: all 0.2s ease-in-out;
+            }
+            /* Input Field Focus Effect */
+            .stTextInput>div>div>input:focus,
+            .stTextArea>div>div>textarea:focus,
+            .stSelectbox>div>div>div>div>span:focus,
+            .stMultiSelect>div>div>div>div>span:focus {
+                border-color: var(--primary-color) !important;
+                box-shadow: 0 0 0 3px rgba(0,206,201,0.4) !important; /* Brighter glow */
+                outline: none;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -332,90 +314,147 @@ def main():
                 color: var(--text-color-dark) !important;
                 font-weight: 500;
                 margin-bottom: 0.5rem;
+                text-shadow: 0 1px 1px rgba(0,0,0,0.3); /* Subtle label shadow */
             }
             /* Buttons */
             .stButton>button {
                 background-color: var(--primary-color);
                 color: white;
                 border: none;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem; /* Slightly more rounded */
                 padding: 0.8rem 1.5rem;
                 font-weight: 600;
-                transition: all 0.2s ease-in-out;
-                box-shadow: 0 4px 8px var(--shadow-light);
-                width: 100%; /* Make sidebar buttons full width */
-                margin-bottom: 0.5rem; /* Spacing between buttons */
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+                box-shadow: 0 5px 15px var(--shadow-light); /* More pronounced initial shadow */
+                width: 100%;
+                margin-bottom: 0.75rem; /* More spacing */
+                letter-spacing: 0.05em; /* Slight letter spacing */
             }
             .stButton>button:hover {
                 background-color: var(--secondary-color);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 12px var(--shadow-dark);
+                transform: translateY(-4px); /* Larger lift */
+                box-shadow: 0 10px 20px var(--shadow-dark); /* Deeper shadow on hover */
             }
+            .stButton>button:active {
+                transform: translateY(-1px); /* Slight press effect */
+                box-shadow: 0 2px 5px var(--shadow-light);
+            }
+
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: var(--input-background-dark);
                 color: var(--text-color-dark);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 0.8rem 1rem;
                 font-weight: 600;
-                border: 1px solid var(--border-color-dark); /* Added border */
+                border: 1px solid var(--border-color-dark);
+                box-shadow: 0 2px 8px var(--shadow-light);
+                transition: all 0.2s ease-in-out;
+            }
+            .streamlit-expanderHeader:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 5px 15px var(--shadow-dark);
             }
             .streamlit-expanderContent {
                 background-color: var(--card-background-dark);
                 color: var(--text-color-dark);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 1rem;
-                margin-top: 0.5rem; /* Small gap to avoid overlap issues */
-                border: 1px solid var(--border-color-dark); /* Added border */
+                margin-top: 0.5rem;
+                border: 1px solid var(--border-color-dark);
+                box-shadow: 0 2px 8px var(--shadow-light);
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: var(--input-background-dark);
                 color: var(--text-color-dark);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 1rem;
                 border: 1px solid var(--border-color-dark);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.15);
             }
             .stAlert > div > div > div > div {
                 color: var(--text-color-dark);
             }
+            .stAlert [data-testid="stMarkdownContainer"] p {
+                color: var(--text-color-dark) !important; /* Ensure text color applies to p tags inside alerts */
+            }
             /* Dataframe styling */
             .stDataFrame {
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                border: 1px solid var(--border-color-dark); /* Added border */
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                border: 1px solid var(--border-color-dark);
+                transition: all 0.2s ease-in-out;
+            }
+            .stDataFrame:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 8px 18px rgba(0,0,0,0.3);
             }
             .stDataFrame section.main tr:nth-child(even) {
-                background-color: var(--surface-color-dark); /* Zebra striping */
+                background-color: var(--surface-color-dark);
             }
             /* Metric boxes */
             .stMetric {
                 background-color: var(--card-background-dark);
-                border-radius: 0.5rem;
-                padding: 1.2rem;
+                border-radius: 0.75rem;
+                padding: 1.5rem; /* Increased padding */
                 border: 1px solid var(--border-color-dark);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                transition: all 0.2s ease-in-out;
             }
+            .stMetric:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+            }
+            .stMetric > div > label { /* Target metric label */
+                color: var(--text-secondary-dark) !important;
+                font-size: 0.9em;
+                margin-bottom: 0.5rem;
+            }
+            .stMetric > div > div { /* Target metric value */
+                font-size: 2.2em !important;
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+
             /* Radio buttons and checkboxes */
             .stRadio div[role="radiogroup"] label, .stCheckbox label {
                 padding: 0.5rem 0;
+                transition: color 0.2s ease;
             }
+            .stRadio div[role="radiogroup"] label:hover, .stCheckbox label:hover {
+                color: var(--primary-color) !important;
+            }
+            
             /* Horizontal Rule */
             hr {
                 border-top: 1px solid var(--border-color-dark);
-                margin: 1rem 0;
+                margin: 1.5rem 0; /* More vertical space */
             }
             /* Specific style for the HR Portal button in sidebar */
             .hr-portal-button button {
                 background-color: #4CAF50 !important; /* Green */
                 color: white !important;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+                box-shadow: 0 5px 15px rgba(76,175,80,0.3) !important; /* Greenish shadow */
             }
             .hr-portal-button button:hover {
                 background-color: #45a049 !important;
-                transform: translateY(-2px) !important;
-                box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+                transform: translateY(-4px) !important;
+                box-shadow: 0 10px 20px rgba(76,175,80,0.5) !important;
+            }
+
+            /* Custom Spinner Animation */
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+            .loading-text {
+                font-size: 1.2em;
+                font-weight: 600;
+                color: var(--primary-color);
+                margin-top: 1em;
+                animation: bounce 0.8s infinite alternate; /* Apply bounce animation */
             }
             </style>
             """,
@@ -430,32 +469,37 @@ def main():
             :root {
                 --primary-color: #00cec9;
                 --secondary-color: #00b0a8;
+                --accent-color: #ff9800; /* Orange for highlights */
                 --background-color-light: #f0f2f6;
                 --surface-color-light: #ffffff;
                 --card-background-light: #f8f8f8;
                 --input-background-light: #ffffff;
                 --text-color-light: #333333;
+                --text-secondary-light: #666666;
                 --border-color-light: #ccc;
                 --shadow-light: rgba(0,0,0,0.1);
-                --shadow-dark: rgba(0,0,0,0.15);
+                --shadow-dark: rgba(0,0,0,0.2);
             }
 
-            html, body, .stApp {
+            html, body, [data-testid="stAppViewContainer"] {
                 font-family: 'Inter', sans-serif;
                 background-color: var(--background-color-light);
                 color: var(--text-color-light);
+                transition: background-color 0.5s ease-in-out;
             }
-            .stSidebar {
+            [data-testid="stSidebar"] {
                 background-color: var(--surface-color-light);
                 color: var(--text-color-light);
                 padding: 2rem 1rem;
-                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+                box-shadow: 2px 0 10px var(--shadow-light);
+                transition: background-color 0.5s ease-in-out, box-shadow 0.3s ease;
             }
             h1, h2, h3, h4, h5, h6 {
                 font-family: 'Playfair Display', serif;
                 color: var(--primary-color);
                 margin-top: 1.5rem;
                 margin-bottom: 1rem;
+                text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -468,9 +512,19 @@ def main():
                 background-color: var(--input-background-light) !important;
                 color: var(--text-color-light) !important;
                 border: 1px solid var(--border-color-light) !important;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 0.75rem;
-                box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+                box-shadow: inset 0 1px 4px rgba(0,0,0,0.08);
+                transition: all 0.2s ease-in-out;
+            }
+            /* Input Field Focus Effect */
+            .stTextInput>div>div>input:focus,
+            .stTextArea>div>div>textarea:focus,
+            .stSelectbox>div>div>div>div>span:focus,
+            .stMultiSelect>div>div>div>div>span:focus {
+                border-color: var(--primary-color) !important;
+                box-shadow: 0 0 0 3px rgba(0,206,201,0.2) !important;
+                outline: none;
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -483,90 +537,144 @@ def main():
                 color: var(--text-color-light) !important;
                 font-weight: 500;
                 margin-bottom: 0.5rem;
+                text-shadow: 0 1px 1px rgba(255,255,255,0.8);
             }
             /* Buttons */
             .stButton>button {
                 background-color: var(--primary-color);
                 color: white;
                 border: none;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 0.8rem 1.5rem;
                 font-weight: 600;
-                transition: all 0.2s ease-in-out;
-                box-shadow: 0 4px 8px var(--shadow-light);
-                width: 100%; /* Make sidebar buttons full width */
-                margin-bottom: 0.5rem;
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                box-shadow: 0 5px 15px var(--shadow-light);
+                width: 100%;
+                margin-bottom: 0.75rem;
+                letter-spacing: 0.05em;
             }
             .stButton>button:hover {
                 background-color: var(--secondary-color);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 12px var(--shadow-dark);
+                transform: translateY(-4px);
+                box-shadow: 0 10px 20px var(--shadow-dark);
+            }
+            .stButton>button:active {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 5px var(--shadow-light);
             }
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: #e0e0e0;
                 color: var(--text-color-light);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 0.8rem 1rem;
                 font-weight: 600;
                 border: 1px solid var(--border-color-light);
+                box-shadow: 0 2px 8px var(--shadow-light);
+                transition: all 0.2s ease-in-out;
+            }
+            .streamlit-expanderHeader:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 5px 15px var(--shadow-dark);
             }
             .streamlit-expanderContent {
                 background-color: var(--card-background-light);
                 color: var(--text-color-light);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 1rem;
                 margin-top: 0.5rem;
                 border: 1px solid var(--border-color-light);
+                box-shadow: 0 2px 8px var(--shadow-light);
             }
             /* Info/Success/Error boxes */
             .stAlert {
                 background-color: var(--surface-color-light);
                 color: var(--text-color-light);
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 padding: 1rem;
                 border: 1px solid var(--border-color-light);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             }
             .stAlert > div > div > div > div {
                 color: var(--text-color-light);
             }
+            .stAlert [data-testid="stMarkdownContainer"] p {
+                color: var(--text-color-light) !important;
+            }
             /* Dataframe styling */
             .stDataFrame {
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 border: 1px solid var(--border-color-light);
+                transition: all 0.2s ease-in-out;
+            }
+            .stDataFrame:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 8px 18px rgba(0,0,0,0.15);
             }
             .stDataFrame section.main tr:nth-child(even) {
-                background-color: #f5f5f5; /* Zebra striping */
+                background-color: #f5f5f5;
             }
             /* Metric boxes */
             .stMetric {
                 background-color: var(--surface-color-light);
-                border-radius: 0.5rem;
-                padding: 1.2rem;
+                border-radius: 0.75rem;
+                padding: 1.5rem;
                 border: 1px solid var(--border-color-light);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                transition: all 0.2s ease-in-out;
+            }
+            .stMetric:hover {
+                 transform: translateY(-2px);
+                 box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            }
+            .stMetric > div > label {
+                color: var(--text-secondary-light) !important;
+                font-size: 0.9em;
+                margin-bottom: 0.5rem;
+            }
+            .stMetric > div > div {
+                font-size: 2.2em !important;
+                font-weight: 700;
+                color: var(--primary-color);
             }
             /* Radio buttons and checkboxes */
             .stRadio div[role="radiogroup"] label, .stCheckbox label {
                 padding: 0.5rem 0;
+                transition: color 0.2s ease;
+            }
+            .stRadio div[role="radiogroup"] label:hover, .stCheckbox label:hover {
+                color: var(--primary-color) !important;
             }
             /* Horizontal Rule */
             hr {
                 border-top: 1px solid var(--border-color-light);
-                margin: 1rem 0;
+                margin: 1.5rem 0;
             }
             /* Specific style for the HR Portal button in sidebar */
             .hr-portal-button button {
                 background-color: #4CAF50 !important; /* Green */
                 color: white !important;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+                box-shadow: 0 5px 15px rgba(76,175,80,0.2) !important; /* Greenish shadow */
             }
             .hr-portal-button button:hover {
                 background-color: #45a049 !important;
-                transform: translateY(-2px) !important;
-                box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+                transform: translateY(-4px) !important;
+                box-shadow: 0 10px 20px rgba(76,175,80,0.3) !important;
+            }
+
+            /* Custom Spinner Animation */
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+            .loading-text {
+                font-size: 1.2em;
+                font-weight: 600;
+                color: var(--primary-color);
+                margin-top: 1em;
+                animation: bounce 0.8s infinite alternate;
             }
             </style>
             """,
@@ -584,19 +692,16 @@ def main():
     save_users(users)
 
     # Authentication section
-    # This must run first to determine authentication status
     is_authenticated = login_section()
 
     if not is_authenticated:
-        # Only show this message if not authenticated
         st.sidebar.write("---")
         st.sidebar.info("Please log in or register to access the portal features.")
-        return # Stop execution if not authenticated
+        return
 
     # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
-    st.sidebar.title("ScreenerPro Portal") # Moved inside authenticated block
+    st.sidebar.title("ScreenerPro Portal")
 
-    # Dark Mode Toggle in Sidebar (Moved inside authenticated block)
     st.sidebar.markdown("---")
     dark_mode_checkbox = st.sidebar.checkbox("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
     if dark_mode_checkbox:
@@ -623,53 +728,52 @@ def main():
 
     st.sidebar.subheader("Navigation")
     
-    # Navigation buttons (already conditional by being after the return)
     if st.sidebar.button("📄 Resume Screen", key="nav_resume"):
         st.session_state.current_page = "resume_screen"
     if st.sidebar.button("🏆 Top Leaderboard", key="nav_leaderboard"):
         st.session_state.current_page = "top_leaderboard"
-    if st.sidebar.button("✅ Verify Certificate", key="nav_certificate_verify"): # New button
+    if st.sidebar.button("✅ Verify Certificate", key="nav_certificate_verify"):
         st.session_state.current_page = "certificate_verify"
-    if st.sidebar.button("📊 Total Resumes Screened", key="nav_total_screened"): # NEW: Total Resumes Screened button
+    if st.sidebar.button("📊 Total Resumes Screened", key="nav_total_screened"):
         st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
-    if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form"): # Renamed for clarity
+    if is_current_user_admin(): # Only show generate fake data for admins
+        if st.sidebar.button("⚙️ Generate Fake Data (Dev)", key="nav_generate_fake_data"):
+            st.session_state.current_page = "generate_fake_data"
+    if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form"):
         st.session_state.current_page = "feedback_form"
     
     st.sidebar.markdown("---")
     if st.sidebar.button("➡️ Logout", key="nav_logout"):
         st.session_state.current_page = "logout"
-        # Logout logic handled by logout_page function
 
-    # Moved "Logged in as:" and "Company:" below navigation buttons
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
     if st.session_state.get('user_company'):
         st.sidebar.info(f"Company: {st.session_state.user_company}")
 
     # Render the selected page
+    st.markdown(f"## Hello, {st.session_state.username}!", unsafe_allow_html=True) # Personalized greeting with HTML for styling
+    st.markdown("---") # Add a divider below the greeting
+
     if st.session_state.current_page == "resume_screen":
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         resume_screener_page()
     elif st.session_state.current_page == "top_leaderboard":
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         leaderboard_page()
-    elif st.session_state.current_page == "certificate_verify": # New page rendering
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+    elif st.session_state.current_page == "certificate_verify":
         certificate_verifier_page()
-    elif st.session_state.current_page == "total_screened": # NEW: Render total screened page
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+    elif st.session_state.current_page == "total_screened":
         total_screened_page()
     elif st.session_state.current_page == "about_us":
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         feedback_and_help_page()
+    elif st.session_state.current_page == "generate_fake_data":
+        generate_fake_data_page()
     elif st.session_state.current_page == "logout":
         logout_page()
 
-    # Admin Section (only visible to admins)
+    # Admin Section
     if is_current_user_admin():
         st.sidebar.markdown("---")
         st.sidebar.subheader("Admin Panel")
@@ -679,7 +783,7 @@ def main():
             key="admin_tabs"
         )
         
-        st.markdown("---") # Separator for admin content in main area
+        st.markdown("---")
         st.header("Admin Management")
         
         if admin_tab_selection == "Create User":
