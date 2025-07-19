@@ -1,5 +1,4 @@
-# Use a more stable Python base image (e.g., 3.10-slim) for better compatibility with WeasyPrint's dependencies.
-# Python 3.13 is a very new release and might have compatibility issues with some C-extension libraries.
+# Use a stable Python base image (e.g., 3.10-slim) for better compatibility with WeasyPrint's dependencies.
 FROM python:3.10-slim
 
 # Set environment variables
@@ -7,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Install system dependencies for WeasyPrint
 # These include libraries for rendering text, graphics, and images.
-# libpangocairo-1.0-0 is explicitly added for robustness.
+# fontconfig is added for robust font handling.
 RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
@@ -26,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     libgdk-pixbuf2.0-dev \
     libpangocairo-1.0-0 \
     shared-mime-info \
+    fontconfig \
     python3-dev \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
