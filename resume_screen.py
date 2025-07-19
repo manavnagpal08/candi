@@ -1388,13 +1388,12 @@ def suggest_courses_for_skills(missing_skills_list):
 @st.cache_data
 def generate_certificate_html(candidate_data):
     html_template = """
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ScreenerPro Certificate</title>
+  <title>ScreenerPro Certificate (Landscape)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
 
@@ -1410,116 +1409,107 @@ def generate_certificate_html(candidate_data):
     }
 
     .certificate {
-  background-color: #ffffff;
-  width: 960px;
-  max-width: 960px;
-  padding: 60px 50px;
-  border: 10px solid #00bcd4;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
+      background-color: #ffffff;
+      width: 1120px;
+      height: 790px;
+      padding: 50px 70px;
+      border: 10px solid #00bcd4;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      text-align: center;
+      position: relative;
+    }
 
-.certificate img.logo {
-  width: 260px;         /* Large logo */
-  max-height: 100px;    /* Limit height */
-  object-fit: contain;  /* Keep it proportional */
-  margin-bottom: 15px;
-}
-
+    .certificate img.logo {
+      width: 200px;
+      margin-bottom: 20px;
+    }
 
     h1 {
       font-family: 'Playfair Display', serif;
       font-size: 36px;
-      margin-bottom: 10px;
       color: #003049;
+      margin: 10px 0;
     }
 
     h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      margin: 5px 0 30px;
+      font-size: 20px;
+      margin-bottom: 25px;
       color: #007c91;
-      font-weight: normal;
+    }
+
+    .subtext {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
     }
 
     .candidate-name {
       font-family: 'Playfair Display', serif;
       font-size: 32px;
       color: #00bcd4;
-      margin: 20px 0 10px;
       font-weight: bold;
+      margin: 10px 0;
       text-decoration: underline;
-    }
-
-    .subtext {
-      font-size: 18px;
-      color: #333;
-      margin-bottom: 20px;
     }
 
     .score-rank {
       display: inline-block;
-      margin: 15px 0;
       font-size: 18px;
       font-weight: 600;
       background: #e0f7fa;
       color: #2e7d32;
-      padding: 8px 20px;
+      padding: 8px 24px;
       border-radius: 8px;
+      margin: 20px 0;
     }
 
     .description {
       font-size: 16px;
       color: #555;
-      margin: 25px auto;
-      line-height: 1.6;
-      max-width: 750px;
+      margin: 20px auto;
+      line-height: 1.5;
+      max-width: 900px;
     }
 
     .footer-details {
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
-      margin-top: 40px;
+      margin-top: 20px;
     }
 
     .signature-block {
-      text-align: left;
-      margin-top: 60px;
+      margin-top: 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .signature {
-      text-align: left;
-    }
-
-    .signature .name {
-      font-weight: 600;
-      font-size: 15px;
-      margin-top: 8px;
+    .signature img {
+      width: 150px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
     }
 
     .signature .title {
       font-size: 13px;
       color: #777;
-    }
-
-    .signature img {
-      width: 160px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
+      margin-top: 5px;
+      text-align: left;
     }
 
     .stamp {
       font-size: 42px;
       color: #4caf50;
+      margin-right: 10px;
     }
 
     @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
       body {
         background: #ffffff;
         -webkit-print-color-adjust: exact;
@@ -1534,9 +1524,7 @@ def generate_certificate_html(candidate_data):
 </head>
 <body>
   <div class="certificate">
-    <!-- Local logo image -->
     <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="ScreenerPro Logo" />
-
 
     <h1>CERTIFICATE OF EXCELLENCE</h1>
     <h2>Presented by ScreenerPro</h2>
@@ -1558,19 +1546,15 @@ def generate_certificate_html(candidate_data):
     </div>
 
     <div class="signature-block">
-  <div class="signature">
-    <img src="https://see.fontimg.com/api/rf5/DOLnW/ZTAyODAyZDM3MWUyNDVjNjg0ZWRmYTRjMjNlOTE3ODUub3Rm/U2NyZWVuZXJQcm8/autography.png?r=fs&h=81&w=1250&fg=000000&bg=FFFFFF&tb=1&s=65" alt="Signature" />
-    <div class="title">Founder & Product Head, ScreenerPro</div>
-  </div>
-  <div class="stamp">✔️</div>
-</div>
-
-
-    
+      <div class="signature">
+        <img src="https://see.fontimg.com/api/rf5/DOLnW/ZTAyODAyZDM3MWUyNDVjNjg0ZWRmYTRjMjNlOTE3ODUub3Rm/U2NyZWVuZXJQcm8/autography.png?r=fs&h=81&w=1250&fg=000000&bg=FFFFFF&tb=1&s=65" alt="Signature" />
+        <div class="title">Founder & Product Head, ScreenerPro</div>
+      </div>
+      <div class="stamp">✔️</div>
+    </div>
   </div>
 </body>
 </html>
-
 
     """
 
