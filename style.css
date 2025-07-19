@@ -451,16 +451,23 @@ html[data-theme="dark"] h6 {
 }
 
 /* FIX: Explicit text color for the selected value in the selectbox input */
+/* This targets the span that holds the selected value in the display box */
 .stSelectbox > div > div > div[data-baseweb="select"] > div > span,
 .stSelectbox > div > div > div[data-baseweb="select"] > div > div > span {
-    color: var(--text-color) !important;
+    color: #333333 !important; /* Explicitly set to a dark color for visibility */
 }
 
 /* NEW: Styling for the dropdown options of selectbox */
-/* Target the actual text within the option items */
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] > div > span {
+/* Target the actual text within the option items (p tag) */
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] p {
     color: #333333 !important; /* Explicitly set to a dark color for visibility */
 }
+
+/* Target the actual text within the option items (span tag, as a fallback/additional specificity) */
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] span {
+    color: #333333 !important; /* Explicitly set to a dark color for visibility */
+}
+
 
 /* Background for the dropdown options and hover state */
 div[data-baseweb="popover"] div[role="listbox"] {
@@ -1330,4 +1337,3 @@ a:hover {
         font-size: 0.9rem;
     }
 }
-
