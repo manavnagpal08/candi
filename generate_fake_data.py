@@ -1607,36 +1607,44 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     """
     first_names = [
        # Indian Male (65)
-    "Advaith", "Bharghav", "Chaitanya", "Dev", "Eshanth", "Fayaz", "Gurshan", "Harshal", "Ishanth", "Jivansh",
-    "Kairav", "Lavith", "Manthan", "Nakul", "Omansh", "Punit", "Qadar", "Ronav", "Sarvesh", "Taraknath",
-    "Ujjwal", "Vedant", "Waris", "Yugant", "Zian", "Ajeet", "Bhuwan", "Chetan", "Devarsh", "Elankath",
-    "Firoze", "Gurwinder", "Hridaan", "Isaan", "Jaideep", "Koushik", "Lakshit", "Moksh", "Nived", "Onish",
-    "Puru", "Rupesh", "Siddhant", "Tanish", "Utpal", "Vivaanth", "Yatin", "Zayyan", "Anil", "Balkrishna",
-    "Chintan", "Dhanraj", "Eklav", "Faheem", "Gokulesh", "Hemanshu", "Ilaiah", "Jaysukh", "Kiranmay", "Laukik",
-    "Maheshwar", "Namdev", "Omkarnath", "Pranjal", "Raghuvir",
+       "Abhinav", "Ajay", "Akhil", "Alok", "Anand", "Aniket", "Anshul", "Anup", "Arvind", "Ashok",
+    "Bhavesh", "Chirag", "Deepak", "Dilip", "Gaurav", "Harish", "Hemant", "Jatin", "Karan", "Kartik",
+    "Lalit", "Mahesh", "Mukul", "Naveen", "Nikhilesh", "Omkar", "Pankaj", "Pradeep", "Rahul", "Raj",
+    "Rakesh", "Ravi", "Sandeep", "Sanjay", "Saurabh", "Sharad", "Shivam", "Sumit", "Sunil", "Tarun",
+    "Tejas", "Uday", "Varun", "Vikram", "Vinay", "Yash", "Arpit", "Dev", "Kunal", "Pranay",
+    
+    # Indian Female Names
+    "Aarti", "Aishwarya", "Alisha", "Anjali", "Asmita", "Bhavana", "Charu", "Damini", "Divya", "Ekta",
+    "Farah", "Garima", "Heena", "Indira", "Jaya", "Kajal", "Komal", "Laxmi", "Madhuri", "Neelam",
+    "Neha", "Pallavi", "Payal", "Poonam", "Preeti", "Rachna", "Rekha", "Ritika", "Sangeeta", "Seema",
+    "Shalini", "Shefali", "Shreya", "Shruti", "Smita", "Snehal", "Sonali", "Suhani", "Swati", "Trisha",
+    "Urmila", "Vaishnavi", "Vandana", "Vidya", "Yamini", "Zeenat", "Khushi", "Tanya", "Rashi", "Nidhi",
+    
+    # More Indian Names
+    "Tanmay", "Bhavya", "Lakshmi", "Rajesh", "Manoj", "Reema", "Saumya", "Darshan", "Vaani", "Ishaan",
+    "Jayant", "Siddhi", "Adarsh", "Prema", "Shanaya", "Rudra", "Devika", "Rohan", "Anvi", "Samar",
+    "Reyansh", "Aarohi", "Moksha", "Advait", "Tanvi", "Saanvika", "Ritvik", "Sia", "Vivaan", "Meher",
+    "Ved", "Myra", "Kritika", "Vihaan", "Suhana", "Tushar", "Ira", "Hrithik", "Avni", "Parth",
+    "Naisha", "Rajiv", "Ayaan", "Chandan", "Gitanjali", "Bhumi", "Shlok", "Simran", "Yug", "Vansh",
+    
+    # Non-Indian Names (only 20)
+    "Emma", "Olivia", "Liam", "Noah", "Mason", "Sophia", "Isabella", "James", "Evelyn", "Lucas",
+    "Charlotte", "Elijah", "Amelia", "Benjamin", "Henry", "Grace", "Ava", "Jack", "Chloe", "Oliver"
 
-    # Indian Female (60)
-    "Aadhya", "Bhavika", "Charita", "Deepika", "Elina", "Fariha", "Gayathri", "Hansika", "Indulekha", "Janani",
-    "Kanika", "Lekha", "Manjari", "Nishita", "Oorvashi", "Prerana", "Qirat", "Roshni", "Sharanya", "Tanirika",
-    "Urvi", "Vaibhavi", "Wamika", "Yoshita", "Zainab", "Anvika", "Brinda", "Chhavi", "Devanshi", "Eshaana",
-    "Falguni", "Gitali", "Harvinder", "Ishana", "Juhi", "Kashish", "Lavika", "Meenal", "Nivriti", "Ojal",
-    "Pavitra", "Ritikaa", "Sailee", "Trisha", "Unnati", "Vritika", "Wendy", "Yoshika", "Zulekha", "Ashita",
-    "Bhuvana", "Chandrima", "Diksha", "Eram", "Farida", "Gungun", "Heer", "Ipsita", "Jagriti", "Kashvi",
-    "Lajja", "Meera",    "Padma", "Rajshree", "Shambhavi", "Tara", "Urvashi", "Vaishali", "Warishta", "Yukti", "Zeba", "Anvitha"
       ]
 
 
     last_names = [
     # Common Indian Last Names (75)
-        "Abrol", "Bansod", "Chitale", "Dani", "Ekambaram", "Fattehpuria", "Ganwani", "Hasija", "Ingle", "Jadhav",
-    "Karnik", "Londhekar", "Madhwani", "Nagori", "Ojari", "Pansare", "Qazi", "Rajput", "Sawlani", "Tiwade",
-    "Ubhaykar", "Valmiki", "Wadhera", "Yellamraju", "Zende", "Ashar", "Baghel", "Chauke", "Dangar", "Eknath",
-    "Funkar", "Gharat", "Hatkar", "Iqubal", "Jakhotia", "Khetan", "Lokre", "Malkani", "Nanda", "Ojariwala",
-    "Pipara", "Rachh", "Sambrekar", "Tapkir", "Upasani", "Virk", "Achrekar", "Bakul", "Chauke", "Deshpande", "Elavia", "Fateh", "Garge", "Hajela", "Ingle", "Jaswal",
-    "Kamblekar", "Lodha", "Mankotia", "Nawalkha", "Ojha", "Parab", "Qureshi", "Rawal", "Shelar", "Taksale",
-    "Upadhyayula", "Vaidya", "Waghela", "Yadavendra", "Zariwala", "Agarwaal", "Bansiwal", "Chatterjee", "Dandekar", "Eshpuniyani",
-    "Fatehpuri", "Gandotra", "Hegde", "Iyengar", "Jagirdar", "Kandoi", "Lehri", "Makhija", "Nimbalkar", "Osmani",
-    "Padgaonkar", "Quazi", "Rangwani", "Saxena", "Tembhare", "Uchil", "Ved", "Wasan", "Yellapragada", "Zarir",
+      "Sharma", "Verma", "Singh", "Kumar", "Yadav", "Gupta", "Reddy", "Mehta", "Kapoor", "Chopra",
+    "Desai", "Patel", "Nair", "Joshi", "Pandey", "Tripathi", "Mishra", "Rastogi", "Jain", "Goyal",
+    "Agarwal", "Malhotra", "Saxena", "Das", "Rao", "Iyer", "Menon", "Bose", "Banerjee", "Chatterjee",
+    "Bhattacharya", "Dubey", "Tiwari", "Thakur", "Rawat", "Choudhary", "Lal", "Shetty", "Sen", "Pillai",
+    "Rajput", "Bhatia", "Vohra", "Mahajan", "Khatri", "Gill", "Sandhu", "Sidhu", "Grover", "Sinha",
+    "Ranganathan", "Ramakrishnan", "Kulkarni", "Phadke", "Sawant", "Naik", "Bendre", "Shukla", "Dwivedi", "Upadhyay",
+    "Tyagi", "Bhatt", "Parikh", "Talwar", "Chugh", "Khanna", "Madaan", "Kohli", "Sodhi", "Arora",
+    "Mathur", "Sareen", "Bansal", "Nagpal", "Batla", "Taneja", "Kashyap", "Bagga", "Sibal", "Vig",
+    "Chhabra", "Mittal", "Aggarwal", "Sikka", "Bajaj", "Garg", "Grover", "Malik", "Sehgal", "Kapila", "Rangwani", "Saxena", "Tembhare", "Uchil", "Ved", "Wasan", "Yellapragada", "Zarir",
     "Arora", "Baliyan", "Chikarmane", "Dongre", "Ekbote", "Fatehchand", "Garg", "Hiranandani", "Indoria", "Joglekar",
     "Kansara", "Lath", "Mavani", "Nagda", "Oza", "Pathare", "Raut", "Saluja", "Talnikar", "Udani",
     "Vattikonda", "Warke", "Yengde", "Zari", "Agnihotri", "Bahl", "Chugh", "Dighe", "Engineer", "Fakir",
