@@ -13,6 +13,7 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
+# Removed: from generate_fake_data import generate_fake_data_page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 USER_DB_FILE = "users.json"
@@ -265,7 +266,8 @@ def main():
         page_title="ScreenerPro Candidate Portal",
         layout="wide",
         initial_sidebar_state="expanded",
-        icon="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" # Favicon
+        # Updated Favicon URL
+        page_icon="https://raw.githubusercontent.com/manavnagpal08/candi/3b4ea84eed486bc2f70ffe8dc224f0a6a5f30894/logo.png" 
     )
 
     if "current_page" not in st.session_state:
@@ -1091,7 +1093,9 @@ def main():
     st.sidebar.subheader("About & Support")
     if st.sidebar.button("ℹ️ About ScreenerPro", key="nav_about_us", help="Learn more about this application"):
         st.session_state.current_page = "about_us"
-    
+    # Removed: if is_current_user_admin(): # Only show generate fake data for admins
+    # Removed:     if st.sidebar.button("⚙️ Generate Fake Data (Dev)", key="nav_generate_fake_data", help="For development and testing purposes"):
+    # Removed:         st.session_state.current_page = "generate_fake_data"
     if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form", help="Provide feedback or ask for help"):
         st.session_state.current_page = "feedback_form"
     
@@ -1151,6 +1155,11 @@ def main():
         st.markdown(f"Hello, {st.session_state.username}!")
         st.divider()
         feedback_and_help_page()
+    # Removed: elif st.session_state.current_page == "generate_fake_data":
+    # Removed:    st.header(f"⚙️ Generate Fake Data (Development)")
+    # Removed:    st.markdown(f"Hello, {st.session_state.username}!")
+    # Removed:    st.divider()
+    # Removed:    generate_fake_data_page()
     elif st.session_state.current_page == "logout":
         logout_page()
 
