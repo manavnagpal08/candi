@@ -462,6 +462,17 @@ html[data-theme="dark"] h6 {
     color: #333333 !important; /* Explicitly set to dark for visibility on light blue background */
 }
 
+/* NEW: Styling for the dropdown options of selectbox */
+/* Target the actual text within the option items (p tag) */
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] p {
+    color: #333333 !important; /* Explicitly set to a dark color for visibility */
+}
+
+/* Target the actual text within the option items (span tag, as a fallback/additional specificity) */
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] span {
+    color: #333333 !important; /* Explicitly set to a dark color for visibility */
+}
+
 /* NEW: Force text color for the input field itself within the selectbox */
 .stSelectbox input[type="text"] {
     color: #333333 !important; /* Force dark text color for visibility on light blue background */
@@ -472,55 +483,36 @@ html[data-theme="dark"] h6 {
     z-index: 2; /* Ensures the input text is on top */
 }
 
-/* Background for the dropdown options and hover state */
-div[data-baseweb="popover"] div[role="listbox"] {
-    background-color: var(--background-color) !important;
-    border: 1px solid var(--input-border) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Removed dark mode specific selectbox dropdown styles */
-/* html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
-} */
-
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] {
-    background-color: transparent !important;
-}
-
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
-    background-color: rgba(0, 206, 201, 0.2) !important;
-}
-
-/* Removed dark mode specific selectbox dropdown hover styles */
-/* html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
-    background-color: rgba(0, 206, 201, 0.3) !important;
-} */
-
-
 /* Text input and Text area styling */
-.stTextInput > div > div > input,
-.stTextArea > div > div {
+.stTextInput > div > div > input, /* For st.text_input */
+.stTextArea > div > div { /* For st.text_area's main container */
     border-radius: 18px;
     border: 1px solid var(--input-border);
     padding: 1.1rem 1.4rem;
     transition: all 0.4s ease;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
     background: var(--input-background);
-    color: var(--text-color) !important; /* Added !important for input text color */
+    /* Removed color from here as we'll target the inner textarea directly */
+    position: relative; /* Added for z-index context */
+    z-index: 1; /* Ensure the container is in a proper z-index layer */
 }
 
-.stTextInput > div > div > input::placeholder { /* Added for placeholder text color */
+.stTextInput > div > div > input, /* For st.text_input's actual input element */
+.stTextArea textarea { /* Targeting the actual textarea element within st.text_area */
+    color: #333333 !important; /* Force dark text color for visibility */
+    -webkit-text-fill-color: #333333 !important; /* For Safari/Chrome autocomplete */
+    background-color: transparent !important; /* Ensure no conflicting background */
+    opacity: 1 !important; /* Ensure full visibility */
+    position: relative; /* Added for z-index context */
+    z-index: 2; /* Ensures the text is on top of its container */
+}
+
+
+.stTextInput > div > div > input::placeholder,
+.stTextArea textarea::placeholder { /* Added for placeholder text color */
     color: var(--text-color) !important; /* Added !important for placeholder text color */
     opacity: 0.7; /* Make placeholder slightly transparent */
 }
-
-/* Removed dark mode specific input placeholder styles */
-/* html[data-theme="dark"] .stTextInput > div > div > input::placeholder {
-    color: var(--text-color) !important;
-    opacity: 0.5;
-} */
 
 
 .stTextInput > div > div > input:focus,
