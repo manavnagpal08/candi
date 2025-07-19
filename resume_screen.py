@@ -1594,8 +1594,6 @@ def resume_screener_page():
     # display_greeting_card() # Removed call to avoid circular import
 
     # Personalized greeting for the logged-in user
-    if st.session_state.get('authenticated', False) and st.session_state.get('username'):
-        st.markdown(f"## Hello, {st.session_state.username}!")
 
     st.title("🧠 ScreenerPro – AI-Powered Resume Screener")
 
