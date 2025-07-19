@@ -8,6 +8,7 @@ import random
 import traceback
 import time
 import pandas as pd
+import re
 import collections # Import collections for defaultdict
 from sentence_transformers import SentenceTransformer
 
