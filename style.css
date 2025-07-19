@@ -159,7 +159,6 @@ html[data-theme="dark"] .dashboard-header {
         transform: translateY(-50px);
     }
     100% {
-        opacity: 1;
         transform: translateY(0);
     }
 }
@@ -740,9 +739,14 @@ html[data-theme="dark"] .stAlert:hover {
 
 html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
     background-color: #2A3C4D;
-    color: #E0F2F6 !important; /* Changed to a very light grey/off-white for better contrast */
     border-left: 8px solid #00B8D4;
 }
+
+/* Targeting the text inside the info alert more specifically */
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 p {
+    color: #E0F2F6 !important; /* Changed to a very light grey/off-white for better contrast */
+}
+
 
 html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
     fill: #00B8D4;
