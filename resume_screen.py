@@ -26,7 +26,7 @@ import time
 import pandas as pd
 import json
 import requests # Import requests for REST API calls
-# Removed: from weasyprint import HTML # WeasyPrint is no longer used
+from weasyprint import HTML # Re-added: WeasyPrint for PDF generation
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -210,7 +210,7 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
 APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 # This URL should be where your generated HTML certificates are publicly accessible.
-# For example, if you upload them to a GitHub Pages repository.
+# For this implementation, the PDF is generated on-the-fly for download/email, so this URL is less critical for email attachment.
 CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 
 # --- Firebase REST API Functions ---
@@ -1092,15 +1092,13 @@ The {sender_name}""")
 
 def send_certificate_email(recipient_email, candidate_name, score, certificate_html_content, certificate_public_url, gmail_address, gmail_app_password):
     """
-    Sends an email with the certificate HTML content.
-    No PDF attachment is included as WeasyPrint is removed.
-    Includes a link to the publicly hosted certificate (if applicable).
+    Sends an email with the certificate HTML content AND a PDF attachment.
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
 
-    msg = MIMEMultipart('alternative') # Use 'alternative' for plain text + HTML
+    msg = MIMEMultipart('mixed') # Changed to 'mixed' for attachments
     msg['Subject'] = f"🎉 Congratulations, {candidate_name}! Your ScreenerPro Certificate is Here!"
     msg['From'] = gmail_address
     msg['To'] = recipient_email
@@ -1112,6 +1110,7 @@ Congratulations on successfully clearing the ScreenerPro resume screening proces
 We’re proud to award you an official certificate recognizing your skills and employability.
 
 You can view your certificate online here: {certificate_public_url}
+A PDF version of your certificate is also attached to this email.
 
 Have questions? Contact us at screenerpro.ai@gmail.com
 
@@ -1128,6 +1127,7 @@ Have questions? Contact us at screenerpro.ai@gmail.com
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
             
             <p>You can view your certificate online here: <a href="{certificate_public_url}">{certificate_public_url}</a></p>
+            <p>A PDF version of your certificate is also attached to this email.</p>
             
             <p>Have questions? Contact us at screenerpro.ai@gmail.com</p>
             <p>🚀 Keep striving. Keep growing.</p>
@@ -1135,9 +1135,32 @@ Have questions? Contact us at screenerpro.ai@gmail.com
         </body>
     </html>
     """
-    msg.attach(MIMEText(plain_text_body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
     
+    # Create a container for both plain and HTML parts
+    alternative_part = MIMEMultipart('alternative')
+    alternative_part.attach(MIMEText(plain_text_body, 'plain'))
+    alternative_part.attach(MIMEText(html_body, 'html'))
+    msg.attach(alternative_part)
+
+    # Attach PDF
+    try:
+        pdf_bytes = HTML(string=certificate_html_content).write_pdf()
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(pdf_bytes)
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename="ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.pdf"')
+        msg.attach(part)
+    except Exception as e:
+        st.error(f"❌ Failed to generate or attach PDF to email: {e}")
+        st.warning("The email will be sent without the PDF attachment.")
+        # If PDF generation fails, send email without attachment
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"🎉 Congratulations, {candidate_name}! Your ScreenerPro Certificate is Here!"
+        msg['From'] = gmail_address
+        msg['To'] = recipient_email
+        msg.attach(MIMEText(plain_text_body.replace("A PDF version of your certificate is also attached to this email.", ""), 'plain'))
+        msg.attach(MIMEText(html_body.replace("A PDF version of your certificate is also attached to this email.", ""), 'html'))
+
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(gmail_address, gmail_app_password)
@@ -1772,7 +1795,7 @@ def resume_screener_page():
                 else:
                     st.write("No categorized missing skills found for this candidate relative to the JD.")
             else:
-                st.write("No missing skills found for this candidate relative to the JD.") # This is line 1759 in the original
+                st.write("No missing skills found for this candidate relative to the JD.") 
             
             st.markdown("---")
             # Course Suggestions based on missing skills
@@ -1841,7 +1864,7 @@ View my certificate online: {certificate_public_url}
 
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
-#resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
+#resume #jobsearch #ai #caregrowth #certified #ScreenerPro #LinkedIn
 🌐 Learn more about the tool: For candidate login: {urllib.parse.quote(APP_BASE_URL)} and for HR login: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
