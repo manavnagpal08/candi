@@ -1,684 +1,1162 @@
-/* style.css - "ScreenerPro Inspired" Theme */
 
-/* --- Google Fonts Import --- */
-/* Using 'Inter' for body/general text (clean, modern) and 'Poppins' for headings (slightly bolder, rounder) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+/* Base Imports & Global Resets */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* --- Root Variables (Light and Dark Mode) --- */
-:root {
-    /* Base Colors - Light Mode (from image) */
-    --color-bg-primary-light: #f7f9fc; /* Main page background */
-    --color-bg-secondary-light: #ffffff; /* Card/element background */
-    --color-text-primary-light: #333d52; /* Darker text for headings/main content */
-    --color-text-secondary-light: #6a7187; /* Lighter text for paragraphs/labels */
-    --color-border-light: #e0e6ed; /* Subtle borders */
-
-    /* Accent Colors (from image and extrapolations) */
-    --color-accent-blue: #3b82f6; /* Dashboard active state, main button */
-    --color-accent-blue-hover: #2563eb;
-    --color-accent-blue-soft: #dbeafe; /* Light background for active state */
-
-    --color-accent-pink: #ec4899; /* Example for other navigation */
-    --color-accent-pink-soft: #fce7f3;
-
-    --color-accent-orange: #f97316; /* Example for other navigation */
-    --color-accent-orange-soft: #fff7ed;
-
-    --color-accent-green: #22c55e; /* Welcome banner element, success */
-
-    /* Sidebar specific */
-    --color-sidebar-bg-light: #ffffff;
-    --color-sidebar-border-light: #f1f5f9; /* Very subtle right border */
-
-    /* Shadows (Subtle, clean, like the image) */
-    --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03); /* Soft, multi-layer */
-    --shadow-sidebar: 6px 0 15px rgba(0, 0, 0, 0.03); /* Subtle right shadow for sidebar */
-    --shadow-welcome-banner: 0 6px 15px rgba(0, 0, 0, 0.08);
-
-    /* Animation Variables */
-    --transition-speed-fast: 0.2s;
-    --transition-speed-normal: 0.3s;
-    --transition-ease: ease-out;
-
-    /* Border Radius */
-    --border-radius-sm: 0.5rem;
-    --border-radius-md: 0.75rem;
-    --border-radius-lg: 1rem;
-    --border-radius-pill: 9999px; /* For pill shapes */
+/* Hide GitHub fork button, Streamlit menu and footer */
+#MainMenu {
+    visibility: hidden;
 }
 
-body.dark-mode {
-    /* Base Colors - Dark Mode (Complementary) */
-    --color-bg-primary-dark: #1e293b; /* Dark slate */
-    --color-bg-secondary-dark: #2d3a4b; /* Slightly lighter for cards/elements */
-    --color-text-primary-dark: #e2e8f0; /* Light text */
-    --color-text-secondary-dark: #94a3b8; /* Muted light text */
-    --color-border-dark: #475569; /* Darker borders */
-
-    /* Accent Colors (remain vibrant or slightly adjusted) */
-    --color-accent-blue-soft: rgba(59, 130, 246, 0.2);
-    --color-accent-pink-soft: rgba(236, 72, 153, 0.2);
-    --color-accent-orange-soft: rgba(249, 115, 22, 0.2);
-
-    /* Sidebar specific */
-    --color-sidebar-bg-dark: #2d3a4b;
-    --color-sidebar-border-dark: #475569;
-
-    /* Shadows (darker, but still subtle) */
-    --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-sidebar: 6px 0 15px rgba(0, 0, 0, 0.2);
-    --shadow-welcome-banner: 0 6px 15px rgba(0, 0, 0, 0.2);
+footer {
+    visibility: hidden;
 }
 
-/* --- Global Base Styles --- */
-html, body, .stApp {
+header {
+    visibility: hidden; /* Optional: hides the top bar */
+}
+
+/* Global body and HTML styling */
+html,
+body,
+[class*="css"] {
     font-family: 'Inter', sans-serif;
-    background-color: var(--color-bg-primary-light);
-    color: var(--color-text-primary-light);
-    transition: background-color var(--transition-speed-normal) var(--transition-ease),
-                color var(--transition-speed-normal) var(--transition-ease);
+    /* Background and color will be set dynamically by Streamlit based on dark_mode toggle */
+    transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-body.dark-mode {
-    background-color: var(--color-bg-primary-dark);
-    color: var(--color-text-primary-dark);
-}
-
-/* Custom Scrollbar (ScreenerPro style) */
+/* Custom scrollbar for a cleaner look */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
 }
+
 ::-webkit-scrollbar-track {
-    background: var(--color-bg-primary-light);
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.15); /* Darker track for better contrast */
+    border-radius: 10px;
 }
+
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15); /* Lighter track for dark mode */
+}
+
 ::-webkit-scrollbar-thumb {
-    background: var(--color-border-light);
-    border-radius: 4px;
-    transition: background var(--transition-speed-fast) var(--transition-ease);
+    background: #00cec9; /* Teal thumb */
+    border-radius: 10px;
+    border: 3px solid transparent; /* Creates more padding effect */
+    background-clip: padding-box;
+    transition: background 0.4s ease;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-secondary-light);
-}
-body.dark-mode ::-webkit-scrollbar-track {
-    background: var(--color-bg-primary-dark);
-}
-body.dark-mode ::-webkit-scrollbar-thumb {
-    background: var(--color-border-dark);
-}
-body.dark-mode ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-secondary-dark);
+    background: #00b0a8; /* Darker teal on hover */
 }
 
-/* Selection Color */
-::selection {
-    background: var(--color-accent-blue);
-    color: white;
-}
-
-/* --- Typography --- */
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif; /* Poppins for headings as in image */
-    color: var(--color-text-primary-light);
-    margin-top: 1.5em;
-    margin-bottom: 0.8em;
-    font-weight: 600; /* Medium bold */
-    line-height: 1.3;
-    transition: color var(--transition-speed-normal) var(--transition-ease);
-}
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
-    color: var(--color-text-primary-dark);
-}
-
-h1 { font-size: 2.2em; font-weight: 700; }
-h2 { font-size: 1.8em; font-weight: 700; }
-h3 { font-size: 1.4em; font-weight: 600; }
-p { line-height: 1.6; color: var(--color-text-secondary-light); }
-body.dark-mode p { color: var(--color-text-secondary-dark); }
-a { color: var(--color-accent-blue); text-decoration: none; transition: all var(--transition-speed-fast) var(--transition-ease); }
-a:hover { color: var(--color-accent-blue-hover); text-decoration: underline; }
-
-/* --- Sidebar Styling (ScreenerPro Inspired) --- */
-.stSidebar {
-    background-color: var(--color-sidebar-bg-light);
-    border-right: 1px solid var(--color-sidebar-border-light); /* Subtle border */
-    box-shadow: var(--shadow-sidebar); /* Light shadow on the right */
-    padding: 1.5rem 1rem; /* Adjust padding to match image */
-    transition: all var(--transition-speed-normal) var(--transition-ease);
-    border-radius: 0; /* No rounding */
-    overflow-x: hidden; /* Prevent horizontal scrollbar on hover effects */
-}
-
-body.dark-mode .stSidebar {
-    background-color: var(--color-sidebar-bg-dark);
-    border-right: 1px solid var(--color-sidebar-border-dark);
-    box-shadow: var(--shadow-sidebar);
-}
-
-/* Dark Mode Toggle */
-.stSidebar .stToggle {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end; /* Align right */
-    padding-right: 0.5rem;
-    margin-bottom: 1.5rem; /* Space below toggle */
-}
-/* Adjust the toggle's look if necessary - Streamlit's default is often fine here */
-
-
-/* Sidebar Logo/Brand (Assuming this is an image or text in a div) */
-/* If using st.image, you might need to wrap it in a div and target that div */
-.sidebar-logo { /* Custom class for a div wrapping your logo */
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 1rem; /* Adjust padding around logo */
-    margin-bottom: 2rem; /* Space below logo */
-}
-.sidebar-logo img { /* If using st.image */
-    height: 35px; /* Adjust height as needed */
-    object-fit: contain;
-}
-.sidebar-logo span { /* If using st.markdown for text */
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.4em;
-    color: var(--color-text-primary-light);
-}
-body.dark-mode .sidebar-logo span {
-    color: var(--color-text-primary-dark);
-}
-
-
-/* Sidebar Navigation Label ("Navigate") */
-.stSidebar .stMarkdown p { /* Targeting 'Navigate' text */
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8em;
-    color: var(--color-text-secondary-light);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-body.dark-mode .stSidebar .stMarkdown p {
-    color: var(--color-text-secondary-dark);
-}
-
-
-/* Sidebar Navigation Buttons (Pill-shaped, ScreenerPro style) */
-.stSidebar .stButton > button {
-    width: 100%; /* Take full width of available sidebar space */
-    margin: 0.3rem 0; /* Minimal margin between buttons */
-    background-color: transparent; /* Default is transparent */
-    color: var(--color-text-primary-light);
-    border: none;
-    box-shadow: none; /* No shadow by default */
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    font-weight: 500;
-    padding: 0.7rem 1.2rem; /* Consistent padding */
-    border-radius: var(--border-radius-pill); /* Pill shape */
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    cursor: pointer;
-}
-
-body.dark-mode .stSidebar .stButton > button {
-    color: var(--color-text-primary-dark);
-}
-
-.stSidebar .stButton > button:hover {
-    background-color: var(--color-border-light); /* Light background on hover */
-    color: var(--color-text-primary-light); /* Text color stays primary on hover */
-    transform: translateY(-1px); /* Subtle lift on hover */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Very subtle shadow on hover */
-}
-body.dark-mode .stSidebar .stButton > button:hover {
-    background-color: var(--color-border-dark);
-    color: var(--color-text-primary-dark);
-}
-
-
-/* Active Sidebar Button (Dashboard in image) */
-/* You need to add a custom class 'sidebar-active' to the active button via st.markdown(f'<button class="sidebar-active">...</button>', unsafe_allow_html=True) */
-.stSidebar .stButton > button.sidebar-active {
-    background-color: var(--color-accent-blue-soft); /* Light blue background */
-    color: var(--color-accent-blue); /* Blue text */
-    font-weight: 600; /* Slightly bolder */
-    box-shadow: var(--shadow-card); /* Subtle card shadow for active state */
-    transform: none; /* No lift */
-    transition: all var(--transition-speed-normal) var(--transition-ease);
-}
-.stSidebar .stButton > button.sidebar-active i { /* Icon color for active */
-    color: var(--color-accent-blue);
-}
-.stSidebar .stButton > button.sidebar-active:hover {
-    background-color: var(--color-accent-blue-soft); /* Keep active color on hover */
-    color: var(--color-accent-blue);
-    transform: none; /* No lift */
-    box-shadow: var(--shadow-card); /* Keep shadow */
-}
-
-/* Example for other sidebar sections if needed (Manage JDs, Email Candidates, etc.) */
-/* You'd apply similar classes like 'sidebar-active-pink', 'sidebar-active-orange' */
-.stSidebar .stButton > button.sidebar-active-pink {
-    background-color: var(--color-accent-pink-soft);
-    color: var(--color-accent-pink);
-}
-.stSidebar .stButton > button.sidebar-active-pink i {
-    color: var(--color-accent-pink);
-}
-
-.stSidebar .stButton > button.sidebar-active-orange {
-    background-color: var(--color-accent-orange-soft);
-    color: var(--color-accent-orange);
-}
-.stSidebar .stButton > button.sidebar-active-orange i {
-    color: var(--color-accent-orange);
-}
-
-
-/* --- Main Content Styling --- */
+/* Main content block container */
 .main .block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInSlideUp var(--transition-speed-normal) 0.1s var(--transition-ease) forwards;
+    padding: 4rem;
+    border-radius: 35px;
+    /* Background and shadow will be set dynamically by Streamlit based on dark_mode toggle */
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.15);
+    animation: fadeInScaleBounce 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transition: background 0.7s ease-in-out, box-shadow 0.7s ease-in-out, border 0.7s ease-in-out;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 3.5rem;
+    overflow: hidden;
 }
 
-@keyframes fadeInSlideUp {
-    to {
+html[data-theme="dark"] .main .block-container {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes fadeInScaleBounce {
+    0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.95);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.01); /* Slight bounce up */
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header (h1-h6) styling */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #00cec9;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1.1;
+    margin-bottom: 1em;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard specific header */
+.dashboard-header {
+    font-size: 4rem;
+    font-weight: 900;
+    padding-bottom: 1.5rem;
+    border-bottom: 8px solid #00cec9;
+    display: inline-block;
+    margin-bottom: 4rem;
+    animation: slideInLeftFadeBounce 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes slideInLeftFadeBounce {
+    0% {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(10px); /* Overshoot for bounce effect */
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Greeting message animation (ENHANCED) */
+@keyframes slideInDownFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    100% {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Welcome Banner (using a custom class) */
-.welcome-banner {
-    background: linear-gradient(to right, #e0f2fe, #e3f5fe); /* Light blue gradient */
-    border-radius: var(--border-radius-lg);
-    padding: 2rem 2.5rem;
-    box-shadow: var(--shadow-welcome-banner);
+.greeting-message {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #00cec9;
     margin-bottom: 2.5rem;
-    position: relative; /* For absolute positioning of emojis */
-    overflow: hidden;
-    color: var(--color-text-primary-light);
+    animation: slideInDownFadeIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.03em;
 }
 
-body.dark-mode .welcome-banner {
-    background: linear-gradient(to right, #344760, #3e5672);
-    color: var(--color-text-primary-dark);
-}
-
-.welcome-banner h1 {
-    font-size: 2em;
-    font-weight: 700;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-primary-light); /* Specific for banner */
-}
-body.dark-mode .welcome-banner h1 {
-    color: var(--color-text-primary-dark);
-}
-
-.welcome-banner p {
-    font-size: 0.95em;
-    color: var(--color-text-secondary-light); /* Specific for banner */
-    margin-bottom: 0;
-}
-body.dark-mode .welcome-banner p {
-    color: var(--color-text-secondary-dark);
-}
-
-/* Welcome Banner Emojis/Icons (using ::before/::after or separate elements) */
-/* You'll likely use st.markdown with specific emojis and inline styling or classes */
-.welcome-banner .emoji-top-left {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    font-size: 2.5em;
-    opacity: 0.8;
-}
-.welcome-banner .emoji-bottom-right {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    font-size: 3em;
-    opacity: 0.8;
-}
-
-
-/* Overview Dashboard Header (with colored bar) */
-.overview-dashboard-header { /* Custom class for st.markdown of the header */
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.8em;
-    font-weight: 700;
-    color: var(--color-text-primary-light);
-    margin-bottom: 1.5rem;
-    position: relative;
-    padding-bottom: 0.5rem; /* Space for the bar */
-}
-body.dark-mode .overview-dashboard-header {
-    color: var(--color-text-primary-dark);
-}
-
-.overview-dashboard-header::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 4px; /* Thickness of the bar */
-    width: 60px; /* Length of the bar */
-    background: linear-gradient(to right, var(--color-accent-blue), var(--color-accent-pink)); /* Gradient bar */
-    border-radius: 2px;
-}
-
-
-/* Key Performance Indicators (KPI Cards - st.metric) */
+/* Metric boxes styling */
 .stMetric {
-    background-color: var(--color-bg-secondary-light);
-    border-radius: var(--border-radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
+    border-radius: 25px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
     overflow: hidden;
-    border: 1px solid var(--color-border-light); /* Subtle border for definition */
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    perspective: 1000px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(240,242,246,0.9));
 }
 
-body.dark-mode .stMetric {
-    background-color: var(--color-bg-secondary-dark);
-    border: 1px solid var(--color-border-dark);
+html[data-theme="dark"] .stMetric {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(145deg, #3A3A3A, #2D2D2D);
 }
 
 .stMetric:hover {
-    transform: translateY(-3px); /* Subtle lift on hover */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Slightly more pronounced shadow */
-}
-body.dark-mode .stMetric:hover {
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-15px) rotateX(3deg);
+    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
+    animation: metricHoverGlow 0.8s forwards;
 }
 
-.stMetric > div:first-child { /* The title of the metric */
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9em;
-    color: var(--color-text-secondary-light);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.8rem;
-}
-body.dark-mode .stMetric > div:first-child {
-    color: var(--color-text-secondary-dark);
+@keyframes metricHoverGlow {
+    0% {
+        box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 25px 65px rgba(0, 206, 201, 0.4), 0 25px 55px rgba(0, 0, 0, 0.3);
+    }
+    100% {
+        box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
+    }
 }
 
-/* Question Mark Icon (inside stMetric title) */
-.stMetric > div:first-child .css-1byxvxm { /* This targets the default help icon wrapper */
-    color: var(--color-text-secondary-light); /* Or a specific icon color */
-    font-size: 1.1em;
-    cursor: help;
-    opacity: 0.7;
-    transition: opacity var(--transition-speed-fast) var(--transition-ease);
-}
-.stMetric > div:first-child .css-1byxvxm:hover {
-    opacity: 1;
-}
-body.dark-mode .stMetric > div:first-child .css-1byxvxm {
-    color: var(--color-text-secondary-dark);
+.stMetric > div[data-testid="stMetricValue"] {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #00cec9;
+    animation: pulseValue 3s infinite alternate ease-in-out;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-
-.stMetric > div:nth-child(2) { /* The value/number of the metric */
-    font-family: 'Poppins', sans-serif;
-    font-size: 2.2em;
-    font-weight: 700;
-    color: var(--color-text-primary-light);
-    line-height: 1.1;
+@keyframes pulseValue {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
 }
-body.dark-mode .stMetric > div:nth-child(2) {
-    color: var(--color-text-primary-dark);
-}
 
-.stMetric > div:nth-child(3) { /* The delta/change of the metric */
-    font-size: 0.9em;
+.stMetric > div[data-testid="stMetricLabel"] {
+    font-size: 1.4rem;
+    opacity: 0.8;
     font-weight: 600;
-    margin-top: 0.5rem;
-    /* Streamlit automatically colors positive/negative delta */
 }
 
-
-/* Inputs (text_input, text_area, selectbox, multiselect, slider) */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea,
-.stSelectbox > div > div > div > div > span,
-.stMultiSelect > div > div > div > div > span {
-    background-color: var(--color-bg-secondary-light) !important;
-    color: var(--color-text-primary-light) !important;
-    border: 1px solid var(--color-border-light) !important;
-    border-radius: var(--border-radius-md);
-    padding: 0.75rem 1rem;
-    box-shadow: none;
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-}
-
-body.dark-mode .stTextInput > div > div > input,
-body.dark-mode .stTextArea > div > div > textarea,
-body.dark-mode .stSelectbox > div > div > div > div > span,
-body.dark-mode .stMultiSelect > div > div > div > div > span {
-    background-color: var(--color-bg-secondary-dark) !important;
-    color: var(--color-text-primary-dark) !important;
-    border: 1px solid var(--color-border-dark) !important;
-}
-
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus,
-.stSelectbox > div > div > div:focus-within,
-.stMultiSelect > div > div > div:focus-within {
-    border-color: var(--color-accent-blue) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important; /* Blue focus ring */
-    outline: none !important;
-}
-
-/* Labels for inputs */
-.stTextInput label,
-.stTextArea label,
-.stSelectbox label,
-.stMultiSelect label,
-.stSlider label,
-.stRadio label,
-.stCheckbox label {
-    color: var(--color-text-secondary-light) !important;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    display: block;
-    font-size: 0.9em;
-}
-
-body.dark-mode .stTextInput label,
-body.dark-mode .stTextArea label,
-body.dark-mode .stSelectbox label,
-body.dark-mode .stMultiSelect label,
-body.dark-mode .stSlider label,
-body.dark-mode .stRadio label,
-body.dark-mode .stCheckbox label {
-    color: var(--color-text-secondary-dark) !important;
-}
-
-/* Main Content Buttons */
+/* Button styling */
 .stButton > button {
-    background-color: var(--color-accent-blue);
+    background-color: #00cec9;
     color: white;
+    border-radius: 18px;
+    padding: 1rem 2rem;
+    font-weight: 700;
     border: none;
-    border-radius: var(--border-radius-md);
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    box-shadow: var(--shadow-card);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-}
-
-.stButton > button:active {
-    transform: translateY(1px) scale(0.99);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    letter-spacing: 0.05em;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
 }
 
 .stButton > button:hover {
-    background-color: var(--color-accent-blue-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-body.dark-mode .stButton > button:hover {
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    background-color: #00b0a8;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    outline: 3px solid rgba(0, 206, 201, 0.6);
+    outline-offset: 4px;
 }
 
+.stButton > button:active {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background-color: #009a93;
+}
 
-/* Expander (Accordion) Styling */
-.streamlit-expanderHeader {
-    background-color: var(--color-bg-secondary-light);
-    color: var(--color-text-primary-light);
-    border-radius: var(--border-radius-md);
-    padding: 0.9rem 1.2rem;
-    font-weight: 600;
-    border: 1px solid var(--color-border-light);
-    box-shadow: var(--shadow-card);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
+/* Ripple effect for buttons */
+.stButton > button:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(1) translate(-50%, -50%);
+    transition: all 0.7s ease-out;
+    z-index: -1;
+}
+
+.stButton > button:active:after {
+    transform: scale(40) translate(-50%, -50%);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* Expander styling */
+.stExpander {
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255,255,255,0.95);
+}
+
+html[data-theme="dark"] .stExpander {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: #3A3A3A;
+}
+
+.stExpander:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px);
+}
+
+.stExpander > div > div > div > p {
+    line-height: 1.9;
+    font-size: 1.05rem;
+}
+
+.stExpander > div[data-testid="stExpanderToggle"] {
+    color: #00cec9;
+    font-weight: 700;
+    font-size: 1.4rem;
     cursor: pointer;
-    margin-bottom: 0.4rem;
+    padding-bottom: 0.8rem;
 }
 
-body.dark-mode .streamlit-expanderHeader {
-    background-color: var(--color-bg-secondary-dark);
-    color: var(--color-text-primary-dark);
-    border: 1px solid var(--color-border-dark);
+.stExpander > div[data-testid="stExpanderToggle"] svg {
+    fill: #00cec9;
+    transition: transform 0.4s ease;
 }
 
-.streamlit-expanderHeader:hover {
-    background-color: var(--color-accent-blue-soft);
-    border-color: var(--color-accent-blue);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
-body.dark-mode .streamlit-expanderHeader:hover {
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.stExpander > div[data-testid="stExpanderToggle"][aria-expanded="true"] svg {
+    transform: rotate(90deg);
 }
 
-.streamlit-expanderContent {
-    background-color: var(--color-bg-secondary-light);
-    color: var(--color-text-primary-light);
-    border: 1px solid var(--color-border-light);
-    border-top: none;
-    border-bottom-left-radius: var(--border-radius-md);
-    border-bottom-right-radius: var(--border-radius-md);
-    padding: 1.5rem;
-    margin-top: -0.4rem;
-    box-shadow: var(--shadow-card);
-    animation: fadeIn var(--transition-speed-normal) var(--transition-ease) forwards;
+/* Form Elements Styling */
+
+/* Selectbox styling */
+.stSelectbox > div > div {
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    padding: 0.8rem 1.2rem;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
+    background: rgba(255,255,255,0.9);
 }
 
-body.dark-mode .streamlit-expanderContent {
-    background-color: var(--color-bg-secondary-dark);
-    color: var(--color-text-primary-dark);
-    border: 1px solid var(--color-border-dark);
+html[data-theme="dark"] .stSelectbox > div > div {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.08);
+    background: #3A3A3A;
 }
 
-/* Info/Success/Warning/Error boxes (Alerts) */
-.stAlert {
-    border-radius: var(--border-radius-md);
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-    box-shadow: var(--shadow-card);
-    transition: all var(--transition-speed-normal) var(--transition-ease);
-    border-left: 5px solid; /* Clean accent line */
-    opacity: 0; /* For fade-in */
-    animation: fadeIn var(--transition-speed-normal) var(--transition-ease) forwards;
+.stSelectbox > div > div:hover {
+    border-color: #00cec9;
+    box-shadow: 0 0 0 4px rgba(0, 206, 201, 0.4);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.stSelectbox > div > div:focus-within {
+    border-color: #00cec9;
+    box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
+    outline: none;
 }
 
-.stAlert.stInfo { background-color: #e3f2fd; color: #1565c0; border-color: #3b82f6; }
-.stAlert.stSuccess { background-color: #e8f5e9; color: #2e7d32; border-color: #22c55e; }
-.stAlert.stWarning { background-color: #fffde7; color: #ef6c00; border-color: #f97316; }
-.stAlert.stError { background-color: #ffebee; color: #c62828; border-color: #ef4444; }
-
-body.dark-mode .stAlert.stInfo { background-color: #1a3b5c; color: #99c2e0; border-color: #3b82f6; }
-body.dark-mode .stAlert.stSuccess { background-color: #1a4f21; color: #87c78e; border-color: #22c55e; }
-body.dark-mode .stAlert.stWarning { background-color: #4f3b1a; color: #ffeb99; border-color: #f97316; }
-body.dark-mode .stAlert.stError { background-color: #4f1a1a; color: #f29999; border-color: #ef4444; }
-
-.stAlert > div > div > div > div {
-    color: inherit;
+.stSelectbox > label {
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    display: block;
+    font-size: 1.1rem;
 }
 
-/* Dataframe styling */
+/* FIX: Explicit text color for the selected value in the selectbox input */
+.stSelectbox > div > div > div[data-baseweb="select"] > div > span,
+.stSelectbox > div > div > div[data-baseweb="select"] > div > div > span {
+    color: var(--text-color) !important; /* Use Streamlit's default text color variable for light mode, with !important */
+}
+
+html[data-theme="dark"] .stSelectbox > div > div > div[data-baseweb="select"] > div > span,
+html[data-theme="dark"] .stSelectbox > div > div > div[data-baseweb="select"] > div > div > span {
+    color: #f0f2f6 !important; /* Explicitly set for dark mode to ensure visibility, with !important */
+}
+
+/* NEW: Styling for the dropdown options of selectbox */
+/* Target the actual text within the option items */
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] > div > span {
+    color: var(--text-color) !important; /* Ensure options text is visible in light mode */
+}
+
+html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role="option"] > div > span {
+    color: #f0f2f6 !important; /* Ensure options text is visible in dark mode */
+}
+
+/* Background for the dropdown options and hover state */
+div[data-baseweb="popover"] div[role="listbox"] {
+    background-color: var(--background-color) !important; /* Ensure the entire popover background matches theme */
+    border: 1px solid rgba(0, 0, 0, 0.15) !important; /* Add a subtle border to the dropdown */
+    border-radius: 12px !important; /* Rounded corners for the dropdown */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important; /* Add shadow to the dropdown */
+}
+
+html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] {
+    background-color: #3A3A3A !important; /* Darker background for options in dark mode */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"] {
+    background-color: transparent !important; /* Make individual option background transparent to allow listbox background to show */
+}
+
+div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
+    background-color: rgba(0, 206, 201, 0.2) !important; /* Teal hover effect */
+}
+
+html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
+    background-color: rgba(0, 206, 201, 0.3) !important; /* Darker teal hover for dark mode */
+}
+
+
+/* Text input and Text area styling */
+.stTextInput > div > div > input,
+.stTextArea > div > div {
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 1.1rem 1.4rem;
+    transition: all 0.4s ease;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
+    background: rgba(255,255,255,0.9);
+}
+
+html[data-theme="dark"] .stTextInput > div > div > input,
+html[data-theme="dark"] .stTextArea > div > div {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.08);
+    background: #3A3A3A;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div:focus-within {
+    border-color: #00cec9;
+    box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
+    outline: none;
+}
+
+.stTextInput > div > div > input:hover,
+.stTextArea > div > div:hover {
+    border-color: #00b0a8;
+}
+
+.stTextInput > label,
+.stTextArea > label {
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    display: block;
+    font-size: 1.1rem;
+}
+
+/* Radio button styling */
+/* Custom styling for st.sidebar.radio to make it look like buttons */
+.stSidebar .stRadio div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stSidebar .stRadio div[role="radiogroup"] label {
+    border-radius: 20px;
+    padding: 1.2rem 1.8rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    background: rgba(255,255,255,0.9);
+}
+
+html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    background: #3A3A3A;
+}
+
+.stSidebar .stRadio div[role="radiogroup"] label span:first-child {
+    display: none;
+}
+
+.stSidebar .stRadio div[role="radiogroup"] label:hover {
+    background-color: rgba(0, 206, 201, 0.2);
+    transform: translateX(12px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Style for the selected radio button (using input:checked + div) */
+.stSidebar .stRadio div[role="radiogroup"] input:checked + div {
+    background-color: #00cec9;
+    color: white;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    transform: translateX(0);
+    border: 1px solid #00a09a;
+    animation: sidebarSelectedPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes sidebarSelectedPop {
+    0% {
+        transform: scale(0.9);
+    }
+    70% {
+        transform: scale(1.03); /* More overshoot */
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* FIX: Explicit text color for unselected radio button labels in the sidebar */
+.stSidebar .stRadio div[role="radiogroup"] label p {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color) !important;
+}
+
+html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label p {
+    color: #f0f2f6 !important;
+}
+
+.stSidebar .stRadio div[role="radiogroup"] input:checked + div p {
+    color: white !important;
+}
+
+/* Custom styling for the dataframes */
 .stDataFrame {
-    border-radius: var(--border-radius-md);
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--color-border-light);
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    transition: all var(--transition-speed-normal) var(--transition-ease);
-}
-body.dark-mode .stDataFrame {
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--color-border-dark);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.5s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255,255,255,0.98);
 }
 
-/* Progress bar */
-.stProgress > div > div {
-    background-color: var(--color-border-light) !important;
-    height: 8px !important;
-    border-radius: 4px !important;
-    overflow: hidden;
-    box-shadow: none;
+html[data-theme="dark"] .stDataFrame {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #303030;
 }
-body.dark-mode .stProgress > div > div {
-    background-color: var(--color-border-dark) !important;
+
+.stDataFrame:hover {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.stDataFrame table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.stDataFrame th {
+    font-weight: 700;
+    padding: 1.2rem 1.5rem;
+    text-align: left;
+    border-bottom: 5px solid #00cec9;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.stDataFrame tbody tr:nth-child(odd) {
+    /* Background will be set dynamically by Streamlit based on dark_mode toggle */
+}
+
+.stDataFrame tbody tr:nth-child(even) {
+    /* Background will be set dynamically by Streamlit based on dark_mode toggle */
+}
+
+.stDataFrame td {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.stDataFrame tbody tr:hover {
+    background-color: rgba(0, 206, 201, 0.12) !important;
+}
+
+/* Dark mode specific table styling */
+html[data-theme="dark"] .stDataFrame table {
+    background-color: #303030;
+    color: #F5F5F5;
+}
+
+html[data-theme="dark"] .stDataFrame th {
+    background-color: #404040;
+    color: #00cec9;
+    border-bottom: 5px solid #00cec9;
+}
+
+html[data-theme="dark"] .stDataFrame tbody tr:nth-child(odd) {
+    background-color: #303030;
+}
+
+html[data-theme="dark"] .stDataFrame tbody tr:nth-child(even) {
+    background-color: #282828;
+}
+
+html[data-theme="dark"] .stDataFrame td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .stDataFrame tbody tr:hover {
+    background-color: rgba(0, 206, 201, 0.18) !important;
+}
+
+
+/* Info/Warning/Error/Success boxes */
+.stAlert {
+    border-radius: 18px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    animation: fadeInSlideUp 0.8s ease-out;
+    transition: all 0.5s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+html[data-theme="dark"] .stAlert {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@keyframes fadeInSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stAlert:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Specific alert types (Streamlit's internal classes are targeted) */
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
+    /* Info */
+    background-color: #E0F7FA;
+    color: #006064;
+    border-left: 8px solid #00BCD4;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
+    fill: #00BCD4;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
+    background-color: #2A3C4D;
+    color: #A7D9EB;
+    border-left: 8px solid #00B8D4;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
+    fill: #00B8D4;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
+    /* Success */
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border-left: 8px solid #4CAF50;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
+    fill: #4CAF50;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
+    background-color: #2C472C;
+    color: #A8D5A8;
+    border-left: 8px solid #4CAF50;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
+    fill: #4CAF50;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
+    /* Warning */
+    background-color: #FFFDE7;
+    color: #FF8F00;
+    border-left: 8px solid #FFC107;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
+    fill: #FFC107;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
+    background-color: #4D422C;
+    color: #EBD9A7;
+    border-left: 8px solid #FFC107;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
+    fill: #FFC107;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
+    /* Error */
+    background-color: #FFEBEE;
+    color: #D32F2F;
+    border-left: 8px solid #F44336;
+}
+
+.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
+    fill: #F44336;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
+    background-color: #4D2C2C;
+    color: #EBA7A7;
+    border-left: 8px solid #F44336;
+}
+
+html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
+    fill: #F44336;
+}
+
+/* Top Header Styles */
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+    /* Background, border, and shadow will be set dynamically by Streamlit based on dark_mode toggle */
+    margin-bottom: 4rem;
+    border-radius: 30px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+    transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    animation: slideInDownFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: linear-gradient(145deg, rgba(255,255,255,0.99), rgba(245,247,250,0.9));
+}
+
+html[data-theme="dark"] .top-header {
+    background: linear-gradient(145deg, #282828, #202020);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+.top-header h1 {
+    margin: 0;
+    color: #00cec9;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.top-header .profile {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+}
+
+html[data-theme="dark"] .top-header .profile {
+    color: #F8F8F8;
+}
+
+.top-header .profile a {
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+html[data-theme="dark"] .top-header .profile a {
+    color: #f8fafd;
+}
+
+.top-header .profile a:hover {
+    color: #00b0a8;
+    text-decoration: underline;
+}
+
+/* Additional User-Friendly Enhancements & Animations */
+
+/* Card-like containers for general elements */
+.stCard {
+    border-radius: 25px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    background: rgba(255,255,255,0.98);
+}
+
+html[data-theme="dark"] .stCard {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #303030;
+}
+
+.stCard:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Progress Bar Styling */
+.stProgress > div > div {
+    border-radius: 15px;
+    height: 16px;
+    background-color: rgba(0, 206, 201, 0.3);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .stProgress > div > div > div {
-    background-color: var(--color-accent-blue) !important;
-    border-radius: 4px !important;
-    transition: width var(--transition-speed-normal) var(--transition-ease);
+    background-color: #00cec9;
+    border-radius: 15px;
+    transition: width 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Loader/Spinner */
-.stSpinner > div > div {
-    border-top-color: var(--color-accent-blue) !important;
-    border-left-color: var(--color-accent-blue) !important;
-    animation: spin 0.8s linear infinite;
-    width: 40px !important;
-    height: 40px !important;
-    border-width: 4px !important;
+.stProgress > div > div > div::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
+    background-size: 1.2rem 1.2rem;
+    animation: progressStripe 1s linear infinite;
+    border-radius: 15px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@keyframes progressStripe {
+    from {
+        background-position: 1.2rem 0;
+    }
+    to {
+        background-position: 0 0;
+    }
 }
 
+/* Checkbox and Radio Button Circles (visual enhancement) */
+.stCheckbox > label > div > span:first-child,
+.stRadio > label > div > span:first-child {
+    border-radius: 50%;
+    border: 3px solid #00cec9;
+    width: 1.4em;
+    height: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
+}
 
-/* --- Rules to Hide Streamlit Elements --- */
-/* These hide the default Streamlit header, footer, and a specific "Deploy" button */
+.stCheckbox > label > div > span:first-child svg,
+.stRadio > label > div > span:first-child svg {
+    fill: #00cec9;
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-header { visibility: hidden; height: 0px; padding: 0px; }
-.stApp header { visibility: hidden; height: 0px; padding: 0px; }
-.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir { visibility: hidden; display: none; }
-footer { visibility: hidden; height: 0px; padding: 0px; }
-.stApp footer { visibility: hidden; height: 0px; padding: 0px; }
-.main .block-container { padding-top: 2rem; } /* Restore some top padding */
+.stCheckbox > label > div > input:checked + span:first-child,
+.stRadio > label > div > input:checked + span:first-child {
+    background-color: #00cec9;
+    border-color: #00cec9;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15), 0 0 0 5px rgba(0, 206, 201, 0.4);
+}
+
+.stCheckbox > label > div > input:checked + span:first-child svg,
+.stRadio > label > div > input:checked + span:first-child svg {
+    transform: scale(1);
+    fill: white;
+}
+
+html[data-theme="dark"] .stCheckbox > label > div > span:first-child,
+html[data-theme="dark"] .stRadio > label > div > span:first-child {
+    border-color: #00b0a8;
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.15);
+}
+
+html[data-theme="dark"] .stCheckbox > label > div > span:first-child svg,
+html[data-theme="dark"] .stRadio > label > div > span:first-child svg {
+    fill: #fff;
+}
+
+html[data-theme="dark"] .stCheckbox > label > div > input:checked + span:first-child,
+html[data-theme="dark"] .stRadio > label > div > input:checked + span:first-child {
+    background-color: #00b0a8;
+    border-color: #00b0a8;
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.15), 0 0 0 5px rgba(0, 176, 168, 0.5);
+}
+
+/* Tooltip styling (for custom tooltips if added) */
+.stTooltip {
+    background-color: rgba(0, 0, 0, 0.95);
+    color: white;
+    border-radius: 12px;
+    padding: 0.7rem 1.4rem;
+    font-size: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(20px);
+    backdrop-filter: blur(8px);
+}
+
+.stTooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Global text styling for readability */
+p {
+    line-height: 1.9;
+    margin-bottom: 1.5em;
+    font-size: 1.1rem;
+}
+
+/* Link styling */
+a {
+    color: #00cec9;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    font-weight: 600;
+}
+
+a:hover {
+    color: #00b0a8;
+    text-decoration: underline;
+}
+
+/* Utility Classes (can be added via st.markdown('<div class="my-class">...</div>', unsafe_allow_html=True)) */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.slide-up {
+    animation: fadeInSlideUp 0.9s ease-out forwards;
+}
+
+/* Responsive Design (Enhanced Breakpoints) */
+@media (max-width: 1024px) { /* Tablet landscape */
+    .main .block-container {
+        padding: 3rem;
+        border-radius: 25px;
+    }
+    .dashboard-header {
+        font-size: 3.2rem;
+        margin-bottom: 3rem;
+    }
+    .greeting-message {
+        font-size: 1.6rem;
+    }
+    .stMetric {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .stMetric > div[data-testid="stMetricValue"] {
+        font-size: 3rem;
+    }
+    .stMetric > div[data-testid="stMetricLabel"] {
+        font-size: 1.2rem;
+    }
+    .top-header {
+        padding: 1.5rem 3rem;
+        margin-bottom: 3rem;
+        border-radius: 25px;
+    }
+    .top-header h1 {
+        font-size: 2.2rem;
+    }
+    .top-header .profile {
+        font-size: 1.05rem;
+    }
+    .stButton > button {
+        padding: 0.8rem 1.6rem;
+        font-size: 0.95rem;
+    }
+    .stExpander {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .stExpander > div[data-testid="stExpanderToggle"] {
+        font-size: 1.2rem;
+    }
+    .stSelectbox > div > div,
+    .stTextInput > div > div > input,
+    .stTextArea > div > div {
+        padding: 0.9rem 1.2rem;
+    }
+    .stSelectbox > label,
+    .stTextInput > label,
+    .stTextArea > label {
+        font-size: 1rem;
+    }
+    .stDataFrame th,
+    .stDataFrame td {
+        padding: 1rem 1.2rem;
+    }
+    .stAlert {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 15px;
+        border-left-width: 7px;
+    }
+    p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) { /* Tablet portrait & large mobile */
+    .main .block-container {
+        padding: 2.5rem;
+        border-radius: 20px;
+    }
+    .dashboard-header {
+        font-size: 2.8rem;
+        margin-bottom: 2.5rem;
+        border-bottom-width: 6px;
+    }
+    .greeting-message {
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+    .stMetric {
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .stMetric > div[data-testid="stMetricValue"] {
+        font-size: 2.8rem;
+    }
+    .stMetric > div[data-testid="stMetricLabel"] {
+        font-size: 1.1rem;
+    }
+    .top-header {
+        padding: 1.2rem 2rem;
+        margin-bottom: 2.5rem;
+        border-radius: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    .top-header h1 {
+        font-size: 2rem;
+    }
+    .top-header .profile {
+        font-size: 1rem;
+    }
+    .stButton > button {
+        padding: 0.7rem 1.4rem;
+        font-size: 0.9rem;
+    }
+    .stExpander {
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .stExpander > div[data-testid="stExpanderToggle"] {
+        font-size: 1.1rem;
+    }
+    .stSelectbox > div > div,
+    .stTextInput > div > div > input,
+    .stTextArea > div > div {
+        padding: 0.8rem 1.1rem;
+    }
+    .stSelectbox > label,
+    .stTextInput > label,
+    .stTextArea > label {
+        font-size: 0.98rem;
+    }
+    .stDataFrame th,
+    .stDataFrame td {
+        padding: 0.8rem 1.1rem;
+    }
+    .stAlert {
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-radius: 15px;
+        border-left-width: 6px;
+    }
+    p {
+        font-size: 0.98rem;
+    }
+}
+
+@media (max-width: 480px) { /* Small mobile */
+    .main .block-container {
+        padding: 1.5rem;
+        border-radius: 15px;
+    }
+    .dashboard-header {
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+        border-bottom-width: 4px;
+    }
+    .greeting-message {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    .stMetric {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .stMetric > div[data-testid="stMetricValue"] {
+        font-size: 2.2rem;
+    }
+    .stMetric > div[data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+    }
+    .top-header {
+        padding: 0.8rem 1rem;
+        margin-bottom: 2rem;
+        border-radius: 12px;
+    }
+    .top-header h1 {
+        font-size: 1.5rem;
+    }
+    .top-header .profile {
+        font-size: 0.85rem;
+    }
+    .stButton > button {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    .stExpander {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .stExpander > div[data-testid="stExpanderToggle"] {
+        font-size: 1rem;
+    }
+    .stSelectbox > div > div,
+    .stTextInput > div > div > input,
+    .stTextArea > div > div {
+        padding: 0.6rem 0.9rem;
+    }
+    .stSelectbox > label,
+    .stTextInput > label,
+    .stTextArea > label {
+        font-size: 0.9rem;
+    }
+    .stDataFrame th,
+    .stDataFrame td {
+        padding: 0.6rem 0.9rem;
+    }
+    .stAlert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        border-left-width: 4px;
+    }
+    p {
+        font-size: 0.9rem;
+    }
+}
