@@ -33,7 +33,7 @@ APP_ID = st.secrets.get('firebase', {}).get('appId', 'your-default-app-id') # Us
 
 # Validate that API Key and Project ID are available
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
-    st.error("Firebase API Key or Project ID not found. Please configure them in .streamlit/secrets.toml.")
+    st.error("Firebase API Key or Project ID not found. Please configure them in .streamlit/secrets.toml under the [firebase] section.")
     st.stop() # Stop the app if essential keys are missing
 
 # Firebase Authentication REST API Endpoints
