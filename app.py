@@ -550,20 +550,20 @@ def main():
                     margin: 0 5px;
                 }}
                 /* Dark mode adjustments for the greeting card */
-                html[data-theme="dark"] .beautiful-greeting-card {
+                html[data-theme="dark"] .beautiful-greeting-card {{
                     background: linear-gradient(135deg, #2c2c44 0%, #3a3a50 100%);
                     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-                }
-                html[data-theme="dark"] .beautiful-greeting-title {
+                }}
+                html[data-theme="dark"] .beautiful-greeting-title {{
                     color: #e0e0e0;
                     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-                }
-                html[data-theme="dark"] .beautiful-username {
+                }}
+                html[data-theme="dark"] .beautiful-username {{
                     color: #6fa8f7; /* Lighter blue for dark mode */
-                }
-                html[data-theme="dark"] .beautiful-welcome-text {
+                }}
+                html[data-theme="dark"] .beautiful-welcome-text {{
                     color: #a0a0a0;
-                }
+                }}
             </style>
 
             <div class="beautiful-greeting-card">
