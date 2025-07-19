@@ -207,6 +207,48 @@ SKILL_CATEGORIES = {
 
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
+# --- NEW: Company Skill Profiles (Simplified for Demonstration) ---
+# This dictionary maps company names to a list of keywords/phrases
+# that represent their typical tech stack, industry focus, or values.
+# In a real-world scenario, this would be a much larger, dynamically updated database.
+COMPANY_SKILL_PROFILES = {
+    "Google": {
+        "description": "A global technology company focusing on search, cloud computing, artificial intelligence, and hardware.",
+        "keywords": ["Google Cloud Platform", "GCP", "Kubernetes", "TensorFlow", "Python", "Go", "Machine Learning", "BigQuery", "Data Science", "AI", "Distributed Systems", "Algorithms", "Scale", "Innovation", "Android", "Chrome", "Deep Learning"]
+    },
+    "Microsoft": {
+        "description": "A multinational technology corporation producing computer software, consumer electronics, personal computers, and related services.",
+        "keywords": ["Azure", "C#", ".NET", "SQL Server", "Microsoft 365", "Dynamics 365", "Power BI", "Cloud Computing", "Enterprise Software", "Windows", "AI", "DevOps", "Cybersecurity", "TypeScript", "Gaming (Xbox)"]
+    },
+    "Amazon": {
+        "description": "An American multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
+        "keywords": ["AWS", "Cloud Computing", "Serverless", "DynamoDB", "S3", "Lambda", "EC2", "Microservices", "Scale", "E-commerce", "Logistics", "Machine Learning", "Alexa", "Data Engineering", "Supply Chain"]
+    },
+    "Meta (Facebook)": {
+        "description": "A technology conglomerate focusing on social media, virtual reality, and artificial intelligence.",
+        "keywords": ["React", "PyTorch", "GraphQL", "AI", "Machine Learning", "Virtual Reality", "Augmented Reality", "Social Media", "Data Science", "Python", "PHP", "Distributed Systems", "Mobile Development", "Computer Vision"]
+    },
+    "Apple": {
+        "description": "A multinational technology company focusing on consumer electronics, software, and online services.",
+        "keywords": ["iOS", "Swift", "Objective-C", "macOS", "Xcode", "Mobile Development", "Hardware", "User Experience", "Design", "Privacy", "Security", "AI (Siri)", "Cloud (iCloud)"]
+    },
+    "Netflix": {
+        "description": "A streaming service and production company.",
+        "keywords": ["AWS", "Microservices", "Distributed Systems", "Java", "Python", "Data Science", "Machine Learning", "Recommendation Systems", "Streaming", "Cloud Native", "DevOps", "Big Data", "User Experience"]
+    },
+    "Salesforce": {
+        "description": "A cloud-based software company providing customer relationship management (CRM) service.",
+        "keywords": ["Salesforce", "CRM", "Apex", "Lightning Web Components", "Cloud Computing", "SaaS", "Enterprise Software", "Customer Success", "Data Analytics", "Integration", "Platform Development"]
+    },
+    "Generic Tech Startup": {
+        "description": "A fast-paced, innovative technology company, often focused on new technologies and agile development.",
+        "keywords": ["Agile", "Scrum", "Fast-paced", "Innovation", "MVP", "Growth Hacking", "Fullstack", "React", "Node.js", "Python", "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Problem Solving", "Adaptability", "Entrepreneurship"]
+    }
+}
+# Convert all company keywords to lowercase for consistent matching
+for company_data in COMPANY_SKILL_PROFILES.values():
+    company_data["keywords"] = [kw.lower() for kw in company_data["keywords"]]
+
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
 APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 # This URL should be where your generated HTML certificates are publicly accessible.
@@ -1021,6 +1063,71 @@ def generate_detailed_hr_assessment(candidate_name, score, years_exp, semantic_s
 
     return final_assessment
 
+# --- NEW: Function to generate Company Fit Assessment ---
+@st.cache_data(show_spinner="Generating Company Fit Assessment...")
+def generate_company_fit_assessment(candidate_name, company_name, resume_embedding, company_profile_embedding, resume_skills_set, company_keywords):
+    """
+    Generates an assessment of how well the resume fits a target company.
+    """
+    if not company_name or company_name.strip() == "":
+        return "Please enter a target company name to get a company fit assessment."
+    
+    company_name_lower = company_name.lower()
+    if company_name_lower not in [k.lower() for k in COMPANY_SKILL_PROFILES.keys()]:
+        return f"Company '{company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup)."
+
+    # Calculate semantic similarity
+    semantic_similarity = cosine_similarity(resume_embedding.reshape(1, -1), company_profile_embedding.reshape(1, -1))[0][0]
+    semantic_similarity = float(np.clip(semantic_similarity, 0, 1))
+
+    # Calculate keyword overlap score
+    matched_company_keywords = resume_skills_set.intersection(set(company_keywords))
+    
+    company_fit_score = 0
+    if len(company_keywords) > 0:
+        keyword_overlap_percentage = (len(matched_company_keywords) / len(company_keywords)) * 100
+        # Blend semantic similarity with keyword overlap
+        company_fit_score = (semantic_similarity * 60) + (keyword_overlap_percentage * 0.4)
+        company_fit_score = np.clip(company_fit_score, 0, 100) # Ensure score is between 0 and 100
+    else:
+        # If no keywords for company, rely more on semantic similarity
+        company_fit_score = semantic_similarity * 100
+
+    assessment = []
+    assessment.append(f"### Company Fit Assessment for {company_name}")
+    assessment.append(f"**Company Fit Score:** {company_fit_score:.2f}%")
+    assessment.append(f"**Semantic Alignment with Company Profile:** {semantic_similarity:.2f}")
+
+    if company_fit_score >= 80:
+        assessment.append(f"**Overall Fit:** **Excellent!** {candidate_name}'s profile shows a very strong alignment with {company_name}'s typical technical and cultural landscape.")
+        assessment.append(f"**Strengths:** Your resume semantically resonates well with {company_name}'s focus areas. You possess a significant number of skills highly relevant to {company_name}'s operations.")
+        if matched_company_keywords:
+            assessment.append(f"**Key Matching Keywords:** {', '.join(sorted(list(matched_company_keywords)))}")
+        assessment.append("This indicates you are likely to be a highly valuable asset and integrate quickly into their environment.")
+    elif company_fit_score >= 60:
+        assessment.append(f"**Overall Fit:** **Good.** {candidate_name}'s resume shows a good general alignment with {company_name}.")
+        assessment.append(f"**Strengths:** There's a solid semantic connection and a fair number of relevant skills identified.")
+        if matched_company_keywords:
+            assessment.append(f"**Key Matching Keywords:** {', '.join(sorted(list(matched_company_keywords)))}")
+        assessment.append("You possess many skills relevant to the company, but some areas might require further development or emphasis during interviews.")
+    elif company_fit_score >= 40:
+        assessment.append(f"**Overall Fit:** **Moderate.** {candidate_name}'s profile has some alignment with {company_name}, but there are noticeable gaps.")
+        assessment.append(f"**Areas for Improvement:** The semantic alignment is moderate, and while some relevant skills were found, a deeper dive into {company_name}'s specific needs and a focus on acquiring more of their core technologies would be beneficial.")
+        if matched_company_keywords:
+            assessment.append(f"**Key Matching Keywords:** {', '.join(sorted(list(matched_company_keywords)))}")
+        assessment.append("Consider tailoring your resume more specifically to the company's known tech stack and industry challenges.")
+    else:
+        assessment.append(f"**Overall Fit:** **Limited.** {candidate_name}'s resume shows limited alignment with {company_name}'s typical profile.")
+        assessment.append(f"**Areas for Improvement:** There is a low semantic match and few direct skill overlaps. It might be challenging to meet {company_name}'s expectations without significant upskilling or targeting different roles within the company.")
+        if matched_company_keywords:
+            assessment.append(f"**Key Matching Keywords:** {', '.join(sorted(list(matched_company_keywords)))}")
+        else:
+            assessment.append("No direct skill overlaps with the company's profile were found.")
+        assessment.append("It's recommended to research {company_name}'s specific requirements thoroughly and consider how your experience can be reframed or augmented to better fit their needs.")
+    
+    return "\n".join(assessment)
+
+
 def semantic_score_calculation(jd_embedding, resume_embedding, years_exp, cgpa, weighted_keyword_overlap_score, _ml_model):
     score = 0.0
     semantic_similarity = cosine_similarity(jd_embedding.reshape(1, -1), resume_embedding.reshape(1, -1))[0][0]
@@ -1177,7 +1284,7 @@ Have questions? Contact us at screenerpro.ai@gmail.com
 def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedding, 
                                              resume_embedding, jd_name_for_results,
                                              high_priority_skills, medium_priority_skills, max_experience,
-                                             _global_ml_model):
+                                             _global_ml_model, target_company_name=None): # Added target_company_name
     """
     Processes a single resume (pre-extracted text and pre-computed embeddings)
     for the main screener page and returns a dictionary of results.
@@ -1193,6 +1300,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
                 "Work History": "Not Found", "Project Details": "Not Found",
                 "AI Suggestion": f"Error: {text.replace('[ERROR] ', '')}",
                 "Detailed HR Assessment": f"Error processing resume: {text.replace('[ERROR] ', '')}",
+                "Company Fit Assessment": "Error: Resume text extraction failed.", # New field
                 "Matched Keywords": "", "Missing Skills": "",
                 "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
                 "Missing Skills (Categorized)": "{}", # Store as empty JSON string
@@ -1281,6 +1389,38 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             max_exp_cutoff=max_experience
         )
 
+        # --- NEW: Company Fit Assessment Logic ---
+        company_fit_assessment_text = "No target company specified or found."
+        if target_company_name:
+            # Normalize company name for lookup
+            normalized_company_name = None
+            for company_key, profile_data in COMPANY_SKILL_PROFILES.items():
+                if company_key.lower() == target_company_name.lower():
+                    normalized_company_name = company_key
+                    break
+
+            if normalized_company_name:
+                company_profile = COMPANY_SKILL_PROFILES[normalized_company_name]
+                company_keywords_for_embedding = " ".join(company_profile["keywords"])
+                company_description_for_embedding = company_profile["description"]
+
+                # Combine keywords and description for a richer company embedding
+                company_text_for_embedding = f"{company_description_for_embedding} {company_keywords_for_embedding}"
+                company_embedding = global_sentence_model.encode([clean_text(company_text_for_embedding)])[0]
+
+                company_fit_assessment_text = generate_company_fit_assessment(
+                    candidate_name=candidate_name,
+                    company_name=normalized_company_name,
+                    resume_embedding=resume_embedding,
+                    company_profile_embedding=company_embedding,
+                    resume_skills_set=resume_raw_skills_set,
+                    company_keywords=company_profile["keywords"]
+                )
+            else:
+                company_fit_assessment_text = f"Company '{target_company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup)."
+        # --- END NEW: Company Fit Assessment Logic ---
+
+
         certificate_id = str(uuid.uuid4())
         certificate_rank = "Not Applicable"
 
@@ -1317,6 +1457,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             "Project Details": project_details_formatted,
             "AI Suggestion": concise_ai_suggestion,
             "Detailed HR Assessment": detailed_hr_assessment,
+            "Company Fit Assessment": company_fit_assessment_text, # New field added here
             "Matched Keywords": ", ".join(matched_keywords),
             "Missing Skills": ", ".join(missing_skills),
             "Matched Keywords (Categorized)": json.dumps(dict(resume_categorized_skills)), # Convert to JSON string
@@ -1341,6 +1482,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             "Work History": "Not Found", "Project Details": "Not Found",
             "AI Suggestion": f"Critical Error: {e}",
             "Detailed HR Assessment": f"Critical Error processing resume: {e}",
+            "Company Fit Assessment": f"Critical Error: {e}", # New field
             "Matched Keywords": "", "Missing Skills": "",
             "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
             "Missing Skills (Categorized)": "{}", # Store as empty JSON string
@@ -1687,6 +1829,16 @@ def resume_screener_page():
             help="Select skills that are very important, but not as critical as high priority ones."
         )
 
+    # --- NEW: Target Company Input ---
+    st.markdown("## 🏢 Target Company Fit (Optional)")
+    st.caption("Assess how well your resume aligns with a specific company's profile.")
+    target_company_name = st.selectbox(
+        "**Select a Target Company**",
+        options=[""] + sorted(list(COMPANY_SKILL_PROFILES.keys())),
+        help="Choose a company from the list to see how well your resume aligns with its typical profile. This is based on a simplified, predefined list of company keywords."
+    )
+    # --- END NEW: Target Company Input ---
+
     uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF)**", type=["pdf"], help="Upload your resume (text-selectable PDF only). File must be less than 1MB.")
     
     if jd_text and uploaded_resume_file:
@@ -1721,7 +1873,7 @@ def resume_screener_page():
             result = _process_single_resume_for_screener_page(
                 file_name, resume_text, jd_text, jd_embedding, resume_embedding,
                 jd_name_for_results, high_priority_skills, medium_priority_skills, max_experience,
-                global_ml_model
+                global_ml_model, target_company_name # Pass target_company_name
             )
             
         st.success("Resume analysis complete. Displaying your results.")
@@ -1748,6 +1900,12 @@ def resume_screener_page():
             st.markdown(f"**Overall AI Assessment:**")
             st.markdown(candidate_data['Detailed HR Assessment'])
             
+            # --- NEW: Display Company Fit Assessment ---
+            st.markdown("---")
+            st.markdown("## 🏢 Company Fit Assessment")
+            st.markdown(candidate_data['Company Fit Assessment'])
+            # --- END NEW: Display Company Fit Assessment ---
+
             st.markdown("#### Matched Skills Breakdown:")
             matched_kws_categorized_str = candidate_data['Matched Keywords (Categorized)']
             if matched_kws_categorized_str and isinstance(matched_kws_categorized_str, str):
