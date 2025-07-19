@@ -1511,7 +1511,7 @@ def generate_fake_data_page():
 
     st.markdown("---")
 
-    num_candidates = st.slider("🔢 Number of Fake Candidates to Generate", 1, 100, 10)
+    num_candidates = st.slider("🔢 Number of Fake Candidates to Generate", 1, 500, 10)
     
     # Text area for a sample JD to influence skill generation and AI assessments
     st.markdown("### Provide a Sample Job Description")
@@ -1606,18 +1606,23 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     influenced by a provided Job Description.
     """
     first_names = [
-        "Abhinav", "Bhargav", "Chirantan", "Deepesh", "Eshanpreet", "Feroz", "Gokul", "Harshvardhan", "Indrajit", "Jatin",
-    "Karthik", "Lokesh", "Mihir", "Nikhilesh", "Onir", "Pradyumna", "Qasim", "Ritvik", "Sharvil", "Tarak",
-    "Udayveer", "Vikrant", "Waman", "Yagnesh", "Zayan", "Aaryan", "Brahma", "Chiranjeevi", "Divyansh", "Ekagra",
-    "Faiyaz", "Gurdeep", "Hemendra", "Irfan", "Jaskaran", "Kush", "Luv", "Mahesh", "Namish", "Omveer",
-    "Prithviraj", "Ravikant", "Sankalp", "Tanraj", "Upendra", "Vibhor", "Wasimuddin", "Yogin", "Zubairuddin", "Ajinkya",
+       # Indian Male (65)
+    "Advaith", "Bharghav", "Chaitanya", "Dev", "Eshanth", "Fayaz", "Gurshan", "Harshal", "Ishanth", "Jivansh",
+    "Kairav", "Lavith", "Manthan", "Nakul", "Omansh", "Punit", "Qadar", "Ronav", "Sarvesh", "Taraknath",
+    "Ujjwal", "Vedant", "Waris", "Yugant", "Zian", "Ajeet", "Bhuwan", "Chetan", "Devarsh", "Elankath",
+    "Firoze", "Gurwinder", "Hridaan", "Isaan", "Jaideep", "Koushik", "Lakshit", "Moksh", "Nived", "Onish",
+    "Puru", "Rupesh", "Siddhant", "Tanish", "Utpal", "Vivaanth", "Yatin", "Zayyan", "Anil", "Balkrishna",
+    "Chintan", "Dhanraj", "Eklav", "Faheem", "Gokulesh", "Hemanshu", "Ilaiah", "Jaysukh", "Kiranmay", "Laukik",
+    "Maheshwar", "Namdev", "Omkarnath", "Pranjal", "Raghuvir",
 
-    # Indian Female (50)
-    "Ankita", "Bhoomi", "Chanchal", "Damini", "Elina", "Farzana", "Gauri", "Haripriya", "Iraja", "Jinal",
-    "Kavitha", "Lajja", "Mallika", "Nirmala", "Ojaswini", "Pankhuri", "Qamra", "Rashmi", "Sharvani", "Triveni",
-    "Urmila", "Vidya", "Winnie", "Yamika", "Zaina", "Ambika", "Bharati", "Chandrika", "Devika", "Eshaana",
-    "Falguni", "Geetika", "Hemlata", "Ishwari", "Jayanti", "Krupali", "Lakshmi", "Mahima", "Neelam", "Oorja",
-    "Padma", "Rajshree", "Shambhavi", "Tara", "Urvashi", "Vaishali", "Warishta", "Yukti", "Zeba", "Anvitha"
+    # Indian Female (60)
+    "Aadhya", "Bhavika", "Charita", "Deepika", "Elina", "Fariha", "Gayathri", "Hansika", "Indulekha", "Janani",
+    "Kanika", "Lekha", "Manjari", "Nishita", "Oorvashi", "Prerana", "Qirat", "Roshni", "Sharanya", "Tanirika",
+    "Urvi", "Vaibhavi", "Wamika", "Yoshita", "Zainab", "Anvika", "Brinda", "Chhavi", "Devanshi", "Eshaana",
+    "Falguni", "Gitali", "Harvinder", "Ishana", "Juhi", "Kashish", "Lavika", "Meenal", "Nivriti", "Ojal",
+    "Pavitra", "Ritikaa", "Sailee", "Trisha", "Unnati", "Vritika", "Wendy", "Yoshika", "Zulekha", "Ashita",
+    "Bhuvana", "Chandrima", "Diksha", "Eram", "Farida", "Gungun", "Heer", "Ipsita", "Jagriti", "Kashvi",
+    "Lajja", "Meera",    "Padma", "Rajshree", "Shambhavi", "Tara", "Urvashi", "Vaishali", "Warishta", "Yukti", "Zeba", "Anvitha"
       ]
 
 
@@ -1627,12 +1632,19 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     "Karnik", "Londhekar", "Madhwani", "Nagori", "Ojari", "Pansare", "Qazi", "Rajput", "Sawlani", "Tiwade",
     "Ubhaykar", "Valmiki", "Wadhera", "Yellamraju", "Zende", "Ashar", "Baghel", "Chauke", "Dangar", "Eknath",
     "Funkar", "Gharat", "Hatkar", "Iqubal", "Jakhotia", "Khetan", "Lokre", "Malkani", "Nanda", "Ojariwala",
-    "Pipara", "Rachh", "Sambrekar", "Tapkir", "Upasani", "Virk", "Warke", "Yelagond", "Zore", "Attal",
-    "Bapat", "Chavan", "Dalvi", "Edla", "Fatnani", "Gavaskar", "Hussain", "Idnani", "Jhala", "Kalra",
-    "Lele", "Mendiratta", "Nerurkar", "Patankar", "Qutbuddin", "Rajani", "Sampat", "Tandel", "Uchil", "Vaghani",
-    "Wadhwani", "Yennam", "Zutshi", "Adani", "Bhoir", "Chougle", "Dubal", "Ekka", "Fouzdar", "Ganatra",
-    "Hingorani", "Ismaili", "Jagtap", "Kansara", "Lunkad", "Mahadik", "Nehra", "Odekar", "Pacharne", "Ravoori",
-    "Sahani", "Talwar", "Ujwal", "Varghese", "Wable", "Yarlagadda", "Zulfi", "Agrawal", "Bhutani", "Chokhani"
+    "Pipara", "Rachh", "Sambrekar", "Tapkir", "Upasani", "Virk", "Achrekar", "Bakul", "Chauke", "Deshpande", "Elavia", "Fateh", "Garge", "Hajela", "Ingle", "Jaswal",
+    "Kamblekar", "Lodha", "Mankotia", "Nawalkha", "Ojha", "Parab", "Qureshi", "Rawal", "Shelar", "Taksale",
+    "Upadhyayula", "Vaidya", "Waghela", "Yadavendra", "Zariwala", "Agarwaal", "Bansiwal", "Chatterjee", "Dandekar", "Eshpuniyani",
+    "Fatehpuri", "Gandotra", "Hegde", "Iyengar", "Jagirdar", "Kandoi", "Lehri", "Makhija", "Nimbalkar", "Osmani",
+    "Padgaonkar", "Quazi", "Rangwani", "Saxena", "Tembhare", "Uchil", "Ved", "Wasan", "Yellapragada", "Zarir",
+    "Arora", "Baliyan", "Chikarmane", "Dongre", "Ekbote", "Fatehchand", "Garg", "Hiranandani", "Indoria", "Joglekar",
+    "Kansara", "Lath", "Mavani", "Nagda", "Oza", "Pathare", "Raut", "Saluja", "Talnikar", "Udani",
+    "Vattikonda", "Warke", "Yengde", "Zari", "Agnihotri", "Bahl", "Chugh", "Dighe", "Engineer", "Fakir",
+    "Gavai", "Harjani", "Ikkurti", "Jain", "Kapadia", "Lalchandani", "Malkani", "Nene", "Oberai", "Panigrahi",
+    "Qutbuddin", "Rane", "Sahdev", "Thorat", "Uppalapati", "Vazirani", "Wadhwa", "Yellappa", "Zende", "Ambegaonkar",
+    "Bhoir", "Chouhan", "Dharmadhikari", "Ebrahim", "Fozdar", "Gangwani", "Hussaini", "Itagi", "Jariwala", "Khushwaha",
+    "Lanke", "Modani", "Nandwani", "Ojari", "Pagare", "Ravindran", "Shaikh", "Toshniwal", "Unni", "Vispute",
+    "Waghray", "Yerunkar", "Zohra", "Ankalikar", "Bhardwaj"
         ]
 
     email_domains = ["example.com", "mail.com", "techcorp.org", "devs.net"]
