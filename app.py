@@ -13,7 +13,6 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
-from generate_fake_data import generate_fake_data_page
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 USER_DB_FILE = "users.json"
@@ -738,9 +737,6 @@ def main():
         st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
-    if is_current_user_admin(): # Only show generate fake data for admins
-        if st.sidebar.button("⚙️ Generate Fake Data (Dev)", key="nav_generate_fake_data"):
-            st.session_state.current_page = "generate_fake_data"
     if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form"):
         st.session_state.current_page = "feedback_form"
     
@@ -768,8 +764,6 @@ def main():
         about_us_page()
     elif st.session_state.current_page == "feedback_form":
         feedback_and_help_page()
-    elif st.session_state.current_page == "generate_fake_data":
-        generate_fake_data_page()
     elif st.session_state.current_page == "logout":
         logout_page()
 
