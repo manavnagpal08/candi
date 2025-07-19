@@ -37,20 +37,18 @@ def load_css(file_name="style.css"):
 
 def set_body_class():
     """
-    Sets a class on the body element based on the Streamlit theme
-    to enable light/dark mode styling.
+    Sets a class on the body element to force light mode styling.
     """
-    is_dark = st.get_option("theme.base") == "dark"
-    body_class = "dark-mode" if is_dark else "light-mode"
-    # Inject JavaScript to add the class to the body tag of the parent window
+    # Force light mode regardless of Streamlit's theme option
+    body_class = "light-mode"
     js_code = f"""
     <script>
         var body = window.parent.document.querySelector('body');
         if (body) {{
             body.className = ''; // Clear existing classes
-            body.classList.add('{body_class}'); // Add the new class
-            // Also set a data-theme attribute for CSS targeting
-            body.setAttribute('data-theme', '{'dark' if is_dark else 'light'}');
+            body.classList.add('{body_class}'); // Add the light mode class
+            // Always set data-theme to 'light'
+            body.setAttribute('data-theme', 'light');
         }}
     </script>
     """
@@ -430,18 +428,19 @@ def display_welcome_dashboard():
 # --- Main Application Logic ---
 
 def main():
+    # Set initial page config. We will override theme later.
     st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
 
-    # Initialize session state for current page and theme
-    if "current_page" not in st.session_state:
-        st.session_state.current_page = "login_page" # Default to login page initially
-    if "theme" not in st.session_state:
-        st.session_state.theme = "light" # Default to light mode
+    # Force theme to light mode
+    st.session_state.theme = "light"
+    # Streamlit's internal theme option should also be set to light
+    st._config.set_option("theme.base", "light")
+
 
     # Load the external CSS file
     load_css("style.css")
 
-    # Set the body class based on the current theme
+    # Set the body class based on the current theme (which is now forced to light)
     set_body_class()
 
     # Ensure all admin users exist for testing/initial setup
@@ -455,6 +454,17 @@ def main():
 
     # --- Permanent Sidebar Content (Always Visible) ---
     with st.sidebar:
+        # Removed the Dark Mode Toggle as the app is now forced to light mode
+        # st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
+        # if st.session_state.sidebar_dark_mode_toggle:
+        #     if st.session_state.theme != "dark":
+        #         st.session_state.theme = "dark"
+        #         st.rerun()
+        # else:
+        #     if st.session_state.theme != "light":
+        #         st.session_state.theme = "light"
+        #         st.rerun()
+
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
         logo_path = "logo.png"  # Assuming logo is in the same directory
 
@@ -489,21 +499,6 @@ def main():
     if is_authenticated:
         # If authenticated, display conditional sidebar content
         with st.sidebar:
-            # Sidebar Dark Mode Toggle
-            st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
-            if st.session_state.sidebar_dark_mode_toggle:
-                if st.session_state.theme != "dark":
-                    st.session_state.theme = "dark"
-                    st.rerun()
-            else:
-                if st.session_state.theme != "light":
-                    st.session_state.theme = "light"
-                    st.rerun()
-
-            # Logo and Name as seen in image (This seems redundant if the clickable logo is always there,
-            # but keeping it as per your original structure, assuming it's for the "ScreenerPro" text)
-
-
             st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
             # Navigation Buttons (using st.button and wrapping in custom div for styling)
