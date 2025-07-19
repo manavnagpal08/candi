@@ -1454,6 +1454,8 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             certificate_rank = "⭐ Strong Match"
         elif score >= 75:
             certificate_rank = "✅ Good Fit"
+        elif score >= 65: # Added new elif block for "Low Fit"
+            certificate_rank = "⚪ Low Fit"
         
         # Determine Tag
         tag = "❌ Limited Match"
@@ -1515,7 +1517,6 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             "Certificate ID": str(uuid.uuid4()), "Certificate Rank": "Not Applicable",
             "Tag": "❌ Critical Processing Error"
         }
-
 # --- NEW: Centralized Course Database ---
 course_database = {
     "python": {"title": "Python for Everybody (Coursera)", "link": "https://www.coursera.org/learn/python"},
