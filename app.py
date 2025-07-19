@@ -4,7 +4,7 @@ import bcrypt
 import os
 import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
-from [ages.certificate_verify import certificate_verifier_page
+from pages.certificate_verify import certificate_verifier_page
 # Import your page functions from separate files
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
