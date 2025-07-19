@@ -13,7 +13,7 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page # New import
 from total_screened_page import total_screened_page # NEW: Import the total screened page
-from generate_fake_data import generate_fake_data_page
+
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
@@ -634,8 +634,6 @@ def main():
         st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
-    if st.sidebar.button("📝 Generate Fake Data (Dev)", key="nav_generate_fake_data"):
-        st.session_state.current_page = "generate_fake_data"
     if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form"): # Renamed for clarity
         st.session_state.current_page = "feedback_form"
     
@@ -668,9 +666,6 @@ def main():
     elif st.session_state.current_page == "feedback_form":
         st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
         feedback_and_help_page()
-    elif st.session_state.current_page == "generate_fake_data":
-        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
-        generate_fake_data_page()
     elif st.session_state.current_page == "logout":
         logout_page()
 
