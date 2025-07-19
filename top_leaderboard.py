@@ -118,8 +118,7 @@ def leaderboard_page():
     Fetches and filters candidate data from Firestore, and provides detailed view.
     """
     # Personalized greeting for the logged-in user
-    if st.session_state.get('authenticated', False) and st.session_state.get('username'):
-        st.markdown(f"## Hello, {st.session_state.username}!")
+    
 
     st.title("🏆 ScreenerPro Leaderboard")
     st.markdown("### Top Candidates by Screening Score")
