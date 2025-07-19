@@ -12,6 +12,7 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
+import base64 
 
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
@@ -326,26 +327,38 @@ def main():
     # Authentication section
     is_authenticated = login_section()
 
-    if not is_authenticated:
-        with st.sidebar:
-            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-            logo_path = "logo.png"  # Assuming logo is in the same directory
+
+
+    with st.sidebar:
+        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+        logo_path = "logo.png"  # Assuming logo is in the same directory
 
         if os.path.exists(logo_path):
-        # Create a clickable image that links to the HR portal
-            st.markdown(f"""
-            <a href="https://screenerpro.streamlit.app/" target="_self">
-                <img src="data:image/png;base64,{st.image(logo_path, width=215, use_container_width=False).image_bytes.decode('utf-8')}" alt="Go to HR Portal">
-            </a>
-            """, unsafe_allow_html=True)
+            try:
+            # Read the image file in binary mode
+                with open(logo_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+
+            # Create a clickable image that links to the HR portal
+                st.markdown(f"""
+                <a href="https://screenerpro.streamlit.app/" target="_self">
+                    <img src="data:image/png;base66,{encoded_string}" alt="Go to HR Portal" width="215">
+                </a>
+                """, unsafe_allow_html=True)
+            # You can remove the st.image(logo_path) call here, as we are embedding it directly
+            except FileNotFoundError:
+                st.warning(f"Logo file not found at: {logo_path}")
+            except Exception as e:
+                st.error(f"An error occurred while processing the logo: {e}")
+                st.info("Please ensure 'logo.png' is a valid PNG image.")
         else:
-            st.write("Logo not found.") # Optional: Handle case where logo is missing
+            st.warning(f"Logo file not found at: {logo_path}") # More specific message
 
         st.sidebar.write("---")
 
         st.sidebar.info("Please log in or register to access the portal features.")
-        
-        return # Stop execution if not authenticated
+
+        return  # Stop execution if not authenticated
 
     # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
     # Sidebar Dark Mode Toggle
