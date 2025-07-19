@@ -564,7 +564,7 @@ def main():
                 st.sidebar.subheader("Admin Panel")
                 admin_tab_selection = st.sidebar.radio(
                     "Admin Actions:",
-                    ("Create User", "Reset Password", "Toggle User Status", "View All Users", "Generate Fake Data")),
+                    ("Create User", "Reset Password", "Toggle User Status", "View All Users", "Generate Fake Data"),
                     key="admin_tabs"
                 )
 
