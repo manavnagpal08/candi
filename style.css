@@ -22,6 +22,8 @@
     --alert-info-text: #00796b;
     --alert-success-bg: #e8f5e9; /* Light green */
     --alert-success-text: #2e7d32;
+    --alert-warning-bg: #fff3e0; /* Light orange */
+    --alert-warning-text: #ff6f00;
     --alert-error-bg: #ffebee; /* Light red */
     --alert-error-text: #c62828;
     --card-background: #ffffff;
@@ -47,6 +49,8 @@ body.dark-mode {
     --alert-info-text: #a7ffeb;
     --alert-success-bg: #354a3a; /* Darker green */
     --alert-success-text: #b9f6ca;
+    --alert-warning-bg: #4a3e2b; /* Darker orange */
+    --alert-warning-text: #ffe0b2;
     --alert-error-bg: #4a2d30; /* Darker red */
     --alert-error-text: #ff8a80;
     --card-background: #2D2D2D;
@@ -144,7 +148,7 @@ p { line-height: 1.6; }
 
 /* --- Main Content Styling --- */
 .main .block-container {
-    padding-top: 2rem;
+    padding-top: 1rem; /* Adjusted for hidden header */
     padding-bottom: 2rem;
     padding-left: 3rem; /* More generous side padding */
     padding-right: 3rem; /* More generous side padding */
@@ -255,8 +259,8 @@ p { line-height: 1.6; }
     border-left: 5px solid #4caf50; /* Specific accent for success */
 }
 .stAlert.stWarning {
-    background-color: var(--alert-warning-bg, #fff3e0); /* Default if variable not found */
-    color: var(--alert-warning-text, #ff6f00); /* Default if variable not found */
+    background-color: var(--alert-warning-bg);
+    color: var(--alert-warning-text);
     border-left: 5px solid #ff9800; /* Specific accent for warning */
 }
 .stAlert.stError {
@@ -318,4 +322,43 @@ p { line-height: 1.6; }
     background-color: #45a049 !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* --- Rules to Hide Streamlit Elements --- */
+
+/* Hide Streamlit Header (including the "Deploy/Share" button) */
+header {
+    visibility: hidden;
+    height: 0px;
+    padding: 0px;
+}
+.stApp header { /* Added for more specificity */
+    visibility: hidden;
+    height: 0px;
+    padding: 0px;
+}
+
+/* Hide the hamburger menu (three lines button) */
+/* These classes are prone to change with Streamlit updates,
+   so you might need to inspect the element if it reappears. */
+.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir { 
+    visibility: hidden;
+    display: none; /* Use display: none to remove it from layout flow entirely */
+}
+
+/* Hide Streamlit Footer (including "Made with Streamlit") */
+footer {
+    visibility: hidden;
+    height: 0px;
+    padding: 0px;
+}
+.stApp footer { /* Added for more specificity */
+    visibility: hidden;
+    height: 0px;
+    padding: 0px;
+}
+
+/* Adjust main content padding to remove any leftover space if needed */
+.main .block-container {
+    padding-top: 1rem; /* Adjusted from 2rem to ensure content is not pushed down by hidden header */
 }
