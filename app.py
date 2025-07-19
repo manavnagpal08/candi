@@ -4,17 +4,39 @@ import bcrypt
 import os
 import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
+import requests # Import requests for HTTP calls to Firebase REST API
+import base64
+import random # Import random for quotes
+
+# Import your page functions from separate files (assuming these are separate Python files)
 from pages.certificate_verify import certificate_verifier_page
-# Import your page functions from separate files
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
 from feedback_form import feedback_and_help_page
-from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
-import base64
-import random # Import random for quotes
 from generate_fake_data import generate_fake_data_page
+
+# --- Firebase Configuration (using global variables from Canvas environment) ---
+# These variables are automatically provided by the Canvas environment.
+# DO NOT hardcode your API key or project ID here.
+FIREBASE_CONFIG = json.loads(os.environ.get('__firebase_config', '{}'))
+FIREBASE_API_KEY = FIREBASE_CONFIG.get('apiKey', '')
+FIREBASE_PROJECT_ID = FIREBASE_CONFIG.get('projectId', '')
+
+# Firebase Authentication REST API Endpoints
+AUTH_SIGNUP_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
+AUTH_SIGNIN_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
+
+# Firestore REST API Base URL for documents
+# We'll store user profiles in a collection named 'user_profiles' within 'artifacts/{app_id}/public/data/'
+APP_ID = os.environ.get('__app_id', 'default-app-id')
+FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
+
+# Define your admin usernames here as a tuple of strings
+ADMIN_USERNAME = ("admin@forscreenerpro", "admin@forscreenerpro2", "manav.nagpal2005@gmail.com")
+
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
     """
@@ -54,65 +76,223 @@ def set_body_class():
     """
     st.markdown(js_code, unsafe_allow_html=True)
 
+# --- Firebase REST API Helper Functions ---
 
-# --- Functions from your login.py (included directly for simplicity in this single file structure) ---
+def get_firestore_doc_url(uid):
+    """Constructs the Firestore document URL for a given UID."""
+    return f"{FIRESTORE_BASE_URL}/{uid}"
 
-# File to store user credentials
-USER_DB_FILE = "users.json"
-# Define your admin usernames here as a tuple of strings
-ADMIN_USERNAME = ("admin@forscreenerpro", "admin@forscreenerpro2", "manav.nagpal2005@gmail.com")
+def get_firestore_collection_url():
+    """Constructs the Firestore collection URL."""
+    return FIRESTORE_BASE_URL
 
-def load_users():
-    """Loads user data from the JSON file, handling potential corruption or emptiness."""
-    if not os.path.exists(USER_DB_FILE):
-        with open(USER_DB_FILE, "w") as f:
-            json.dump({}, f)
-        return {} # Return empty dict if file was just created
+def get_user_profile_from_firestore(uid, id_token):
+    """Fetches user profile data from Firestore using UID and ID Token."""
+    url = get_firestore_doc_url(uid)
+    headers = {"Authorization": f"Bearer {id_token}"}
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+        if 'fields' in data:
+            # Firestore returns fields as {"fieldName": {"valueType": "value"}}
+            profile = {}
+            for key, value_obj in data['fields'].items():
+                if 'stringValue' in value_obj:
+                    profile[key] = value_obj['stringValue']
+                elif 'booleanValue' in value_obj:
+                    profile[key] = value_obj['booleanValue']
+                # Add other types as needed (e.g., integerValue, arrayValue)
+            return profile
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching user profile from Firestore: {e}")
+        return None
+
+def set_user_profile_in_firestore(uid, id_token, profile_data):
+    """Sets/updates user profile data in Firestore."""
+    url = get_firestore_doc_url(uid)
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {id_token}"
+    }
+    # Convert Python dict to Firestore's expected JSON structure
+    fields = {}
+    for key, value in profile_data.items():
+        if isinstance(value, str):
+            fields[key] = {"stringValue": value}
+        elif isinstance(value, bool):
+            fields[key] = {"booleanValue": value}
+        # Add other types as needed
+    payload = {"fields": fields}
 
     try:
-        with open(USER_DB_FILE, "r") as f:
-            users = json.load(f)
-            # Ensure each user has a 'status' key and 'company' key for backward compatibility
-            for username, data in users.items():
-                if isinstance(data, str): # Old format: "username": "hashed_password"
-                    users[username] = {"password": data, "status": "active", "company": "N/A"}
-                elif "status" not in data:
-                    data["status"] = "active"
-                if "company" not in data: # Add company field if missing
-                    data["company"] = "N/A"
-            return users
-    except json.JSONDecodeError:
-        # If the file is empty or malformed JSON, re-initialize it
-        st.warning(f"⚠️ '{USER_DB_FILE}' is empty or corrupted. Re-initializing with an empty user database.")
-        with open(USER_DB_FILE, "w") as f:
-            json.dump({}, f)
-        return {}
-    except Exception as e:
-        st.error(f"❌ An unexpected error occurred while loading users: {e}")
-        return {}
+        response = requests.patch(url, headers=headers, json=payload) # Use PATCH for update, PUT for replace
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error setting user profile in Firestore: {e}")
+        return False
 
-
-def save_users(users):
-    """Saves user data to the JSON file."""
-    with open(USER_DB_FILE, "w") as f:
-        json.dump(users, f, indent=4)
-
-def hash_password(password):
-    """Hashes a password using bcrypt."""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def check_password(password, hashed_password):
-    """Checks a password against its bcrypt hash."""
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+# --- Authentication and User Management Functions ---
 
 def is_valid_email(email):
     """Basic validation for email format."""
-    # Regex for a simple email check (covers @ and at least one . after @)
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 def is_current_user_admin():
     """Checks if the currently logged-in user is an admin."""
     return st.session_state.get("username") in ADMIN_USERNAME
+
+def register_user_firebase(email, password, company_name):
+    """Registers a new user with Firebase Auth and stores profile in Firestore."""
+    payload = json.dumps({
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    })
+    try:
+        response = requests.post(AUTH_SIGNUP_URL, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        id_token = data['idToken']
+        uid = data['localId']
+
+        # Store additional profile data in Firestore
+        profile_data = {
+            "email": email,
+            "company": company_name,
+            "status": "active"
+        }
+        if set_user_profile_in_firestore(uid, id_token, profile_data):
+            return {"success": True, "idToken": id_token, "uid": uid, "email": email, "company": company_name, "status": "active"}
+        else:
+            return {"success": False, "message": "Failed to save user profile to Firestore."}
+    except requests.exceptions.RequestException as e:
+        error_message = "Registration failed."
+        if response.status_code == 400:
+            error_data = response.json()
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Registration failed: {error_data['error']['message']}"
+        st.error(error_message)
+        return {"success": False, "message": error_message}
+
+def sign_in_user_firebase(email, password):
+    """Signs in a user with Firebase Auth and fetches profile from Firestore."""
+    payload = json.dumps({
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    })
+    try:
+        response = requests.post(AUTH_SIGNIN_URL, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        id_token = data['idToken']
+        uid = data['localId']
+
+        user_profile = get_user_profile_from_firestore(uid, id_token)
+        if user_profile:
+            if user_profile.get("status") == "disabled":
+                st.error("❌ Your account has been disabled. Please contact an administrator.")
+                return {"success": False, "message": "Account disabled."}
+            return {"success": True, "idToken": id_token, "uid": uid, "email": email, "company": user_profile.get("company", "N/A"), "status": user_profile.get("status", "active")}
+        else:
+            st.warning("User profile not found in Firestore. Please contact support.")
+            return {"success": False, "message": "User profile not found."}
+    except requests.exceptions.RequestException as e:
+        error_message = "Login failed."
+        if response.status_code == 400:
+            error_data = response.json()
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Login failed: {error_data['error']['message']}"
+        st.error(error_message)
+        return {"success": False, "message": error_message}
+
+def send_password_reset_email_firebase(email):
+    """Sends a password reset email via Firebase Auth REST API."""
+    payload = json.dumps({
+        "requestType": "PASSWORD_RESET",
+        "email": email
+    })
+    try:
+        response = requests.post(AUTH_RESET_PASSWORD_URL, data=payload)
+        response.raise_for_status()
+        st.success(f"✅ Password reset email sent to {email}. Please check your inbox.")
+        return True
+    except requests.exceptions.RequestException as e:
+        error_message = "Failed to send password reset email."
+        if response.status_code == 400:
+            error_data = response.json()
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Failed to send password reset email: {error_data['error']['message']}"
+        st.error(error_message)
+        return False
+
+def get_all_user_profiles_from_firestore():
+    """Fetches all user profiles from the Firestore collection.
+       Note: This is for admin view. In production, this should be secured
+       and potentially paginated via a backend.
+    """
+    url = get_firestore_collection_url()
+    # For listing documents, Firebase Firestore REST API doesn't require an ID token
+    # unless security rules enforce it. Assuming public read for this collection for simplicity
+    # in this context, but in production, this would need proper authentication.
+    # For now, we'll try without a token, as there's no direct client-side way to get
+    # an admin ID token without a full admin SDK setup.
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        users_list = []
+        if 'documents' in data:
+            for doc in data['documents']:
+                fields = doc.get('fields', {})
+                email = fields.get('email', {}).get('stringValue', 'N/A')
+                company = fields.get('company', {}).get('stringValue', 'N/A')
+                status = fields.get('status', {}).get('stringValue', 'N/A')
+                # Extract UID from document name
+                uid = doc['name'].split('/')[-1]
+                # We don't store hashed passwords in Firestore for security reasons,
+                # so we'll just indicate it's not exposed.
+                users_list.append([email, "******** (Not Exposed)", status, company, uid])
+        return users_list
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching all user profiles from Firestore: {e}")
+        return []
+
+def get_uid_from_email_firestore(email):
+    """
+    Attempts to find a user's UID by their email from Firestore.
+    This is a workaround as Firebase Auth REST API doesn't offer email-to-UID mapping directly for client-side.
+    Requires Firestore security rules to allow querying by email.
+    """
+    url = f"{FIRESTORE_BASE_URL}:runQuery"
+    query_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "user_profiles"}],
+            "where": {
+                "fieldFilter": {
+                    "field": {"fieldPath": "email"},
+                    "op": "EQUAL",
+                    "value": {"stringValue": email}
+                }
+            },
+            "limit": 1
+        }
+    }
+    try:
+        response = requests.post(url, json=query_payload)
+        response.raise_for_status()
+        results = response.json()
+        if results and len(results) > 0 and 'document' in results[0]:
+            doc_name = results[0]['document']['name']
+            uid = doc_name.split('/')[-1]
+            return uid
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error finding UID by email in Firestore: {e}")
+        return None
 
 def register_section():
     """Public self-registration form."""
@@ -132,24 +312,21 @@ def register_section():
             elif new_password != confirm_password:
                 st.error("Passwords do not match.")
             else:
-                users = load_users()
-                if new_username in users:
-                    st.error("Username already exists. Please choose a different one.")
-                else:
-                    users[new_username] = {
-                        "password": hash_password(new_password),
-                        "status": "active",
-                        "company": new_company_name # Store company name
-                    }
-                    save_users(users)
+                # Attempt to register with Firebase Auth
+                result = register_user_firebase(new_username, new_password, new_company_name)
+                if result["success"]:
                     st.success("✅ Registration successful! You are now logged in.")
-
                     # Automatically log in the user
                     st.session_state.authenticated = True
-                    st.session_state.username = new_username
-                    st.session_state.user_company = new_company_name
-                    st.session_state.current_page = "welcome_dashboard" # Redirect to welcome dashboard after registration
-                    st.rerun() # Rerun to apply the login and redirect
+                    st.session_state.username = result["email"]
+                    st.session_state.user_company = result["company"]
+                    st.session_state.user_uid = result["uid"] # Store UID
+                    st.session_state.id_token = result["idToken"] # Store ID Token
+                    st.session_state.current_page = "welcome_dashboard" # Redirect
+                    st.rerun()
+                else:
+                    st.error(f"❌ {result['message']}")
+
 
 def admin_registration_section():
     """Admin-driven user creation form."""
@@ -166,65 +343,85 @@ def admin_registration_section():
         elif not is_valid_email(new_username): # Email format validation
             st.error("Please enter a valid email address for the username.")
         else:
-            users = load_users()
-            if new_username in users:
-                st.error(f"User '{new_username}' already exists.")
-            else:
-                users[new_username] = {
-                    "password": hash_password(new_password),
-                    "status": "active",
-                    "company": new_company_name
-                }
-                save_users(users)
+            # Attempt to register with Firebase Auth
+            result = register_user_firebase(new_username, new_password, new_company_name)
+            if result["success"]:
                 st.success(f"✅ User '{new_username}' added successfully!")
+            else:
+                st.error(f"❌ {result['message']}")
 
 def admin_password_reset_section():
     """Admin-driven password reset form."""
     st.subheader("🔑 Reset User Password (Admin Only)")
-    users = load_users()
-    # Exclude all admin usernames from the list of users whose passwords can be reset
-    user_options = [user for user in users.keys() if user not in ADMIN_USERNAME]
+    # Fetch all users from Firestore to populate the selectbox
+    users_data = get_all_user_profiles_from_firestore()
+    user_options = [user[0] for user in users_data if user[0] not in ADMIN_USERNAME] # user[0] is email
 
     if not user_options:
         st.info("No other users to reset passwords for.")
         return
 
     with st.form("admin_reset_password_form", clear_on_submit=True):
-        selected_user = st.selectbox("Select User to Reset Password For", user_options, key="reset_user_select")
-        new_password = st.text_input("New Password", type="password", key="new_password_reset")
-        reset_button = st.form_submit_button("Reset Password")
+        selected_user_email = st.selectbox("Select User to Reset Password For", user_options, key="reset_user_select")
+        # Note: Firebase Auth REST API for password reset sends an email,
+        # it does not allow setting a new password directly from client-side.
+        st.info("A password reset email will be sent to the selected user.")
+        reset_button = st.form_submit_button("Send Password Reset Email")
 
         if reset_button:
-            if not new_password:
-                st.error("Please enter a new password.")
+            if not selected_user_email:
+                st.error("Please select a user.")
             else:
-                users[selected_user]["password"] = hash_password(new_password)
-                save_users(users)
-                st.success(f"✅ Password for '{selected_user}' has been reset.")
+                send_password_reset_email_firebase(selected_user_email)
 
 def admin_disable_enable_user_section():
     """Admin-driven user disable/enable form."""
     st.subheader("⛔ Toggle User Status (Admin Only)")
-    users = load_users()
-    # Exclude all admin usernames from the list of users whose status can be toggled
-    user_options = [user for user in users.keys() if user not in ADMIN_USERNAME]
+    users_data = get_all_user_profiles_from_firestore()
+    user_options = [user[0] for user in users_data if user[0] not in ADMIN_USERNAME]
 
     if not user_options:
         st.info("No other users to manage status for.")
         return
 
-    with st.form("admin_toggle_user_status_form", clear_on_submit=False): # Keep values after submit for easier toggling
-        selected_user = st.selectbox("Select User to Toggle Status", user_options, key="toggle_user_select")
+    with st.form("admin_toggle_user_status_form", clear_on_submit=False):
+        selected_user_email = st.selectbox("Select User to Toggle Status", user_options, key="toggle_user_select")
 
-        current_status = users[selected_user]["status"]
-        st.info(f"Current status of '{selected_user}': **{current_status.upper()}**")
+        # Find current status for the selected user
+        current_status = "N/A"
+        selected_user_uid = None
+        for user_info in users_data:
+            if user_info[0] == selected_user_email:
+                current_status = user_info[2] # Status is at index 2
+                selected_user_uid = user_info[4] # UID is at index 4
+                break
 
-        if st.form_submit_button(f"Toggle to {'Disable' if current_status == 'active' else 'Enable'} User"):
-            new_status = "disabled" if current_status == "active" else "active"
-            users[selected_user]["status"] = new_status
-            save_users(users)
-            st.success(f"✅ User '{selected_user}' status set to **{new_status.upper()}**.")
-            st.rerun() # Rerun to update the displayed status immediately
+        if selected_user_email and selected_user_uid:
+            st.info(f"Current status of '{selected_user_email}': **{current_status.upper()}**")
+
+            if st.form_submit_button(f"Toggle to {'Disable' if current_status == 'active' else 'Enable'} User"):
+                new_status = "disabled" if current_status == "active" else "active"
+                # Need an ID token to update Firestore.
+                # For admin actions, ideally, this would be handled by a secure backend
+                # that uses Firebase Admin SDK to get an admin ID token.
+                # For this client-side example, we'll use the logged-in admin's token.
+                admin_id_token = st.session_state.get('id_token')
+                if admin_id_token:
+                    profile_data = {
+                        "status": new_status,
+                        # Keep other fields as they are, or fetch them first and then update
+                        "email": selected_user_email, # Ensure email is also in the update payload
+                        "company": next((u[3] for u in users_data if u[0] == selected_user_email), "N/A")
+                    }
+                    if set_user_profile_in_firestore(selected_user_uid, admin_id_token, profile_data):
+                        st.success(f"✅ User '{selected_user_email}' status set to **{new_status.upper()}**.")
+                        st.rerun()
+                    else:
+                        st.error("Failed to update user status in Firestore.")
+                else:
+                    st.error("Admin ID token not found. Please log in as admin.")
+        else:
+            st.warning("Selected user not found or UID missing.")
 
 
 def login_section():
@@ -233,21 +430,20 @@ def login_section():
         st.session_state.authenticated = False
     if "username" not in st.session_state:
         st.session_state.username = None
+    if "user_company" not in st.session_state:
+        st.session_state.user_company = None
+    if "user_uid" not in st.session_state: # Store Firebase UID
+        st.session_state.user_uid = None
+    if "id_token" not in st.session_state: # Store Firebase ID Token
+        st.session_state.id_token = None
 
     # Initialize active_login_tab_selection if not present
     if "active_login_tab_selection" not in st.session_state:
-        # Default to 'Register' if no users, otherwise 'Login'
-        if not os.path.exists(USER_DB_FILE) or len(load_users()) == 0:
-            st.session_state.active_login_tab_selection = "Register"
-        else:
-            st.session_state.active_login_tab_selection = "Login"
-
+        st.session_state.active_login_tab_selection = "Login" # Default to Login
 
     if st.session_state.authenticated:
-        # If already authenticated, just return True without showing login forms
         return True
 
-    # Use st.radio to simulate tabs if st.tabs() default_index is not supported
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -257,30 +453,27 @@ def login_section():
 
     if tab_selection == "Login":
         st.subheader("🔐 HR Login")
-        st.info("If you don't have an account, please go to the 'Register' option first.") # Added instructional message
+        st.info("If you don't have an account, please go to the 'Register' option first.")
         with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("Username", key="username_login")
+            username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
 
             if submitted:
-                users = load_users()
-                if username not in users:
-                    st.error("❌ Invalid username or password. Please register if you don't have an account.")
+                if not username or not password:
+                    st.error("Please enter both username and password.")
                 else:
-                    user_data = users[username]
-                    if user_data["status"] == "disabled":
-                        st.error("❌ Your account has been disabled. Please contact an administrator.")
-                    elif check_password(password, user_data["password"]):
+                    result = sign_in_user_firebase(username, password)
+                    if result["success"]:
                         st.session_state.authenticated = True
-                        st.session_state.username = username
-                        st.session_state.user_company = user_data.get("company", "N/A") # Store company name
-                        st.session_state.current_page = "welcome_dashboard" # Redirect to welcome dashboard after login
+                        st.session_state.username = result["email"]
+                        st.session_state.user_company = result["company"]
+                        st.session_state.user_uid = result["uid"]
+                        st.session_state.id_token = result["idToken"]
+                        st.session_state.current_page = "welcome_dashboard"
                         st.rerun()
-                    else:
-                        st.error("❌ Invalid username or password.")
-
-    elif tab_selection == "Register": # This will be the initially selected option for new users
+                    # Error message is handled within sign_in_user_firebase
+    elif tab_selection == "Register":
         register_section()
 
     return st.session_state.authenticated
@@ -292,6 +485,8 @@ def logout_page():
         st.session_state.authenticated = False
         st.session_state.pop('username', None)
         st.session_state.pop('user_company', None)
+        st.session_state.pop('user_uid', None)
+        st.session_state.pop('id_token', None)
         st.session_state.pop('current_quote', None) # Clear the quote on logout
         st.session_state.active_login_tab_selection = "Login" # Reset to login tab
         st.rerun()
@@ -443,38 +638,16 @@ def main():
     # Set the body class based on the current theme (which is now forced to light)
     set_body_class()
 
-    # Ensure all admin users exist for testing/initial setup
-    users = load_users()
-    default_admin_password = "adminpass"
-    for admin_user in ADMIN_USERNAME:
-        if admin_user not in users:
-            users[admin_user] = {"password": bcrypt.hashpw(default_admin_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'), "status": "active", "company": "AdminCo"}
-            st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
-    save_users(users)
-
     # --- Permanent Sidebar Content (Always Visible) ---
     with st.sidebar:
-        # Removed the Dark Mode Toggle as the app is now forced to light mode
-        # st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
-        # if st.session_state.sidebar_dark_mode_toggle:
-        #     if st.session_state.theme != "dark":
-        #         st.session_state.theme = "dark"
-        #         st.rerun()
-        # else:
-        #     if st.session_state.theme != "light":
-        #         st.session_state.theme = "light"
-        #         st.rerun()
-
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
         logo_path = "logo.png"  # Assuming logo is in the same directory
 
         if os.path.exists(logo_path):
             try:
-                # Read the image file in binary mode
                 with open(logo_path, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode()
 
-                # Create a clickable image that links to the HR portal
                 st.markdown(f"""
                 <a href="https://screenerpro.streamlit.app/" target="_self">
                     <img src="data:image/png;base64,{encoded_string}" alt="Go to HR Portal" width="215">
@@ -490,9 +663,6 @@ def main():
 
         st.sidebar.write("---")
 
-        # The login/register info is now handled by the login_section() call
-        # st.sidebar.info("Please log in or register to access the portal features.")
-
     # --- Main Content Area Logic ---
     is_authenticated = login_section() # Call login_section first
 
@@ -502,8 +672,6 @@ def main():
             st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
             # Navigation Buttons (using st.button and wrapping in custom div for styling)
-            # Removed Dashboard Button as requested
-
             # Resume Screener Button
             if st.button("Resume Screener", key="nav_resume_screen"):
                 st.session_state.current_page = "resume_screen"
@@ -597,31 +765,24 @@ def main():
                 admin_registration_section()
             elif st.session_state.get("admin_tabs") == "Reset Password":
                 admin_password_reset_section()
-
             elif st.session_state.get("admin_tabs") == "Toggle User Status":
                 admin_disable_enable_user_section()
-            elif st.session_state.get("admin_tabs") == "Generate Fake Data": # Corrected typo here
+            elif st.session_state.get("admin_tabs") == "Generate Fake Data":
                 generate_fake_data_page()
             elif st.session_state.get("admin_tabs") == "View All Users":
                 st.subheader("👥 All Registered Users:")
                 try:
-                    users_data = load_users()
+                    users_data = get_all_user_profiles_from_firestore()
                     if users_data:
-                        display_users = []
-                        for user, data in users_data.items():
-                            # Ensure data is a dictionary before accessing keys
-                            hashed_pass = data.get("password", "") if isinstance(data, dict) else data
-                            status = data.get("status", "N/A") if isinstance(data, dict) else "N/A"
-                            company = data.get("company", "N/A") if isinstance(data, dict) else "N/A"
-                            display_users.append([user, hashed_pass, status, company])
-                        st.dataframe(pd.DataFrame(display_users, columns=["Email/Username", "Hashed Password (DO NOT EXPOSE)", "Status", "Company"]), use_container_width=True)
+                        # Ensure 'UID' column is included for admin view
+                        df = pd.DataFrame(users_data, columns=["Email/Username", "Password (Not Exposed)", "Status", "Company", "UID"])
+                        st.dataframe(df, use_container_width=True)
                     else:
                         st.info("No users registered yet.")
                 except Exception as e:
                     st.error(f"Error loading user data for admin view: {e}")
     else:
         # If not authenticated, only show the login/registration section
-        # The permanent sidebar content is already handled outside this if/else
         pass # login_section() is called before this block and handles non-authenticated display
 
 if __name__ == "__main__":
