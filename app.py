@@ -347,7 +347,7 @@ def main():
 
         # Logo and Name as seen in image
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-        logo_path = "screenerpro_logo.png" # Assuming logo is in the same directory
+        logo_path = "logo.png" # Assuming logo is in the same directory
         if os.path.exists(logo_path):
             st.image(logo_path, width=35)
         else:
