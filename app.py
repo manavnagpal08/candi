@@ -5,8 +5,7 @@ import os
 import re # Import regex for email validation
 import pandas as pd # Ensure pandas is imported for DataFrame display
 
-# Import your page functions
-# Ensure these files are in the same directory as app.py or adjust paths
+# Import your page functions from separate files
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
@@ -320,7 +319,7 @@ def main():
     default_admin_password = "adminpass"
     for admin_user in ADMIN_USERNAME:
         if admin_user not in users:
-            users[admin_user] = {"password": hash_password(default_admin_password), "status": "active", "company": "AdminCo"}
+            users[admin_user] = {"password": bcrypt.hashpw(default_admin_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'), "status": "active", "company": "AdminCo"}
             st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
     save_users(users)
 
@@ -430,7 +429,7 @@ def main():
             <style>
                 @keyframes fadeInScale {{
                     from {{ opacity: 0; transform: scale(0.9); }}
-                    to {{ opacity: 1; transform: scale(1); }}
+                    to {{ opacity: 1; transform; scale(1); }}
                 }}
 
                 .beautiful-greeting-card {{
