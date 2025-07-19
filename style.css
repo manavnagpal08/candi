@@ -1,62 +1,82 @@
-/* style.css - The "Soft & Organic Modernism" Edition (Full Version with Enhanced Sidebar) */
+/* style.css - "ScreenerPro Inspired" Theme */
 
 /* --- Google Fonts Import --- */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Comfortaa:wght@400;500;600;700&display=swap');
+/* Using 'Inter' for body/general text (clean, modern) and 'Poppins' for headings (slightly bolder, rounder) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
 
 /* --- Root Variables (Light and Dark Mode) --- */
 :root {
-    /* Base Colors - Light Mode (Warm & Soft) */
-    --color-bg-primary-light: #eceff4; /* Very light cool grey */
-    --color-bg-secondary-light: #f7f9fc; /* Slightly lighter for main elements */
-    --color-text-primary-light: #34495e; /* Dark slate blue */
-    --color-text-secondary-light: #7f8c8d; /* Muted grey */
-    --color-border-light: #e0e6ed; /* Subtle border for definition */
+    /* Base Colors - Light Mode (from image) */
+    --color-bg-primary-light: #f7f9fc; /* Main page background */
+    --color-bg-secondary-light: #ffffff; /* Card/element background */
+    --color-text-primary-light: #333d52; /* Darker text for headings/main content */
+    --color-text-secondary-light: #6a7187; /* Lighter text for paragraphs/labels */
+    --color-border-light: #e0e6ed; /* Subtle borders */
 
-    /* Accent Color (Warm, inviting blue-green) */
-    --color-accent-main: #4CAF50; /* Google's Material Green */
-    --color-accent-dark: #388E3C; /* Darker green */
-    --color-accent-light: #81C784; /* Lighter green */
-    --color-accent-subtle: rgba(76, 175, 80, 0.1); /* Very light accent tint */
+    /* Accent Colors (from image and extrapolations) */
+    --color-accent-blue: #3b82f6; /* Dashboard active state, main button */
+    --color-accent-blue-hover: #2563eb;
+    --color-accent-blue-soft: #dbeafe; /* Light background for active state */
 
-    /* Soft UI Shadows - Light Mode (Slightly more pronounced for general elements) */
-    --soft-shadow-light: 8px 8px 16px rgba(174, 174, 192, 0.45), /* Increased spread */
-                         -8px -8px 16px rgba(255, 255, 255, 0.85); /* Increased spread */
-    --soft-shadow-pressed: inset 4px 4px 8px rgba(174, 174, 192, 0.4), /* Deeper inset */
-                           inset -4px -4px 8px rgba(255, 255, 255, 0.8); /* Deeper inset */
-    --soft-shadow-inner: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
-                         inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+    --color-accent-pink: #ec4899; /* Example for other navigation */
+    --color-accent-pink-soft: #fce7f3;
+
+    --color-accent-orange: #f97316; /* Example for other navigation */
+    --color-accent-orange-soft: #fff7ed;
+
+    --color-accent-green: #22c55e; /* Welcome banner element, success */
+
+    /* Sidebar specific */
+    --color-sidebar-bg-light: #ffffff;
+    --color-sidebar-border-light: #f1f5f9; /* Very subtle right border */
+
+    /* Shadows (Subtle, clean, like the image) */
+    --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03); /* Soft, multi-layer */
+    --shadow-sidebar: 6px 0 15px rgba(0, 0, 0, 0.03); /* Subtle right shadow for sidebar */
+    --shadow-welcome-banner: 0 6px 15px rgba(0, 0, 0, 0.08);
 
     /* Animation Variables */
-    --transition-speed: 0.35s; /* Slightly slower for organic feel */
-    --transition-ease: ease-in-out; /* Smoother easing */
+    --transition-speed-fast: 0.2s;
+    --transition-speed-normal: 0.3s;
+    --transition-ease: ease-out;
+
+    /* Border Radius */
+    --border-radius-sm: 0.5rem;
+    --border-radius-md: 0.75rem;
+    --border-radius-lg: 1rem;
+    --border-radius-pill: 9999px; /* For pill shapes */
 }
 
 body.dark-mode {
-    /* Base Colors - Dark Mode (Deep & Soft) */
-    --color-bg-primary-dark: #2c2c44; /* Dark blue-purple */
-    --color-bg-secondary-dark: #3a3a50; /* Slightly lighter for elements */
-    --color-text-primary-dark: #ecf0f1; /* Off-white */
-    --color-text-secondary-dark: #bdc3c7; /* Muted light grey */
-    --color-border-dark: #4e4e66; /* Darker border */
+    /* Base Colors - Dark Mode (Complementary) */
+    --color-bg-primary-dark: #1e293b; /* Dark slate */
+    --color-bg-secondary-dark: #2d3a4b; /* Slightly lighter for cards/elements */
+    --color-text-primary-dark: #e2e8f0; /* Light text */
+    --color-text-secondary-dark: #94a3b8; /* Muted light text */
+    --color-border-dark: #475569; /* Darker borders */
 
-    /* Accent remains consistent */
+    /* Accent Colors (remain vibrant or slightly adjusted) */
+    --color-accent-blue-soft: rgba(59, 130, 246, 0.2);
+    --color-accent-pink-soft: rgba(236, 72, 153, 0.2);
+    --color-accent-orange-soft: rgba(249, 115, 22, 0.2);
 
-    /* Soft UI Shadows - Dark Mode (Slightly more pronounced for general elements) */
-    --soft-shadow-light: 8px 8px 16px rgba(0, 0, 0, 0.45),
-                         -8px -8px 16px rgba(60, 60, 80, 0.85);
-    --soft-shadow-pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
-                           inset -4px -4px 8px rgba(60, 60, 80, 0.8);
-    --soft-shadow-inner: inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-                         inset -3px -3px 6px rgba(60, 60, 80, 0.7);
+    /* Sidebar specific */
+    --color-sidebar-bg-dark: #2d3a4b;
+    --color-sidebar-border-dark: #475569;
+
+    /* Shadows (darker, but still subtle) */
+    --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-sidebar: 6px 0 15px rgba(0, 0, 0, 0.2);
+    --shadow-welcome-banner: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* --- Global Base Styles --- */
 html, body, .stApp {
-    font-family: 'Quicksand', sans-serif; /* Soft, friendly sans-serif for body */
+    font-family: 'Inter', sans-serif;
     background-color: var(--color-bg-primary-light);
     color: var(--color-text-primary-light);
-    transition: background-color var(--transition-speed) var(--transition-ease),
-                color var(--transition-speed) var(--transition-ease);
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+                color var(--transition-speed-normal) var(--transition-ease);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -67,176 +87,215 @@ body.dark-mode {
     color: var(--color-text-primary-dark);
 }
 
-/* Custom Scrollbar (Subtle) */
+/* Custom Scrollbar (ScreenerPro style) */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--color-bg-primary-light);
+    border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-    background: var(--color-accent-light);
-    border-radius: 5px;
-    transition: background var(--transition-speed) var(--transition-ease);
+    background: var(--color-border-light);
+    border-radius: 4px;
+    transition: background var(--transition-speed-fast) var(--transition-ease);
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-accent-main);
+    background: var(--color-text-secondary-light);
 }
 body.dark-mode ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-primary-dark);
+}
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--color-border-dark);
+}
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary-dark);
 }
 
 /* Selection Color */
 ::selection {
-    background: var(--color-accent-main);
+    background: var(--color-accent-blue);
     color: white;
 }
 
 /* --- Typography --- */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Comfortaa', sans-serif; /* Rounded, inviting sans-serif for headings */
+    font-family: 'Poppins', sans-serif; /* Poppins for headings as in image */
     color: var(--color-text-primary-light);
     margin-top: 1.5em;
-    margin-bottom: 0.7em;
-    font-weight: 700;
-    line-height: 1.4;
-    transition: color var(--transition-speed) var(--transition-ease);
+    margin-bottom: 0.8em;
+    font-weight: 600; /* Medium bold */
+    line-height: 1.3;
+    transition: color var(--transition-speed-normal) var(--transition-ease);
 }
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
     color: var(--color-text-primary-dark);
 }
 
-h1 { font-size: 2.5em; letter-spacing: -0.01em; }
-h2 { font-size: 2em; font-weight: 600; }
-h3 { font-size: 1.5em; font-weight: 600; }
+h1 { font-size: 2.2em; font-weight: 700; }
+h2 { font-size: 1.8em; font-weight: 700; }
+h3 { font-size: 1.4em; font-weight: 600; }
 p { line-height: 1.6; color: var(--color-text-secondary-light); }
 body.dark-mode p { color: var(--color-text-secondary-dark); }
-a { color: var(--color-accent-main); text-decoration: none; transition: all var(--transition-speed) var(--transition-ease); }
-a:hover { color: var(--color-accent-dark); text-decoration: underline; transform: translateY(-1px); }
+a { color: var(--color-accent-blue); text-decoration: none; transition: all var(--transition-speed-fast) var(--transition-ease); }
+a:hover { color: var(--color-accent-blue-hover); text-decoration: underline; }
 
-/* --- Sidebar Styling (Soft UI - Enhanced) --- */
+/* --- Sidebar Styling (ScreenerPro Inspired) --- */
 .stSidebar {
-    /* Slightly more complex background for depth */
-    background: linear-gradient(135deg, var(--color-bg-primary-light) 0%, var(--color-bg-secondary-light) 100%);
-    border-right: none;
-    box-shadow: 10px 10px 20px rgba(174, 174, 192, 0.4), /* Deeper light shadow */
-                -10px -10px 20px rgba(255, 255, 255, 0.9); /* Deeper dark shadow */
-    padding-top: 2.5rem; /* More top padding */
-    color: var(--color-text-primary-light);
-    transition: all var(--transition-speed) var(--transition-ease);
-    border-radius: 0 2rem 2rem 0; /* More rounded outer edge */
-    overflow: hidden; /* To contain pseudo-elements */
-    position: relative;
-    z-index: 1; /* Ensure content is above potential pseudo-elements */
+    background-color: var(--color-sidebar-bg-light);
+    border-right: 1px solid var(--color-sidebar-border-light); /* Subtle border */
+    box-shadow: var(--shadow-sidebar); /* Light shadow on the right */
+    padding: 1.5rem 1rem; /* Adjust padding to match image */
+    transition: all var(--transition-speed-normal) var(--transition-ease);
+    border-radius: 0; /* No rounding */
+    overflow-x: hidden; /* Prevent horizontal scrollbar on hover effects */
 }
 
 body.dark-mode .stSidebar {
-    background: linear-gradient(135deg, var(--color-bg-primary-dark) 0%, var(--color-bg-secondary-dark) 100%);
-    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4),
-                -10px -10px 20px rgba(60, 60, 80, 0.9);
+    background-color: var(--color-sidebar-bg-dark);
+    border-right: 1px solid var(--color-sidebar-border-dark);
+    box-shadow: var(--shadow-sidebar);
+}
+
+/* Dark Mode Toggle */
+.stSidebar .stToggle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align right */
+    padding-right: 0.5rem;
+    margin-bottom: 1.5rem; /* Space below toggle */
+}
+/* Adjust the toggle's look if necessary - Streamlit's default is often fine here */
+
+
+/* Sidebar Logo/Brand (Assuming this is an image or text in a div) */
+/* If using st.image, you might need to wrap it in a div and target that div */
+.sidebar-logo { /* Custom class for a div wrapping your logo */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem; /* Adjust padding around logo */
+    margin-bottom: 2rem; /* Space below logo */
+}
+.sidebar-logo img { /* If using st.image */
+    height: 35px; /* Adjust height as needed */
+    object-fit: contain;
+}
+.sidebar-logo span { /* If using st.markdown for text */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.4em;
+    color: var(--color-text-primary-light);
+}
+body.dark-mode .sidebar-logo span {
     color: var(--color-text-primary-dark);
 }
 
-/* Optional: Subtle inner shimmer for premium feel */
-.stSidebar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 40%);
-    pointer-events: none;
-    z-index: -1;
+
+/* Sidebar Navigation Label ("Navigate") */
+.stSidebar .stMarkdown p { /* Targeting 'Navigate' text */
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8em;
+    color: var(--color-text-secondary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
 }
-body.dark-mode .stSidebar::before {
-    background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.01), transparent 40%);
+body.dark-mode .stSidebar .stMarkdown p {
+    color: var(--color-text-secondary-dark);
 }
 
 
+/* Sidebar Navigation Buttons (Pill-shaped, ScreenerPro style) */
 .stSidebar .stButton > button {
-    width: calc(100% - 3rem); /* More horizontal padding */
-    margin: 0.6rem 1.5rem;
-    background-color: var(--color-bg-secondary-light); /* Slightly lighter background for buttons */
+    width: 100%; /* Take full width of available sidebar space */
+    margin: 0.3rem 0; /* Minimal margin between buttons */
+    background-color: transparent; /* Default is transparent */
     color: var(--color-text-primary-light);
     border: none;
-    box-shadow: var(--soft-shadow-light); /* Soft extruded button */
-    transition: all var(--transition-speed) var(--transition-ease);
+    box-shadow: none; /* No shadow by default */
+    transition: all var(--transition-speed-fast) var(--transition-ease);
     font-weight: 500;
-    padding: 1rem 1.5rem; /* More vertical padding */
-    border-radius: 1.2rem; /* More rounded button */
+    padding: 0.7rem 1.2rem; /* Consistent padding */
+    border-radius: var(--border-radius-pill); /* Pill shape */
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 1rem; /* More space for icon/text */
+    gap: 0.8rem;
     cursor: pointer;
-    transform: translateZ(0); /* For smoother animation */
 }
 
 body.dark-mode .stSidebar .stButton > button {
-    background-color: var(--color-bg-secondary-dark);
     color: var(--color-text-primary-dark);
-    box-shadow: var(--soft-shadow-light);
 }
 
 .stSidebar .stButton > button:hover {
-    box-shadow: var(--soft-shadow-pressed); /* Pressed in effect */
-    color: var(--color-accent-main);
-    background-color: var(--color-accent-subtle); /* Subtle tint on hover */
-    transform: scale(0.985); /* Very subtle scale for tactile feel */
+    background-color: var(--color-border-light); /* Light background on hover */
+    color: var(--color-text-primary-light); /* Text color stays primary on hover */
+    transform: translateY(-1px); /* Subtle lift on hover */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Very subtle shadow on hover */
+}
+body.dark-mode .stSidebar .stButton > button:hover {
+    background-color: var(--color-border-dark);
+    color: var(--color-text-primary-dark);
 }
 
-.stSidebar .stButton > button:active {
-    box-shadow: var(--soft-shadow-pressed); /* Maintain pressed effect */
-    transform: scale(0.97); /* Deeper press */
+
+/* Active Sidebar Button (Dashboard in image) */
+/* You need to add a custom class 'sidebar-active' to the active button via st.markdown(f'<button class="sidebar-active">...</button>', unsafe_allow_html=True) */
+.stSidebar .stButton > button.sidebar-active {
+    background-color: var(--color-accent-blue-soft); /* Light blue background */
+    color: var(--color-accent-blue); /* Blue text */
+    font-weight: 600; /* Slightly bolder */
+    box-shadow: var(--shadow-card); /* Subtle card shadow for active state */
+    transform: none; /* No lift */
+    transition: all var(--transition-speed-normal) var(--transition-ease);
+}
+.stSidebar .stButton > button.sidebar-active i { /* Icon color for active */
+    color: var(--color-accent-blue);
+}
+.stSidebar .stButton > button.sidebar-active:hover {
+    background-color: var(--color-accent-blue-soft); /* Keep active color on hover */
+    color: var(--color-accent-blue);
+    transform: none; /* No lift */
+    box-shadow: var(--shadow-card); /* Keep shadow */
 }
 
-/* Custom HR Portal Button in sidebar (More prominent) */
-.stSidebar a > button {
-    background-color: var(--color-accent-main) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 1.2rem !important; /* Consistent with other buttons */
-    padding: 1.2rem 2rem !important; /* More prominent padding */
-    font-weight: 700 !important; /* Bolder text */
-    width: calc(100% - 3rem) !important;
-    margin: 2rem 1.5rem !important; /* More margin to stand out */
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    box-shadow: 8px 8px 16px rgba(76, 175, 80, 0.4), -8px -8px 16px rgba(129, 199, 132, 0.7) !important; /* Accent-colored shadow */
-    transition: all var(--transition-speed) var(--transition-ease) !important;
-    transform: translateZ(0);
+/* Example for other sidebar sections if needed (Manage JDs, Email Candidates, etc.) */
+/* You'd apply similar classes like 'sidebar-active-pink', 'sidebar-active-orange' */
+.stSidebar .stButton > button.sidebar-active-pink {
+    background-color: var(--color-accent-pink-soft);
+    color: var(--color-accent-pink);
+}
+.stSidebar .stButton > button.sidebar-active-pink i {
+    color: var(--color-accent-pink);
 }
 
-body.dark-mode .stSidebar a > button {
-    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.4), -8px -8px 16px rgba(60, 60, 80, 0.7) !important;
+.stSidebar .stButton > button.sidebar-active-orange {
+    background-color: var(--color-accent-orange-soft);
+    color: var(--color-accent-orange);
+}
+.stSidebar .stButton > button.sidebar-active-orange i {
+    color: var(--color-accent-orange);
 }
 
-.stSidebar a > button:hover {
-    background-color: var(--color-accent-dark) !important;
-    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.2) !important; /* Pressed in effect for accent button */
-    transform: scale(0.98) !important;
-}
-.stSidebar a > button:active {
-    transform: scale(0.97) !important;
-}
 
 /* --- Main Content Styling --- */
 .main .block-container {
     padding-top: 2rem;
-    padding-bottom: 2.5rem;
-    padding-left: 3.5rem;
-    padding-right: 3.5rem;
+    padding-bottom: 3rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
     opacity: 0;
     transform: translateY(20px);
-    animation: fadeInSlideUp var(--transition-speed) 0.1s var(--transition-ease) forwards;
+    animation: fadeInSlideUp var(--transition-speed-normal) 0.1s var(--transition-ease) forwards;
 }
 
-/* Keyframe for page fade-in and slide-up */
 @keyframes fadeInSlideUp {
     to {
         opacity: 1;
@@ -244,36 +303,190 @@ body.dark-mode .stSidebar a > button {
     }
 }
 
+/* Welcome Banner (using a custom class) */
+.welcome-banner {
+    background: linear-gradient(to right, #e0f2fe, #e3f5fe); /* Light blue gradient */
+    border-radius: var(--border-radius-lg);
+    padding: 2rem 2.5rem;
+    box-shadow: var(--shadow-welcome-banner);
+    margin-bottom: 2.5rem;
+    position: relative; /* For absolute positioning of emojis */
+    overflow: hidden;
+    color: var(--color-text-primary-light);
+}
+
+body.dark-mode .welcome-banner {
+    background: linear-gradient(to right, #344760, #3e5672);
+    color: var(--color-text-primary-dark);
+}
+
+.welcome-banner h1 {
+    font-size: 2em;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary-light); /* Specific for banner */
+}
+body.dark-mode .welcome-banner h1 {
+    color: var(--color-text-primary-dark);
+}
+
+.welcome-banner p {
+    font-size: 0.95em;
+    color: var(--color-text-secondary-light); /* Specific for banner */
+    margin-bottom: 0;
+}
+body.dark-mode .welcome-banner p {
+    color: var(--color-text-secondary-dark);
+}
+
+/* Welcome Banner Emojis/Icons (using ::before/::after or separate elements) */
+/* You'll likely use st.markdown with specific emojis and inline styling or classes */
+.welcome-banner .emoji-top-left {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 2.5em;
+    opacity: 0.8;
+}
+.welcome-banner .emoji-bottom-right {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 3em;
+    opacity: 0.8;
+}
+
+
+/* Overview Dashboard Header (with colored bar) */
+.overview-dashboard-header { /* Custom class for st.markdown of the header */
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--color-text-primary-light);
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem; /* Space for the bar */
+}
+body.dark-mode .overview-dashboard-header {
+    color: var(--color-text-primary-dark);
+}
+
+.overview-dashboard-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px; /* Thickness of the bar */
+    width: 60px; /* Length of the bar */
+    background: linear-gradient(to right, var(--color-accent-blue), var(--color-accent-pink)); /* Gradient bar */
+    border-radius: 2px;
+}
+
+
+/* Key Performance Indicators (KPI Cards - st.metric) */
+.stMetric {
+    background-color: var(--color-bg-secondary-light);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    overflow: hidden;
+    border: 1px solid var(--color-border-light); /* Subtle border for definition */
+}
+
+body.dark-mode .stMetric {
+    background-color: var(--color-bg-secondary-dark);
+    border: 1px solid var(--color-border-dark);
+}
+
+.stMetric:hover {
+    transform: translateY(-3px); /* Subtle lift on hover */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Slightly more pronounced shadow */
+}
+body.dark-mode .stMetric:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stMetric > div:first-child { /* The title of the metric */
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9em;
+    color: var(--color-text-secondary-light);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+body.dark-mode .stMetric > div:first-child {
+    color: var(--color-text-secondary-dark);
+}
+
+/* Question Mark Icon (inside stMetric title) */
+.stMetric > div:first-child .css-1byxvxm { /* This targets the default help icon wrapper */
+    color: var(--color-text-secondary-light); /* Or a specific icon color */
+    font-size: 1.1em;
+    cursor: help;
+    opacity: 0.7;
+    transition: opacity var(--transition-speed-fast) var(--transition-ease);
+}
+.stMetric > div:first-child .css-1byxvxm:hover {
+    opacity: 1;
+}
+body.dark-mode .stMetric > div:first-child .css-1byxvxm {
+    color: var(--color-text-secondary-dark);
+}
+
+
+.stMetric > div:nth-child(2) { /* The value/number of the metric */
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--color-text-primary-light);
+    line-height: 1.1;
+}
+body.dark-mode .stMetric > div:nth-child(2) {
+    color: var(--color-text-primary-dark);
+}
+
+.stMetric > div:nth-child(3) { /* The delta/change of the metric */
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    /* Streamlit automatically colors positive/negative delta */
+}
+
+
 /* Inputs (text_input, text_area, selectbox, multiselect, slider) */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
 .stSelectbox > div > div > div > div > span,
 .stMultiSelect > div > div > div > div > span {
-    background-color: var(--color-bg-primary-light) !important; /* Blends with background */
+    background-color: var(--color-bg-secondary-light) !important;
     color: var(--color-text-primary-light) !important;
-    border: none !important; /* No harsh borders */
-    border-radius: 1rem; /* Softly rounded */
-    padding: 0.9rem 1.2rem;
-    box-shadow: var(--soft-shadow-inner); /* Debossed effect */
-    transition: all var(--transition-speed) var(--transition-ease);
+    border: 1px solid var(--color-border-light) !important;
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    box-shadow: none;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
 }
 
 body.dark-mode .stTextInput > div > div > input,
 body.dark-mode .stTextArea > div > div > textarea,
 body.dark-mode .stSelectbox > div > div > div > div > span,
 body.dark-mode .stMultiSelect > div > div > div > div > span {
-    background-color: var(--color-bg-primary-dark) !important;
+    background-color: var(--color-bg-secondary-dark) !important;
     color: var(--color-text-primary-dark) !important;
-    box-shadow: var(--soft-shadow-inner);
+    border: 1px solid var(--color-border-dark) !important;
 }
 
 .stTextInput > div > div > input:focus,
 .stTextArea > div > div > textarea:focus,
 .stSelectbox > div > div > div:focus-within,
 .stMultiSelect > div > div > div:focus-within {
-    box-shadow: var(--soft-shadow-light), 0 0 0 3px var(--color-accent-light) !important; /* Subtle outer glow + soft extruded */
+    border-color: var(--color-accent-blue) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important; /* Blue focus ring */
     outline: none !important;
-    transform: translateY(-1px); /* Slight lift on focus */
 }
 
 /* Labels for inputs */
@@ -284,11 +497,11 @@ body.dark-mode .stMultiSelect > div > div > div > div > span {
 .stSlider label,
 .stRadio label,
 .stCheckbox label {
-    color: var(--color-text-primary-light) !important;
-    font-weight: 600;
-    margin-bottom: 0.6rem;
+    color: var(--color-text-secondary-light) !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
     display: block;
-    font-size: 0.95em;
+    font-size: 0.9em;
 }
 
 body.dark-mode .stTextInput label,
@@ -298,92 +511,98 @@ body.dark-mode .stMultiSelect label,
 body.dark-mode .stSlider label,
 body.dark-mode .stRadio label,
 body.dark-mode .stCheckbox label {
-    color: var(--color-text-primary-dark) !important;
+    color: var(--color-text-secondary-dark) !important;
 }
 
 /* Main Content Buttons */
 .stButton > button {
-    background-color: var(--color-accent-main);
+    background-color: var(--color-accent-blue);
     color: white;
     border: none;
-    border-radius: 1rem;
-    padding: 0.9rem 1.5rem;
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1.5rem;
     font-weight: 600;
-    transition: all var(--transition-speed) var(--transition-ease);
-    box-shadow: var(--soft-shadow-light); /* Soft extruded button */
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    box-shadow: var(--shadow-card);
     cursor: pointer;
-    overflow: hidden;
-    position: relative;
-    transform: translateZ(0);
 }
 
 .stButton > button:active {
-    box-shadow: var(--soft-shadow-pressed); /* Pressed in effect */
-    transform: scale(0.98);
+    transform: translateY(1px) scale(0.99);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .stButton > button:hover {
-    background-color: var(--color-accent-dark);
-    box-shadow: var(--soft-shadow-pressed); /* Keep pressed effect on hover */
-    transform: scale(0.98); /* Slightly scale down */
+    background-color: var(--color-accent-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+body.dark-mode .stButton > button:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 
-/* Expander (Accordion) Styling (Soft UI) */
+/* Expander (Accordion) Styling */
 .streamlit-expanderHeader {
-    background-color: var(--color-bg-primary-light);
+    background-color: var(--color-bg-secondary-light);
     color: var(--color-text-primary-light);
-    border-radius: 1rem;
+    border-radius: var(--border-radius-md);
     padding: 0.9rem 1.2rem;
     font-weight: 600;
-    border: none;
-    box-shadow: var(--soft-shadow-light); /* Soft extruded */
-    transition: all var(--transition-speed) var(--transition-ease);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
     cursor: pointer;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 body.dark-mode .streamlit-expanderHeader {
-    background-color: var(--color-bg-primary-dark);
+    background-color: var(--color-bg-secondary-dark);
     color: var(--color-text-primary-dark);
-    box-shadow: var(--soft-shadow-light);
+    border: 1px solid var(--color-border-dark);
 }
 
 .streamlit-expanderHeader:hover {
-    background-color: var(--color-accent-subtle);
-    color: var(--color-accent-main);
-    box-shadow: var(--soft-shadow-pressed); /* Pressed in effect */
-    transform: scale(0.99);
+    background-color: var(--color-accent-blue-soft);
+    border-color: var(--color-accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+body.dark-mode .streamlit-expanderHeader:hover {
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .streamlit-expanderContent {
-    background-color: var(--color-bg-secondary-light); /* Slightly different background for content */
+    background-color: var(--color-bg-secondary-light);
     color: var(--color-text-primary-light);
-    border: none;
-    border-radius: 1rem;
+    border: 1px solid var(--color-border-light);
+    border-top: none;
+    border-bottom-left-radius: var(--border-radius-md);
+    border-bottom-right-radius: var(--border-radius-md);
     padding: 1.5rem;
-    margin-top: -0.5rem; /* Overlap for smooth transition */
-    box-shadow: var(--soft-shadow-inner); /* Debossed effect for content */
-    animation: fadeIn 0.4s var(--transition-ease) forwards;
+    margin-top: -0.4rem;
+    box-shadow: var(--shadow-card);
+    animation: fadeIn var(--transition-speed-normal) var(--transition-ease) forwards;
 }
 
 body.dark-mode .streamlit-expanderContent {
     background-color: var(--color-bg-secondary-dark);
     color: var(--color-text-primary-dark);
-    box-shadow: var(--soft-shadow-inner);
+    border: 1px solid var(--color-border-dark);
 }
 
-/* Info/Success/Warning/Error boxes (Soft UI) */
+/* Info/Success/Warning/Error boxes (Alerts) */
 .stAlert {
-    border-radius: 1rem;
-    padding: 1.2rem 1.5rem;
+    border-radius: var(--border-radius-md);
+    padding: 1rem 1.5rem;
     margin-bottom: 1.5rem;
     font-weight: 500;
-    box-shadow: var(--soft-shadow-light); /* Extruded alert */
-    transition: all var(--transition-speed) var(--transition-ease);
-    border: none; /* No harsh borders */
-    opacity: 0;
-    animation: fadeIn 0.4s var(--transition-ease) forwards;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-speed-normal) var(--transition-ease);
+    border-left: 5px solid; /* Clean accent line */
+    opacity: 0; /* For fade-in */
+    animation: fadeIn var(--transition-speed-normal) var(--transition-ease) forwards;
 }
 
 @keyframes fadeIn {
@@ -391,123 +610,61 @@ body.dark-mode .streamlit-expanderContent {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Specific colors - adjusted for softer aesthetic */
-.stAlert.stInfo { background-color: #e3f2fd; color: #1565c0; }
-.stAlert.stSuccess { background-color: #e8f5e9; color: #2e7d32; }
-.stAlert.stWarning { background-color: #fffde7; color: #ef6c00; }
-.stAlert.stError { background-color: #ffebee; color: #c62828; }
+.stAlert.stInfo { background-color: #e3f2fd; color: #1565c0; border-color: #3b82f6; }
+.stAlert.stSuccess { background-color: #e8f5e9; color: #2e7d32; border-color: #22c55e; }
+.stAlert.stWarning { background-color: #fffde7; color: #ef6c00; border-color: #f97316; }
+.stAlert.stError { background-color: #ffebee; color: #c62828; border-color: #ef4444; }
 
-body.dark-mode .stAlert.stInfo { background-color: #0d47a1; color: #90caf9; }
-body.dark-mode .stAlert.stSuccess { background-color: #1b5e20; color: #a5d6a7; }
-body.dark-mode .stAlert.stWarning { background-color: #ff6f00; color: #ffeb3b; }
-body.dark-mode .stAlert.stError { background-color: #b71c1c; color: #ef9a9a; }
+body.dark-mode .stAlert.stInfo { background-color: #1a3b5c; color: #99c2e0; border-color: #3b82f6; }
+body.dark-mode .stAlert.stSuccess { background-color: #1a4f21; color: #87c78e; border-color: #22c55e; }
+body.dark-mode .stAlert.stWarning { background-color: #4f3b1a; color: #ffeb99; border-color: #f97316; }
+body.dark-mode .stAlert.stError { background-color: #4f1a1a; color: #f29999; border-color: #ef4444; }
 
+.stAlert > div > div > div > div {
+    color: inherit;
+}
 
-/* Dataframe styling (Soft UI) */
+/* Dataframe styling */
 .stDataFrame {
-    border-radius: 1rem;
+    border-radius: var(--border-radius-md);
     overflow: hidden;
-    box-shadow: var(--soft-shadow-light); /* Extruded dataframe */
-    border: none;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border-light);
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
-    transition: all var(--transition-speed) var(--transition-ease);
+    transition: all var(--transition-speed-normal) var(--transition-ease);
 }
 body.dark-mode .stDataFrame {
-    box-shadow: var(--soft-shadow-light);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border-dark);
 }
 
-/* Metric boxes (Soft UI) */
-.stMetric {
-    background-color: var(--color-bg-primary-light);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: none;
-    box-shadow: var(--soft-shadow-light); /* Extruded metric */
-    transition: all var(--transition-speed) var(--transition-ease);
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-}
-
-body.dark-mode .stMetric {
-    background-color: var(--color-bg-primary-dark);
-    box-shadow: var(--soft-shadow-light);
-}
-
-.stMetric:hover {
-    box-shadow: var(--soft-shadow-pressed); /* Pressed in effect */
-    transform: scale(0.99);
-}
-
-/* Slider (Soft UI) */
-.stSlider > div > div > div > div {
-    background-color: var(--color-bg-primary-light) !important;
-    box-shadow: var(--soft-shadow-inner) !important; /* Debossed track */
-    border-radius: 0.5rem !important;
-    height: 10px !important;
-}
-body.dark-mode .stSlider > div > div > div > div {
-    background-color: var(--color-bg-primary-dark) !important;
-    box-shadow: var(--soft-shadow-inner) !important;
-}
-
-.stSlider [data-baseweb="slider"] div[role="slider"] { /* Thumb */
-    background-color: var(--color-accent-main) !important;
-    border-radius: 50% !important;
-    height: 20px !important;
-    width: 20px !important;
-    box-shadow: var(--soft-shadow-light) !important; /* Extruded thumb */
-    border: none !important;
-    transition: all var(--transition-speed) var(--transition-ease) !important;
-}
-.stSlider [data-baseweb="slider"] div[role="slider"]:hover,
-.stSlider [data-baseweb="slider"] div[role="slider"]:focus {
-    background-color: var(--color-accent-dark) !important;
-    box-shadow: var(--soft-shadow-pressed) !important;
-    transform: scale(0.9) !important; /* Subtle press */
-    outline: none !important;
-}
-
-/* Radio buttons and checkboxes (Soft UI) */
-.stRadio div[role="radiogroup"] label, .stCheckbox label {
-    padding: 0.6rem 0;
-    color: var(--color-text-primary-light);
-    font-weight: 500;
-    transition: color var(--transition-speed) var(--transition-ease);
-    cursor: pointer;
-}
-body.dark-mode .stRadio div[role="radiogroup"] label, body.dark-mode .stCheckbox label {
-    color: var(--color-text-primary-dark);
-}
-
-/* Custom progress bar (Soft UI) */
+/* Progress bar */
 .stProgress > div > div {
-    background-color: var(--color-bg-primary-light) !important;
+    background-color: var(--color-border-light) !important;
     height: 8px !important;
     border-radius: 4px !important;
     overflow: hidden;
-    box-shadow: var(--soft-shadow-inner); /* Debossed track */
+    box-shadow: none;
 }
 body.dark-mode .stProgress > div > div {
-    background-color: var(--color-bg-primary-dark) !important;
-    box-shadow: var(--soft-shadow-inner);
+    background-color: var(--color-border-dark) !important;
 }
 
 .stProgress > div > div > div {
-    background-color: var(--color-accent-main) !important; /* Solid accent color */
+    background-color: var(--color-accent-blue) !important;
     border-radius: 4px !important;
-    transition: width var(--transition-speed) var(--transition-ease);
+    transition: width var(--transition-speed-normal) var(--transition-ease);
 }
 
-/* Custom Loader/Spinner (Soft & smooth) */
+/* Loader/Spinner */
 .stSpinner > div > div {
-    border-top-color: var(--color-accent-main) !important;
-    border-left-color: var(--color-accent-main) !important;
-    animation: spin 1s ease-in-out infinite, pulseColor 2s ease-in-out infinite alternate;
-    width: 50px !important;
-    height: 50px !important;
-    border-width: 5px !important;
+    border-top-color: var(--color-accent-blue) !important;
+    border-left-color: var(--color-accent-blue) !important;
+    animation: spin 0.8s linear infinite;
+    width: 40px !important;
+    height: 40px !important;
+    border-width: 4px !important;
 }
 
 @keyframes spin {
@@ -515,18 +672,13 @@ body.dark-mode .stProgress > div > div {
     100% { transform: rotate(360deg); }
 }
 
-@keyframes pulseColor {
-    0% { border-top-color: var(--color-accent-main) !important; border-left-color: var(--color-accent-main) !important; }
-    50% { border-top-color: var(--color-accent-light) !important; border-left-color: var(--color-accent-dark) !important; }
-    100% { border-top-color: var(--color-accent-main) !important; border-left-color: var(--color-accent-main) !important; }
-}
 
-
-/* --- Rules to Hide Streamlit Elements (Standard) --- */
+/* --- Rules to Hide Streamlit Elements --- */
+/* These hide the default Streamlit header, footer, and a specific "Deploy" button */
 
 header { visibility: hidden; height: 0px; padding: 0px; }
 .stApp header { visibility: hidden; height: 0px; padding: 0px; }
 .css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir { visibility: hidden; display: none; }
 footer { visibility: hidden; height: 0px; padding: 0px; }
 .stApp footer { visibility: hidden; height: 0px; padding: 0px; }
-.main .block-container { padding-top: 2rem; }
+.main .block-container { padding-top: 2rem; } /* Restore some top padding */
