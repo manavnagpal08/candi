@@ -18,15 +18,15 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
+from email.mime.base import MIMEBase # Import MIMEBase for file attachment
 from email import encoders
 from io import BytesIO
 import traceback
 import time
 import pandas as pd
 import json
-import requests
-from weasyprint import HTML # Import WeasyPrint for HTML to PDF conversion
+import requests # Import requests for REST API calls
+# Removed: from weasyprint import HTML # WeasyPrint is no longer used
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -37,7 +37,7 @@ try:
 except LookupError:
     nltk.download('stopwords')
 
-# Define global constants (copy from app.py to ensure consistency in this module)
+# Define global constants
 MASTER_CITIES = set([
     "Bengaluru", "Mumbai", "Delhi", "Chennai", "Hyderabad", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
     "Chandigarh", "Kochi", "Coimbatore", "Nagpur", "Bhopal", "Indore", "Gurgaon", "Noida", "Surat", "Visakhapatnam",
@@ -213,11 +213,119 @@ APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS Y
 # For example, if you upload them to a GitHub Pages repository.
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
+# --- Firebase REST API Functions ---
+
+# Helper function to convert Python data to Firestore REST API format
+def _convert_to_firestore_rest_format(data):
+    """
+    Converts a Python dictionary to the Firestore REST API document format.
+    Handles basic types (string, int, float, bool) and lists of strings.
+    Nested dictionaries are converted to mapValue.
+    """
+    fields = {}
+    for key, value in data.items():
+        if value is None:
+            fields[key] = {"nullValue": None}
+        elif isinstance(value, bool):
+            fields[key] = {"booleanValue": value}
+        elif isinstance(value, int):
+            fields[key] = {"integerValue": str(value)} # Firestore REST API expects integerValue as string
+        elif isinstance(value, float):
+            fields[key] = {"doubleValue": value}
+        elif isinstance(value, str):
+            fields[key] = {"stringValue": value}
+        elif isinstance(value, list):
+            list_values = []
+            for item in value:
+                # Recursively convert items in list if they are complex, otherwise stringValue
+                if isinstance(item, dict):
+                    list_values.append({"mapValue": {"fields": _convert_to_firestore_rest_format(item)["fields"]}})
+                elif isinstance(item, list):
+                    # Handle nested lists by stringifying for simplicity, or implement deeper recursion
+                    list_values.append({"stringValue": json.dumps(item)})
+                elif isinstance(item, (int, float)):
+                    list_values.append({"doubleValue": float(item)})
+                elif isinstance(item, bool):
+                    list_values.append({"booleanValue": item})
+                else:
+                    list_values.append({"stringValue": str(item)})
+            fields[key] = {"arrayValue": {"values": list_values}}
+        elif isinstance(value, dict):
+            fields[key] = {"mapValue": {"fields": _convert_to_firestore_rest_format(value)["fields"]}}
+        else:
+            fields[key] = {"stringValue": str(value)} # Fallback for other types
+    return {"fields": fields}
+
+def save_screening_result_to_firestore_rest(result_data):
+    """
+    Saves a single screening result to Firestore using the REST API.
+    Requires FIREBASE_PROJECT_ID and FIREBASE_API_KEY in st.secrets.
+    """
+    try:
+        project_id = st.secrets["FIREBASE_PROJECT_ID"]
+        api_key = st.secrets["FIREBASE_API_KEY"]
+        
+        # Firestore collection path (using 'leaderboard' as before)
+        # Note: For public data, your Firestore security rules must allow unauthenticated writes
+        # or you need to implement user authentication and pass an ID token.
+        collection_id = "leaderboard" 
+        
+        # Firestore REST API endpoint for creating a document with an auto-generated ID
+        # To specify an ID, you'd use PATCH /v1/projects/{project_id}/databases/(default)/documents/{collection_id}/{document_id}
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}" # Corrected API key interpolation
+
+        # Prepare data for Firestore REST API
+        # Ensure 'Matched Keywords (Categorized)' and 'Missing Skills (Categorized)' are dicts, not JSON strings
+        data_to_send = result_data.copy()
+        if isinstance(data_to_send.get('Matched Keywords (Categorized)'), str):
+            try:
+                data_to_send['Matched Keywords (Categorized)'] = json.loads(data_to_send['Matched Keywords (Categorized)'])
+            except json.JSONDecodeError:
+                data_to_send['Matched Keywords (Categorized)'] = {} # Fallback
+        if isinstance(data_to_send.get('Missing Skills (Categorized)'), str):
+            try:
+                data_to_send['Missing Skills (Categorized)'] = json.loads(data_to_send['Missing Skills (Categorized)'])
+            except json.JSONDecodeError:
+                data_to_send['Missing Skills (Categorized)'] = {} # Fallback
+
+        # Convert datetime.date objects to string for JSON serialization
+        if isinstance(data_to_send.get('Date Screened'), (datetime, date)):
+            data_to_send['Date Screened'] = data_to_send['Date Screened'].strftime("%Y-%m-%d")
+
+        # Remove raw text if it's too large or not needed in leaderboard
+        data_to_send.pop('Resume Raw Text', None)
+
+        firestore_payload = _convert_to_firestore_rest_format(data_to_send)
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(firestore_payload))
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+
+        st.success(f"📈 Your score has been added to the leaderboard via REST API!")
+        st.info("Remember: For write access, your Firestore security rules must allow it. For production, consider secure authentication.")
+
+    except KeyError as e:
+        st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
+        st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
+    except requests.exceptions.HTTPError as e:
+        st.error(f"❌ Failed to save results to leaderboard via REST API: HTTP Error {e.response.status_code}")
+        st.error(f"Response: {e.response.text}")
+        st.warning("This often indicates an issue with Firestore security rules (e.g., write access denied) or incorrect API key/project ID.")
+    except Exception as e:
+        st.error(f"❌ An unexpected error occurred while saving to leaderboard via REST API: {e}")
+        st.exception(e)
+
+
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
 # If running locally without this, you might need to hardcode a default or set it via env var.
 appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
+
+# Removed get_tesseract_cmd as Tesseract is no longer used.
 
 # Load ML models once using st.cache_resource
 @st.cache_resource
@@ -984,20 +1092,18 @@ The {sender_name}""")
 
 def send_certificate_email(recipient_email, candidate_name, score, certificate_html_content, certificate_public_url, gmail_address, gmail_app_password):
     """
-    Sends an email with the certificate embedded as HTML content and attached as a PDF file.
+    Sends an email with the certificate HTML content.
+    No PDF attachment is included as WeasyPrint is removed.
     Includes a link to the publicly hosted certificate (if applicable).
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
 
-    msg = MIMEMultipart('mixed') # Use 'mixed' for attachments
+    msg = MIMEMultipart('alternative') # Use 'alternative' for plain text + HTML
     msg['Subject'] = f"🎉 Congratulations, {candidate_name}! Your ScreenerPro Certificate is Here!"
     msg['From'] = gmail_address
     msg['To'] = recipient_email
-
-    # Create the alternative part (plain text + HTML)
-    msg_alternative = MIMEMultipart('alternative')
 
     plain_text_body = f"""Hi {candidate_name},
 
@@ -1006,8 +1112,6 @@ Congratulations on successfully clearing the ScreenerPro resume screening proces
 We’re proud to award you an official certificate recognizing your skills and employability.
 
 You can view your certificate online here: {certificate_public_url}
-
-The certificate is also attached as a PDF file for your convenience.
 
 Have questions? Contact us at support@screenerpro.in
 
@@ -1024,7 +1128,6 @@ Have questions? Contact us at support@screenerpro.in
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
             
             <p>You can view your certificate online here: <a href="{certificate_public_url}">{certificate_public_url}</a></p>
-            <p>The certificate is also attached to this email as a PDF file.</p>
             
             <p>Have questions? Contact us at support@screenerpro.in</p>
             <p>🚀 Keep striving. Keep growing.</p>
@@ -1032,31 +1135,14 @@ Have questions? Contact us at support@screenerpro.in
         </body>
     </html>
     """
-    msg_alternative.attach(MIMEText(plain_text_body, 'plain'))
-    msg_alternative.attach(MIMEText(html_body, 'html'))
-    msg.attach(msg_alternative)
-
-    # Generate PDF using WeasyPrint
-    try:
-        pdf_bytes = HTML(string=certificate_html_content).write_pdf()
-    except Exception as e:
-        st.error(f"❌ Error generating PDF for email attachment: {e}")
-        st.info("WeasyPrint requires system dependencies (like Cairo, Pango, GDK-Pixbuf). Ensure these are listed in your `packages.txt` file.")
-        return False
-
-    # Attach the PDF certificate file
-    part = MIMEBase('application', 'pdf')
-    part.set_payload(pdf_bytes)
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f'attachment; filename="ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.pdf"')
-    part.add_header('Content-Type', 'application/pdf; charset=utf-8') # Specify content type as PDF
-    msg.attach(part)
+    msg.attach(MIMEText(plain_text_body, 'plain'))
+    msg.attach(MIMEText(html_body, 'html'))
     
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(gmail_address, gmail_app_password)
             smtp.send_message(msg)
-        st.success(f"✅ Certificate email sent to {recipient_email} with PDF attachment!")
+        st.success(f"✅ Certificate email sent to {recipient_email}!")
         return True
     except smtplib.SMTPAuthenticationError:
         st.error("❌ Failed to send email: Authentication error. Please check your Gmail address and App Password.")
@@ -1687,11 +1773,14 @@ def resume_screener_page():
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for display
 
                 # Construct the public URL for the certificate (if you plan to host them)
-                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.pdf" # Changed to .pdf extension
+                # For this implementation, the PDF is generated on-the-fly for download/email.
+                # If you need to host PDFs, you'd need a separate storage mechanism (e.g., AWS S3, GitHub Pages for PDFs).
+                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.html" # Changed to .html extension
 
                 # --- Automatic Email Sending ---
                 candidate_email = candidate_data.get('Email')
                 if candidate_email and candidate_email != "Not Found":
+                    # Check if email has already been sent for this session and candidate
                     email_sent_key = f"email_sent_{candidate_data['Certificate ID']}"
                     if not st.session_state.get(email_sent_key, False):
                         with st.spinner(f"Sending certificate to {candidate_email}..."):
@@ -1702,7 +1791,7 @@ def resume_screener_page():
                                 candidate_email, 
                                 candidate_data['Candidate Name'], 
                                 candidate_data['Score (%)'], 
-                                certificate_html_content, # Pass HTML content for WeasyPrint
+                                certificate_html_content, # Pass HTML content for email body
                                 certificate_public_url, # Pass public URL
                                 gmail_address, 
                                 gmail_app_password
@@ -1717,20 +1806,15 @@ def resume_screener_page():
                 col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3)
                 
                 with col_cert_download:
-                    # Generate PDF bytes for download
-                    try:
-                        pdf_download_bytes = HTML(string=certificate_html_content).write_pdf()
-                        st.download_button(
-                            label="⬇️ Download Certificate (PDF)",
-                            data=pdf_download_bytes,
-                            file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.pdf",
-                            mime="application/pdf",
-                            key="download_cert_button",
-                            help="Download the certificate as a PDF file."
-                        )
-                    except Exception as e:
-                        st.error(f"❌ Error generating PDF for download: {e}")
-                        st.info("PDF generation requires system dependencies. Ensure these are listed in your `packages.txt` file.")
+                    # Download button for HTML file
+                    st.download_button(
+                        label="⬇️ Download Certificate (HTML)",
+                        data=certificate_html_content.encode('utf-8'), # Encode HTML string to bytes
+                        file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.html",
+                        mime="text/html",
+                        key="download_cert_button",
+                        help="Download the certificate as an HTML file. You can open it in your browser and use 'Print to PDF' to save it as a PDF."
+                    )
                 
                 # Share message for social media
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
@@ -1741,7 +1825,7 @@ Check out my certificate here: {certificate_public_url}
 
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
-#resume #jobsearch #ai #caregrowth #certified #ScreenerPro #LinkedIn
+#resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
 🌐 Learn more about the tool: For candidate login: {urllib.parse.quote(APP_BASE_URL)} and for HR login: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
@@ -1756,6 +1840,7 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
                 # --- Firestore Save for Leaderboard (using REST API) ---
+                # This will attempt to save the data via REST API
                 save_screening_result_to_firestore_rest(candidate_data)
                 # --- End of Firestore save section ---
 
@@ -1773,7 +1858,11 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
         else:
             st.info("No results to display for the candidate.")
 
+    # This block ensures the preview is hidden if the input is cleared or no resume is uploaded
     if not uploaded_resume_file and st.session_state['certificate_html_content']:
         st.session_state['certificate_html_content'] = ""
-        st.rerun()
+        st.rerun() # Rerun to clear the display immediately
 
+if __name__ == "__main__":
+    st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
+    resume_screener_page()
