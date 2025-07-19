@@ -1,0 +1,685 @@
+/* style.css */
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+/* --- Light Mode Variables --- */
+:root {
+    --primary-color-light: #00cec9; /* Teal */
+    --secondary-color-light: #00b0a8; /* Darker Teal */
+    --accent-color-light: #ff9800; /* Orange for highlights */
+    --background-color-light: #f0f5f9; /* Lighter, subtle grey-blue */
+    --surface-color-light: #ffffff; /* White for sidebar, etc. */
+    --card-background-light: rgba(255, 255, 255, 0.8); /* Frosted glass effect */
+    --input-background-light: rgba(255, 255, 255, 0.9); /* Frosted glass for inputs */
+    --text-color-light: #333333;
+    --text-secondary-light: #777777;
+    --border-color-light: rgba(200, 200, 200, 0.7);
+    --shadow-light: rgba(0,0,0,0.15);
+    --shadow-dark: rgba(0,0,0,0.3);
+}
+
+/* --- Dark Mode Variables --- */
+body.dark-mode {
+    --primary-color-dark: #00cec9; /* Teal */
+    --secondary-color-dark: #00b0a8; /* Darker Teal */
+    --accent-color-dark: #ffd700; /* Gold for highlights */
+    --background-color-dark: #0d0d0d; /* Even darker, almost black */
+    --surface-color-dark: #1a1a1a; /* Sidebar, outer card backgrounds */
+    --card-background-dark: rgba(45, 45, 45, 0.7); /* Frosted glass effect */
+    --input-background-dark: rgba(60, 60, 60, 0.7); /* Frosted glass for inputs */
+    --text-color-dark: #e0e0e0;
+    --text-secondary-dark: #b0b0b0;
+    --border-color-dark: rgba(75, 75, 75, 0.5); /* Semi-transparent border */
+    --shadow-light-dark: rgba(0,0,0,0.4); /* Renamed to avoid clash */
+    --shadow-dark-dark: rgba(0,0,0,0.8); /* Renamed to avoid clash */
+}
+
+
+/* --- Base Styles (apply to both themes, use specific variables where needed) --- */
+html, body, [data-testid="stAppViewContainer"] {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.7s ease-in-out;
+    overflow-x: hidden; /* Prevent horizontal scrollbar from particle effects */
+}
+
+/* Default colors (Light mode) */
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: var(--background-color-light);
+    color: var(--text-color-light);
+}
+[data-testid="stSidebar"] {
+    background-color: var(--surface-color-light);
+    color: var(--text-color-light);
+    box-shadow: 5px 0 20px var(--shadow-light);
+    border-right: 1px solid var(--border-color-light);
+}
+
+/* Dark mode specific overrides */
+body.dark-mode html,
+body.dark-mode body,
+body.dark-mode [data-testid="stAppViewContainer"] {
+    background-color: var(--background-color-dark);
+    color: var(--text-color-dark);
+}
+body.dark-mode [data-testid="stSidebar"] {
+    background-color: var(--surface-color-dark);
+    color: var(--text-color-dark);
+    box-shadow: 5px 0 20px var(--shadow-dark-dark);
+    border-right: 1px solid var(--border-color-dark);
+}
+
+/* Particle Background Effect (Simple CSS fallback) */
+[data-testid="stAppViewContainer"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Behind everything */
+    animation: backgroundPulse 15s infinite alternate ease-in-out;
+}
+/* Light mode particles */
+[data-testid="stAppViewContainer"]::before {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(0,206,201, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(255,152,0, 0.03) 0%, transparent 50%);
+}
+/* Dark mode particles */
+body.dark-mode [data-testid="stAppViewContainer"]::before {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(0,206,201, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(255,215,0, 0.08) 0%, transparent 50%);
+}
+
+@keyframes backgroundPulse {
+    0% { background-position: 0% 0%, 100% 100%; }
+    100% { background-position: 100% 100%, 0% 0%; }
+}
+/* --- END Particle Background Effect --- */
+
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    /* Use current theme's secondary color */
+    background: var(--secondary-color-light);
+}
+
+/* Light mode scrollbar */
+::-webkit-scrollbar-track { background: var(--background-color-light); }
+::-webkit-scrollbar-thumb { background: var(--primary-color-light); }
+
+/* Dark mode scrollbar */
+body.dark-mode ::-webkit-scrollbar-track { background: var(--surface-color-dark); }
+body.dark-mode ::-webkit-scrollbar-thumb { background: var(--primary-color-dark); }
+body.dark-mode ::-webkit-scrollbar-thumb:hover { background: var(--secondary-color-dark); }
+/* --- END Custom Scrollbar --- */
+
+
+[data-testid="stSidebar"] {
+    padding: 2.5rem 1.2rem; /* More padding */
+    transition: background-color 0.7s ease-in-out, box-shadow 0.5s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.03em;
+}
+/* Light mode headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color-light);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.08);
+}
+/* Dark mode headings */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+    color: var(--primary-color-dark);
+    text-shadow: 3px 3px 8px rgba(0,0,0,0.8);
+}
+
+
+/* Main Content Area */
+.main .block-container {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+/* Text input, text area, selectbox, etc. */
+.stTextInput>div>div>input,
+.stTextArea>div>div>textarea,
+.stSelectbox>div>div>div>div>span,
+.stMultiSelect>div>div>div>div>span,
+.stSlider .stSliderHandle,
+.stRadio > label > div,
+.stCheckbox > label > div {
+    border-radius: 0.8rem; /* Slightly more rounded */
+    padding: 1rem; /* More padding */
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* Light mode inputs */
+.stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div>div>span, .stMultiSelect>div>div>div>div>span, .stSlider .stSliderHandle, .stRadio > label > div, .stCheckbox > label > div {
+    background-color: var(--input-background-light) !important;
+    color: var(--text-color-light) !important;
+    border: 1px solid var(--border-color-light) !important;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.1); /* Deeper inner shadow */
+}
+/* Dark mode inputs */
+body.dark-mode .stTextInput>div>div>input, body.dark-mode .stTextArea>div>div>textarea, body.dark-mode .stSelectbox>div>div>div>div>span, body.dark-mode .stMultiSelect>div>div>div>div>span, body.dark-mode .stSlider .stSliderHandle, body.dark-mode .stRadio > label > div, body.dark-mode .stCheckbox > label > div {
+    background-color: var(--input-background-dark) !important;
+    color: var(--text-color-dark) !important;
+    border: 1px solid var(--border-color-dark) !important;
+    backdrop-filter: blur(8px); /* More blur for dark mode */
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.4);
+}
+
+/* Input Field Focus Effect */
+.stTextInput>div>div>input:focus,
+.stTextArea>div>div>textarea:focus,
+.stSelectbox>div>div>div>div>span:focus,
+.stMultiSelect>div>div>div>div>span:focus {
+    outline: none;
+}
+/* Light mode input focus */
+.stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus, .stSelectbox>div>div>div>div>span:focus, .stMultiSelect>div>div>div>div>span:focus {
+    border-color: var(--primary-color-light) !important;
+    box-shadow: 0 0 0 5px rgba(0,206,201,0.3) !important;
+}
+/* Dark mode input focus */
+body.dark-mode .stTextInput>div>div>input:focus, body.dark-mode .stTextArea>div>div>textarea:focus, body.dark-mode .stSelectbox>div>div>div>div>span:focus, body.dark-mode .stMultiSelect>div>div>div>div>span:focus {
+    border-color: var(--primary-color-dark) !important;
+    box-shadow: 0 0 0 5px rgba(0,206,201,0.6) !important;
+}
+
+/* Labels for inputs */
+.stTextInput label,
+.stTextArea label,
+.stSelectbox label,
+.stMultiSelect label,
+.stSlider label,
+.stRadio label,
+.stCheckbox label {
+    font-weight: 700; /* Bolder labels */
+    margin-bottom: 0.7rem;
+}
+/* Light mode labels */
+.stTextInput label, .stTextArea label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stRadio label, .stCheckbox label {
+    color: var(--text-color-light) !important;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+}
+/* Dark mode labels */
+body.dark-mode .stTextInput label, body.dark-mode .stTextArea label, body.dark-mode .stSelectbox label, body.dark-mode .stMultiSelect label, body.dark-mode .stSlider label, body.dark-mode .stRadio label, body.dark-mode .stCheckbox label {
+    color: var(--text-color-dark) !important;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Buttons */
+.stButton>button {
+    color: white;
+    border: none;
+    border-radius: 0.8rem;
+    padding: 1rem 2rem; /* Even more prominent buttons */
+    font-weight: 800; /* Extra bold text */
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 100%;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden; /* For potential ripple effect */
+}
+/* Light mode buttons */
+.stButton>button {
+    background-image: linear-gradient(45deg, var(--primary-color-light) 0%, var(--secondary-color-light) 100%);
+    box-shadow: 0 10px 30px var(--shadow-light); /* More pronounced initial shadow */
+}
+.stButton>button:hover {
+    background-image: linear-gradient(45deg, var(--secondary-color-light) 0%, var(--primary-color-light) 100%);
+    transform: translateY(-8px) scale(1.03); /* Larger lift and slight scale */
+    box-shadow: 0 20px 40px var(--shadow-dark); /* Deeper shadow on hover */
+    border: 1px solid var(--accent-color-light); /* Highlight border on hover */
+}
+/* Dark mode buttons */
+body.dark-mode .stButton>button {
+    background-image: linear-gradient(45deg, var(--primary-color-dark) 0%, var(--secondary-color-dark) 100%);
+    box-shadow: 0 10px 30px var(--shadow-light-dark);
+}
+body.dark-mode .stButton>button:hover {
+    background-image: linear-gradient(45deg, var(--secondary-color-dark) 0%, var(--primary-color-dark) 100%);
+    box-shadow: 0 20px 40px var(--shadow-dark-dark);
+    border: 1px solid var(--accent-color-dark);
+}
+.stButton>button:active {
+    transform: translateY(-3px);
+    /* Use current theme's shadow */
+    box-shadow: 0 5px 15px var(--shadow-light);
+}
+body.dark-mode .stButton>button:active {
+    box-shadow: 0 5px 15px var(--shadow-light-dark);
+}
+
+
+/* Expander background (Glassmorphism) */
+.streamlit-expanderHeader {
+    border-radius: 0.8rem;
+    padding: 1rem 1.5rem;
+    font-weight: 700;
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* Light mode expander header */
+.streamlit-expanderHeader {
+    background-color: var(--card-background-light);
+    color: var(--text-color-light);
+    border: 1px solid var(--border-color-light);
+    box-shadow: 0 5px 15px var(--shadow-light);
+}
+.streamlit-expanderHeader:hover {
+     transform: translateY(-4px);
+     box-shadow: 0 10px 25px var(--shadow-dark);
+     border-color: var(--primary-color-light);
+}
+/* Dark mode expander header */
+body.dark-mode .streamlit-expanderHeader {
+    background-color: var(--card-background-dark);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color-dark);
+    backdrop-filter: blur(8px); /* More blur for dark mode */
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 5px 15px var(--shadow-light-dark);
+}
+body.dark-mode .streamlit-expanderHeader:hover {
+     box-shadow: 0 10px 25px var(--shadow-dark-dark);
+     border-color: var(--primary-color-dark);
+}
+
+.streamlit-expanderContent {
+    border-radius: 0.8rem;
+    padding: 1.5rem;
+    margin-top: 0.8rem;
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 5px 15px var(--shadow-light);
+}
+/* Light mode expander content */
+.streamlit-expanderContent {
+    background-color: var(--card-background-light);
+    color: var(--text-color-light);
+    border: 1px solid var(--border-color-light);
+}
+/* Dark mode expander content */
+body.dark-mode .streamlit-expanderContent {
+    background-color: var(--card-background-dark);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color-dark);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 5px 15px var(--shadow-light-dark);
+}
+
+
+/* Info/Success/Error boxes (Glassmorphism) */
+.stAlert {
+    border-radius: 0.8rem;
+    padding: 1.5rem;
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+}
+/* Light mode alerts */
+.stAlert {
+    background-color: var(--input-background-light);
+    color: var(--text-color-light);
+    border: 1px solid var(--border-color-light);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+/* Dark mode alerts */
+body.dark-mode .stAlert {
+    background-color: var(--input-background-dark);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color-dark);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+.stAlert > div > div > div > div {
+    /* Use current theme's text color */
+    color: var(--text-color-light);
+}
+body.dark-mode .stAlert > div > div > div > div {
+    color: var(--text-color-dark);
+}
+.stAlert [data-testid="stMarkdownContainer"] p {
+    /* Use current theme's text color */
+    color: var(--text-color-light) !important;
+}
+body.dark-mode .stAlert [data-testid="stMarkdownContainer"] p {
+    color: var(--text-color-dark) !important;
+}
+
+
+/* Dataframe styling (Glassmorphism) */
+.stDataFrame {
+    border-radius: 0.8rem;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* Light mode dataframe */
+.stDataFrame {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color-light);
+    background-color: var(--card-background-light);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+.stDataFrame:hover {
+     transform: translateY(-4px);
+     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+     border-color: var(--primary-color-light);
+}
+/* Dark mode dataframe */
+body.dark-mode .stDataFrame {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--card-background-dark);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+body.dark-mode .stDataFrame:hover {
+     box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+     border-color: var(--primary-color-dark);
+}
+
+.stDataFrame section.main tr:nth-child(even) {
+    /* Subtle alternating row (default light) */
+    background-color: rgba(0,0,0, 0.02);
+}
+body.dark-mode .stDataFrame section.main tr:nth-child(even) {
+    background-color: rgba(var(--text-color-dark), 0.05);
+}
+
+.stDataFrame section.main th { /* Table headers */
+    color: white !important;
+    font-weight: 700;
+    padding: 0.8rem 1rem !important;
+}
+/* Light mode table headers */
+.stDataFrame section.main th {
+    background-color: var(--secondary-color-light) !important;
+    border-bottom: 2px solid var(--primary-color-light) !important;
+}
+/* Dark mode table headers */
+body.dark-mode .stDataFrame section.main th {
+    background-color: var(--secondary-color-dark) !important;
+    border-bottom: 2px solid var(--primary-color-dark) !important;
+}
+.stDataFrame section.main td { /* Table cells */
+    padding: 0.7rem 1rem !important;
+}
+
+
+/* Metric boxes (Glassmorphism) */
+.stMetric {
+    border-radius: 0.8rem;
+    padding: 2rem; /* Even more padding */
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* Light mode metrics */
+.stMetric {
+    background-color: var(--card-background-light);
+    border: 1px solid var(--border-color-light);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+.stMetric:hover {
+     transform: translateY(-4px);
+     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+     border-color: var(--primary-color-light);
+}
+/* Dark mode metrics */
+body.dark-mode .stMetric {
+    background-color: var(--card-background-dark);
+    border: 1px solid var(--border-color-dark);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+body.dark-mode .stMetric:hover {
+     box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+     border-color: var(--primary-color-dark);
+}
+
+.stMetric > div > label {
+    font-size: 1.1em;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+/* Light mode metric label */
+.stMetric > div > label {
+    color: var(--text-secondary-light) !important;
+}
+/* Dark mode metric label */
+body.dark-mode .stMetric > div > label {
+    color: var(--text-secondary-dark) !important;
+}
+
+.stMetric > div > div {
+    font-size: 2.8em !important; /* Larger value */
+    font-weight: 900; /* Super bold */
+}
+/* Light mode metric value */
+.stMetric > div > div {
+    color: var(--primary-color-light);
+}
+/* Dark mode metric value */
+body.dark-mode .stMetric > div > div {
+    color: var(--primary-color-dark);
+}
+
+
+/* Radio buttons and checkboxes */
+.stRadio div[role="radiogroup"] label, .stCheckbox label {
+    padding: 0.7rem 0;
+    transition: color 0.3s ease;
+}
+.stRadio div[role="radiogroup"] label:hover, .stCheckbox label:hover {
+    /* Use current theme's primary color */
+    color: var(--primary-color-light) !important;
+}
+body.dark-mode .stRadio div[role="radiogroup"] label:hover, body.dark-mode .stCheckbox label:hover {
+    color: var(--primary-color-dark) !important;
+}
+
+/* Horizontal Rule (st.divider) */
+hr {
+    margin: 2.5rem 0;
+}
+/* Light mode hr */
+hr { border-top: 2px solid var(--border-color-light); }
+/* Dark mode hr */
+body.dark-mode hr { border-top: 2px solid var(--border-color-dark); }
+
+
+/* Specific style for the HR Portal button in sidebar */
+.hr-portal-button button {
+    background-image: linear-gradient(45deg, #4CAF50 0%, #388E3C 100%) !important; /* Green gradient */
+    box-shadow: 0 10px 30px rgba(76,175,80,0.3) !important;
+}
+.hr-portal-button button:hover {
+    background-image: linear-gradient(45deg, #388E3C 0%, #4CAF50 100%) !important;
+    transform: translateY(-8px) scale(1.03) !important;
+    box-shadow: 0 20px 40px rgba(76,175,80,0.4) !important;
+    /* Use current theme's accent color */
+    border-color: var(--accent-color-light) !important;
+}
+body.dark-mode .hr-portal-button button:hover {
+    border-color: var(--accent-color-dark) !important;
+}
+
+
+/* --- Custom Animations / Elements --- */
+
+/* Hero Section Text Animation */
+@keyframes fadeInSlideIn {
+    from { opacity: 0; transform: translateY(30px); } /* More prominent slide */
+    to { opacity: 1; transform: translateY(0); }
+}
+.hero-title {
+    font-size: 4em; /* Even larger title */
+    font-weight: 900; /* Super bold */
+    text-align: center;
+    margin-bottom: 0.6em;
+    animation: fadeInSlideIn 1.2s ease-out forwards;
+}
+/* Light mode hero title */
+.hero-title {
+    color: var(--primary-color-light);
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+}
+/* Dark mode hero title */
+body.dark-mode .hero-title {
+    color: var(--primary-color-dark);
+    text-shadow: 4px 4px 10px rgba(0,0,0,0.9);
+}
+
+.hero-subtitle {
+    font-size: 1.8em; /* Larger subtitle */
+    text-align: center;
+    animation: fadeInSlideIn 1.5s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+/* Light mode hero subtitle */
+.hero-subtitle {
+    color: var(--text-secondary-light);
+}
+/* Dark mode hero subtitle */
+body.dark-mode .hero-subtitle {
+    color: var(--text-secondary-dark);
+}
+
+.stAlert.info {
+    /* Use current theme's card background */
+    background-color: var(--card-background-light);
+}
+body.dark-mode .stAlert.info {
+    background-color: var(--card-background-dark);
+}
+
+/* Loader (Spinner) */
+@keyframes rotateAndScale {
+    0% { transform: rotate(0deg) scale(0.8); opacity: 0.5; }
+    50% { transform: rotate(180deg) scale(1); opacity: 1; }
+    100% { transform: rotate(360deg) scale(0.8); opacity: 0.5; }
+}
+.stSpinner > div > svg { /* Target Streamlit's default spinner SVG */
+    animation: rotateAndScale 2s infinite ease-in-out;
+    transform-origin: center center; /* Ensure rotation around center */
+}
+/* Light mode spinner */
+.stSpinner > div > svg {
+    color: var(--primary-color-light) !important;
+}
+/* Dark mode spinner */
+body.dark-mode .stSpinner > div > svg {
+    color: var(--primary-color-dark) !important;
+}
+
+[data-testid="stStatusWidget"] [data-testid="stMarkdownContainer"] p {
+    animation: none; /* Remove previous pulse */
+    font-size: 1.1em;
+}
+/* Light mode status widget */
+[data-testid="stStatusWidget"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text-color-light) !important;
+}
+/* Dark mode status widget */
+body.dark-mode [data-testid="stStatusWidget"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text-color-dark) !important;
+}
+
+
+/* Sidebar custom styling for logged in user info (Glassmorphism) */
+.sidebar-user-info {
+    padding: 1.2rem 0.8rem;
+    border-radius: 0.8rem;
+    margin-top: 1.5rem;
+    backdrop-filter: blur(5px); /* Frosted glass effect (default light) */
+    -webkit-backdrop-filter: blur(5px);
+}
+/* Light mode sidebar user info */
+.sidebar-user-info {
+    background-color: var(--card-background-light);
+    border: 1px solid var(--border-color-light);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+    color: var(--text-secondary-light);
+}
+/* Dark mode sidebar user info */
+body.dark-mode .sidebar-user-info {
+    background-color: var(--card-background-dark);
+    border: 1px solid var(--border-color-dark);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+    color: var(--text-secondary-dark);
+}
+
+.sidebar-user-info strong {
+    /* Use current theme's primary color */
+    color: var(--primary-color-light);
+}
+body.dark-mode .sidebar-user-info strong {
+    color: var(--primary-color-dark);
+}
+
+.sidebar-user-info .stAlert {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.6rem 0 !important;
+}
+
+
+/* Login/Register Tabs */
+.stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+/* Light mode tabs */
+.stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+    color: var(--text-secondary-light);
+}
+.stTabs [data-baseweb="tab-list"] button:hover [data-testid="stMarkdownContainer"] p {
+    color: var(--primary-color-light);
+}
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
+    color: var(--primary-color-light);
+}
+/* Dark mode tabs */
+body.dark-mode .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+    color: var(--text-secondary-dark);
+}
+body.dark-mode .stTabs [data-baseweb="tab-list"] button:hover [data-testid="stMarkdownContainer"] p {
+    color: var(--primary-color-dark);
+}
+body.dark-mode .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
+    color: var(--primary-color-dark);
+}
