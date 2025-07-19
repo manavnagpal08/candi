@@ -26,9 +26,21 @@ from generate_fake_data import generate_fake_data_page
 # APP_ID = "YOUR_APP_ID_FOR_FIRESTORE_PATH" # Use a consistent ID for your app's data in Firestore
 
 # Get Firebase API Key and Project ID from Streamlit Secrets, matching capitalization
-FIREBASE_API_KEY = st.secrets.get('firebase', {}).get('APIKEY', '')
+FIREBASE_API_KEY = st.secrets.get('firebase', {}).get('APIKey', '')
 FIREBASE_PROJECT_ID = st.secrets.get('firebase', {}).get('PROJECT_ID', '')
 APP_ID = st.secrets.get('firebase', {}).get('APP_ID', 'your-default-app-id') # Use a default if not provided
+
+# --- DEBUGGING: Display Firebase Secrets (REMOVE IN PRODUCTION) ---
+if not st.session_state.get("authenticated", False):
+    st.sidebar.markdown("---")
+    st.sidebar.warning("DEBUG INFO (REMOVE IN PRODUCTION):")
+    st.sidebar.write(f"st.secrets.get('firebase'): `{st.secrets.get('firebase')}`")
+    st.sidebar.write(f"API Key (from secrets): `{FIREBASE_API_KEY}`")
+    st.sidebar.write(f"Project ID (from secrets): `{FIREBASE_PROJECT_ID}`")
+    st.sidebar.write(f"App ID (from secrets): `{APP_ID}`")
+    st.sidebar.markdown("---")
+# --- END DEBUGGING ---
+
 
 # Validate that API Key and Project ID are available
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
