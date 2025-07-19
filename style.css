@@ -489,16 +489,16 @@ html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role
     transition: all 0.4s ease;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
     background: var(--input-background);
-    color: var(--text-color); /* Added for input text color */
+    color: var(--text-color) !important; /* Added !important for input text color */
 }
 
 .stTextInput > div > div > input::placeholder { /* Added for placeholder text color */
-    color: var(--text-color);
+    color: var(--text-color) !important; /* Added !important for placeholder text color */
     opacity: 0.7; /* Make placeholder slightly transparent */
 }
 
 html[data-theme="dark"] .stTextInput > div > div > input::placeholder {
-    color: var(--text-color);
+    color: var(--text-color) !important;
     opacity: 0.5; /* Slightly more transparent in dark mode */
 }
 
@@ -740,7 +740,7 @@ html[data-theme="dark"] .stAlert:hover {
 
 html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
     background-color: #2A3C4D;
-    color: #A7D9EB; /* Adjusted for better visibility in dark mode */
+    color: #E0F2F6 !important; /* Changed to a very light grey/off-white for better contrast */
     border-left: 8px solid #00B8D4;
 }
 
