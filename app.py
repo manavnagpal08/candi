@@ -76,6 +76,8 @@ def set_body_class():
     is_dark = st.get_option("theme.base") == "dark"
     body_class = "dark-mode" if is_dark else "light-mode"
     # Use st.markdown with unsafe_allow_html=True to inject the body class
+    # Note: Streamlit's internal rendering might override 'body' direct styling.
+    # The CSS typically handles light/dark mode via body.dark-mode / :root
     st.markdown(f'<body class="{body_class}">', unsafe_allow_html=True)
 
 
@@ -133,6 +135,10 @@ def is_valid_email(email):
     """Basic validation for email format."""
     # Regex for a simple email check (covers @ and at least one . after @)
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+def is_current_user_admin():
+    """Checks if the currently logged-in user is an admin."""
+    return st.session_state.get("username") in ADMIN_USERNAME
 
 def register_section():
     """Public self-registration form."""
