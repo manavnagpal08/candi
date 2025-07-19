@@ -14,7 +14,7 @@ from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
 import base64
 import random # Import random for quotes
-from generate_fake_data import generate_fake_data_page 
+from generate_fake_data import resume_screener_page 
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
     """
