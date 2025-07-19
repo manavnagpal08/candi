@@ -211,7 +211,7 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 # This URL should be where your generated HTML certificates are publicly accessible.
 # For this implementation, the PDF is generated on-the-fly for download/email, so this URL is less critical for email attachment.
-CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
+CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/certificate_verify" # <--- UPDATED URL
 
 # --- Firebase REST API Functions ---
 
