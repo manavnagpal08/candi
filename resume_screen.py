@@ -1095,6 +1095,15 @@ def send_certificate_email(recipient_email, candidate_name, score, certificate_h
     """
     Sends an email with the certificate embedded as HTML content and attached as an HTML file.
     Includes a link to the publicly hosted certificate.
+
+    NOTE: Direct server-side conversion of HTML to image (PNG/JPG) or PDF
+    for email attachments is not feasible in this environment without complex
+    external dependencies (e.g., headless browsers like Puppeteer/Playwright
+    or dedicated rendering libraries like wkhtmltopdf), which are typically
+    not available or practical in Streamlit Cloud.
+    Therefore, the certificate is attached as an HTML file. Users can open
+    this HTML file in their browser and then use their browser's native
+    "Print to PDF" or screenshot functionality to get an image/PDF.
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
@@ -1846,7 +1855,8 @@ def resume_screener_page():
                         key="download_cert_button",
                         help="Download the certificate as an HTML file. You can open it in your browser and print to PDF."
                     )
-                    st.info("💡 To get an image (PNG/JPG) of your certificate, open the downloaded HTML file in your browser and use your browser's 'Print to PDF' or screenshot functionality.")
+                    # Updated info message to clarify image/PDF generation
+                    st.info("💡 To get an **image (PNG/JPG)** or **PDF** of your certificate, open the downloaded HTML file in your browser and use your browser's **'Print to PDF'** or **screenshot functionality**.")
                 
                 # Share message for social media
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
