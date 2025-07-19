@@ -7,46 +7,12 @@ import pandas as pd # Ensure pandas is imported for DataFrame display
 
 # Import your page functions
 # Ensure these files are in the same directory as app.py or adjust paths
-# from resume_screen import resume_screener_page # Uncomment if you have this file
-# from top_leaderboard import leaderboard_page # Uncomment if you have this file
-# from about_us import about_us_page # Uncomment if you have this file
-# from feedback_form import feedback_and_help_page # Uncomment if you have this file
-# from certificate_verify import certificate_verifier_page # Uncomment if you have this file
-# from total_screened_page import total_screened_page # Uncomment if you have this file
-
-# Placeholder functions for pages if the actual files are not provided
-def resume_screener_page():
-    st.write("## Resume Screener Content")
-    st.info("This is the Resume Screener page content.")
-    st.file_uploader("Upload Resume", type=["pdf", "docx"])
-
-def leaderboard_page():
-    st.write("## Top Leaderboard Content")
-    st.info("This is the Top Leaderboard page content.")
-    st.dataframe(pd.DataFrame({'Name': ['Alice', 'Bob'], 'Score': [95, 88]}))
-
-def about_us_page():
-    st.write("## About Us Content")
-    st.info("Learn more about our platform here.")
-    st.markdown("We are dedicated to providing the best HR solutions.")
-
-def feedback_and_help_page():
-    st.write("## Feedback & Help Content")
-    st.info("Provide your valuable feedback or get help.")
-    st.text_area("Your Feedback")
-    st.button("Submit Feedback")
-
-def certificate_verifier_page():
-    st.write("## Certificate Verifier Content")
-    st.info("Verify candidate certificates here.")
-    st.text_input("Certificate ID")
-    st.button("Verify")
-
-def total_screened_page():
-    st.write("## Total Resumes Screened Content")
-    st.info("Overview of all screened resumes.")
-    st.bar_chart(pd.DataFrame({'Month': ['Jan', 'Feb', 'Mar'], 'Count': [100, 120, 150]}))
-
+from resume_screen import resume_screener_page
+from top_leaderboard import leaderboard_page
+from about_us import about_us_page
+from feedback_form import feedback_and_help_page
+from certificate_verify import certificate_verifier_page
+from total_screened_page import total_screened_page
 
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
@@ -183,7 +149,7 @@ def register_section():
                     st.session_state.authenticated = True
                     st.session_state.username = new_username
                     st.session_state.user_company = new_company_name
-                    st.session_state.current_page = "Dashboard" # Redirect to Dashboard after registration
+                    st.session_state.current_page = "resume_screen" # Redirect to Resume Screener after registration
                     st.rerun() # Rerun to apply the login and redirect
 
 def admin_registration_section():
@@ -338,7 +304,7 @@ def main():
 
     # Initialize session state for current page and theme
     if "current_page" not in st.session_state:
-        st.session_state.current_page = "Dashboard" # Default page after login
+        st.session_state.current_page = "resume_screen" # Default page after login, changed from Dashboard
     if "theme" not in st.session_state:
         st.session_state.theme = "light" # Default to light mode
 
@@ -393,13 +359,7 @@ def main():
         st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
         # Navigation Buttons (using st.button and wrapping in custom div for styling)
-        # Dashboard Button
-        # We use a custom key for each button to ensure Streamlit tracks clicks correctly
-        if st.button("Dashboard", key="nav_dashboard"):
-            st.session_state.current_page = "Dashboard"
-        st.markdown(f'<style>div[data-testid="stButton-nav_dashboard"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "Dashboard" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "Dashboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "Dashboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "Dashboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_dashboard"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "Dashboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_dashboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True) # Adjust margin for the button container
-
+        # Removed Dashboard Button as requested
 
         # Resume Screener Button
         if st.button("Resume Screener", key="nav_resume_screen"):
@@ -412,7 +372,6 @@ def main():
             st.session_state.current_page = "top_leaderboard"
         st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] > button {{ background-color: {"var(--color-accent-orange-soft)" if st.session_state.current_page == "top_leaderboard" else "transparent"} !important; color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "top_leaderboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "top_leaderboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_top_leaderboard"] > button i {{ color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
         st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
 
         # Certificate Verify Button
         if st.button("Verify Certificate", key="nav_certificate_verify"):
@@ -562,74 +521,11 @@ def main():
         )
 
 
-    if st.session_state.current_page == "Dashboard":
-        # Overview Dashboard Header with colored bar
-        st.markdown('<h2 class="overview-dashboard-header">Overview Dashboard</h2>', unsafe_allow_html=True)
+    # The Dashboard content block is removed as requested
+    # if st.session_state.current_page == "Dashboard":
+    #     # ... (Dashboard content) ...
 
-        # Key Performance Indicators (KPIs)
-        st.write("### Key Performance Indicators")
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-            st.metric(label="Resumes Screened", value="1", delta="", help="Total number of resumes processed.")
-        with col2:
-            st.metric(label="Job Descriptions", value="101", delta="", help="Number of active job descriptions.")
-        with col3:
-            st.metric(label="Shortlisted Candidates", value="0", delta="", help="Candidates moved to the next stage.")
-        with col4:
-            st.metric(label="Average Score", value="20.6%", delta="", help="Average screening score across candidates.")
-
-        st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True) # Custom styled divider
-
-        # --- Quick Actions (Placeholder for more sections) ---
-        st.write("### Quick Actions")
-        col_qa1, col_qa2, col_qa3 = st.columns(3)
-        with col_qa1:
-            st.button("Screen New Resume")
-        with col_qa2:
-            st.button("Create New JD")
-        with col_qa3:
-            st.button("View All Candidates")
-
-        st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
-
-        # --- Sample Interactive Elements (to show styling) ---
-        st.write("### Interactive Demo")
-        st.text_input("Candidate Name", placeholder="Enter candidate's full name")
-        st.text_area("Candidate Skills", placeholder="List skills separated by commas...")
-        st.selectbox("Job Role", ["Software Engineer", "Data Scientist", "Product Manager", "UI/UX Designer"], index=0)
-
-        st.slider("Match Confidence", 0, 100, 75)
-
-        with st.expander("Advanced Options"):
-            st.checkbox("Enable AI Suggestions", value=True)
-            st.date_input("Application Date")
-
-        st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
-
-        # --- System Alerts ---
-        st.write("### System Status")
-        st.info("Information: Dashboard data updated successfully a few moments ago.")
-        st.success("Success! Your latest resume screening batch completed.")
-        st.warning("Warning: Some JD entries require review for completeness.")
-        st.error("Error: Failed to connect to the external analytics service.")
-
-        st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
-
-        # --- Sample Data Table ---
-        st.write("### Recent Screenings")
-        sample_data = {
-            'Candidate': ['Alice Johnson', 'Bob Williams', 'Charlie Davis', 'Diana Miller'],
-            'Job Title': ['Software Engineer', 'Data Scientist', 'Product Manager', 'Software Engineer'],
-            'Score': [85, 72, 60, 91],
-            'Status': ['Shortlisted', 'Interviewing', 'Rejected', 'Shortlisted'],
-            'Date': ['2025-07-15', '2025-07-14', '2025-07-13', '2025-07-12']
-        }
-        sample_df = pd.DataFrame(sample_data)
-        st.dataframe(sample_df)
-
-
-    elif st.session_state.current_page == "resume_screen":
+    if st.session_state.current_page == "resume_screen":
         st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
         resume_screener_page()
 
