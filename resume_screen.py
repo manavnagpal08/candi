@@ -3340,7 +3340,7 @@ def generate_certificate_html(candidate_data):
 </head>
 <body>
   <div class="certificate">
-    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="ScreenerPro Logo" />
+    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/candi/main/logo.png" alt="ScreenerPro Logo" />
 
     <h1>CERTIFICATE OF EXCELLENCE</h1>
     <h2>Presented by ScreenerPro</h2>
