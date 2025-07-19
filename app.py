@@ -328,8 +328,8 @@ def main():
 
     if not is_authenticated:
         with st.sidebar:
-        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-        logo_path = "logo.png"  # Assuming logo is in the same directory
+            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+            logo_path = "logo.png"  # Assuming logo is in the same directory
 
         if os.path.exists(logo_path):
         # Create a clickable image that links to the HR portal
