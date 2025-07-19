@@ -267,7 +267,7 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded",
         # Updated Favicon URL
-        page_icon="https://raw.githubusercontent.com/manavnagpal08/candi/3b4ea84eed486bc2f70ffe8dc224f0a6a5f30894/logo.png" 
+        page_icon="https://raw.githubusercontent.com/manavnagpal08/candi/3b4ea84eed486bc2f70ffe8dc224f0a6a5f30894/logo.png"
     )
 
     if "current_page" not in st.session_state:
@@ -277,6 +277,7 @@ def main():
 
     # Apply global CSS based on theme
     if st.session_state.theme == "dark":
+        # ... (Your dark mode CSS remains unchanged as it was likely correct) ...
         st.markdown(
             """
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -314,7 +315,7 @@ def main():
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: 
+                background:
                     radial-gradient(circle at 10% 20%, rgba(0,206,201, 0.1) 0%, transparent 50%),
                     radial-gradient(circle at 90% 80%, rgba(255,215,0, 0.08) 0%, transparent 50%);
                 z-index: -1; /* Behind everything */
@@ -549,7 +550,7 @@ def main():
             .stRadio div[role="radiogroup"] label:hover, .stCheckbox label:hover {
                 color: var(--primary-color) !important;
             }
-            
+
             /* Horizontal Rule (st.divider) */
             hr {
                 border-top: 2px solid var(--border-color-dark); /* Thicker divider */
@@ -633,7 +634,7 @@ def main():
                 box-shadow: none !important;
                 padding: 0.6rem 0 !important;
             }
-            
+
             /* Login/Register Tabs */
             .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
                 font-size: 1.1em;
@@ -690,7 +691,7 @@ def main():
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: 
+                background:
                     radial-gradient(circle at 10% 20%, rgba(0,206,201, 0.05) 0%, transparent 50%),
                     radial-gradient(circle at 90% 80%, rgba(255,152,0, 0.03) 0%, transparent 50%);
                 z-index: -1;
@@ -1021,8 +1022,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
-
-
     # Ensure all admin users exist for testing/initial setup
     users = load_users()
     default_admin_password = "adminpass" 
