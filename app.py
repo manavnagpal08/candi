@@ -417,7 +417,7 @@ def main():
     if st.session_state.theme == "dark":
         set_body_class("dark-mode")
     else:
-        set_body_class("light-mode") # Add a light-mode class too for consistency
+        set_body_class() # Add a light-mode class too for consistency
 
     # Ensure all admin users exist for testing/initial setup
     users = load_users()
