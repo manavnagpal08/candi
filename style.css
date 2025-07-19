@@ -27,7 +27,7 @@ body,
     overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Light mode default colors */
+/* Light mode default colors (now the only active theme) */
 html {
     --background-color: #f0f2f6;
     --text-color: #333333;
@@ -36,17 +36,6 @@ html {
     --shadow-light: 0 30px 70px rgba(0, 0, 0, 0.15);
     --input-background: rgba(255,255,255,0.9);
     --input-border: rgba(0, 0, 0, 0.15);
-}
-
-/* Dark mode specific colors */
-html[data-theme="dark"] {
-    --background-color: #1a1a1a;
-    --text-color: #f0f2f6;
-    --card-background: #282828;
-    --border-color-light: rgba(255, 255, 255, 0.08);
-    --shadow-light: 0 30px 70px rgba(0, 0, 0, 0.6);
-    --input-background: #3a3a3a;
-    --input-border: rgba(255, 255, 255, 0.15);
 }
 
 /* Apply global theme variables */
@@ -66,9 +55,10 @@ html, body, [class*="css"] {
     border-radius: 10px;
 }
 
-html[data-theme="dark"] ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.15); /* Lighter track for dark mode */
-}
+/* Removed dark mode specific scrollbar track as only light mode is active */
+/* html[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15);
+} */
 
 ::-webkit-scrollbar-thumb {
     background: #00cec9; /* Teal thumb */
@@ -110,15 +100,16 @@ h6 {
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-html[data-theme="dark"] h1,
+/* Removed dark mode specific header colors */
+/* html[data-theme="dark"] h1,
 html[data-theme="dark"] h2,
 html[data-theme="dark"] h3,
 html[data-theme="dark"] h4,
 html[data-theme="dark"] h5,
 html[data-theme="dark"] h6 {
-    color: #00e0db; /* Slightly brighter teal for dark mode */
+    color: #00e0db;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
+} */
 
 /* Dashboard specific header */
 .dashboard-header {
@@ -133,9 +124,10 @@ html[data-theme="dark"] h6 {
     overflow: hidden;
 }
 
-html[data-theme="dark"] .dashboard-header {
-    border-bottom: 8px solid #00e0db; /* Consistent with dark mode header color */
-}
+/* Removed dark mode specific dashboard header border */
+/* html[data-theme="dark"] .dashboard-header {
+    border-bottom: 8px solid #00e0db;
+} */
 
 @keyframes slideInLeftFadeBounce {
     0% {
@@ -159,6 +151,7 @@ html[data-theme="dark"] .dashboard-header {
         transform: translateY(-50px);
     }
     100% {
+        opacity: 1;
         transform: translateY(0);
     }
 }
@@ -173,10 +166,11 @@ html[data-theme="dark"] .dashboard-header {
     letter-spacing: -0.03em;
 }
 
-html[data-theme="dark"] .greeting-message {
+/* Removed dark mode specific greeting message colors */
+/* html[data-theme="dark"] .greeting-message {
     color: #00e0db;
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
+} */
 
 /* Metric boxes styling */
 .stMetric {
@@ -191,11 +185,12 @@ html[data-theme="dark"] .greeting-message {
     background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(240,242,246,0.9));
 }
 
-html[data-theme="dark"] .stMetric {
+/* Removed dark mode specific metric box styles */
+/* html[data-theme="dark"] .stMetric {
     border: 1px solid rgba(255, 255, 255, 0.05);
     background: linear-gradient(145deg, #3A3A3A, #2D2D2D);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stMetric:hover {
     transform: translateY(-15px) rotateX(3deg);
@@ -203,9 +198,10 @@ html[data-theme="dark"] .stMetric {
     animation: metricHoverGlow 0.8s forwards;
 }
 
-html[data-theme="dark"] .stMetric:hover {
-    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.6); /* Darker shadow on hover for dark mode */
-}
+/* Removed dark mode specific metric box hover styles */
+/* html[data-theme="dark"] .stMetric:hover {
+    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.6);
+} */
 
 @keyframes metricHoverGlow {
     0% {
@@ -219,7 +215,8 @@ html[data-theme="dark"] .stMetric:hover {
     }
 }
 
-html[data-theme="dark"] @keyframes metricHoverGlow {
+/* Removed dark mode specific metric box hover animation */
+/* html[data-theme="dark"] @keyframes metricHoverGlow {
     0% {
         box-shadow: 0 25px 55px rgba(0, 0, 0, 0.6);
     }
@@ -229,7 +226,7 @@ html[data-theme="dark"] @keyframes metricHoverGlow {
     100% {
         box-shadow: 0 25px 55px rgba(0, 0, 0, 0.6);
     }
-}
+} */
 
 
 .stMetric > div[data-testid="stMetricValue"] {
@@ -240,10 +237,11 @@ html[data-theme="dark"] @keyframes metricHoverGlow {
     text-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-html[data-theme="dark"] .stMetric > div[data-testid="stMetricValue"] {
-    color: #00e0db; /* Brighter teal for dark mode */
+/* Removed dark mode specific metric value colors */
+/* html[data-theme="dark"] .stMetric > div[data-testid="stMetricValue"] {
+    color: #00e0db;
     text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
+} */
 
 @keyframes pulseValue {
     0% {
@@ -262,10 +260,11 @@ html[data-theme="dark"] .stMetric > div[data-testid="stMetricValue"] {
     font-weight: 600;
 }
 
-html[data-theme="dark"] .stMetric > div[data-testid="stMetricLabel"] {
-    opacity: 0.9; /* Slightly higher opacity for better visibility */
-    color: #cccccc; /* Lighter grey for dark mode labels */
-}
+/* Removed dark mode specific metric label colors */
+/* html[data-theme="dark"] .stMetric > div[data-testid="stMetricLabel"] {
+    opacity: 0.9;
+    color: #cccccc;
+} */
 
 /* Button styling */
 .stButton > button {
@@ -289,10 +288,11 @@ html[data-theme="dark"] .stMetric > div[data-testid="stMetricLabel"] {
     background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
 }
 
-html[data-theme="dark"] .stButton > button {
-    background-color: #00b0a8; /* Darker teal for dark mode */
+/* Removed dark mode specific button styles */
+/* html[data-theme="dark"] .stButton > button {
+    background-color: #00b0a8;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stButton > button:hover {
     background-color: #00b0a8;
@@ -302,11 +302,12 @@ html[data-theme="dark"] .stButton > button {
     outline-offset: 4px;
 }
 
-html[data-theme="dark"] .stButton > button:hover {
-    background-color: #009a93; /* Even darker teal on hover for dark mode */
+/* Removed dark mode specific button hover styles */
+/* html[data-theme="dark"] .stButton > button:hover {
+    background-color: #009a93;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
     outline: 3px solid rgba(0, 176, 168, 0.7);
-}
+} */
 
 .stButton > button:active {
     transform: translateY(-4px);
@@ -314,10 +315,11 @@ html[data-theme="dark"] .stButton > button:hover {
     background-color: #009a93;
 }
 
-html[data-theme="dark"] .stButton > button:active {
+/* Removed dark mode specific button active styles */
+/* html[data-theme="dark"] .stButton > button:active {
     background-color: #00807b;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-}
+} */
 
 /* Ripple effect for buttons */
 .stButton > button:after {
@@ -352,20 +354,22 @@ html[data-theme="dark"] .stButton > button:active {
     background: rgba(255,255,255,0.95);
 }
 
-html[data-theme="dark"] .stExpander {
+/* Removed dark mode specific expander styles */
+/* html[data-theme="dark"] .stExpander {
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: #3A3A3A;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stExpander:hover {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     transform: translateY(-8px);
 }
 
-html[data-theme="dark"] .stExpander:hover {
+/* Removed dark mode specific expander hover styles */
+/* html[data-theme="dark"] .stExpander:hover {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-}
+} */
 
 .stExpander > div > div > div > p {
     line-height: 1.9;
@@ -381,9 +385,10 @@ html[data-theme="dark"] .stExpander:hover {
     padding-bottom: 0.8rem;
 }
 
-html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] {
-    color: #00e0db; /* Brighter teal for dark mode */
-}
+/* Removed dark mode specific expander toggle colors */
+/* html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] {
+    color: #00e0db;
+} */
 
 
 .stExpander > div[data-testid="stExpanderToggle"] svg {
@@ -391,9 +396,10 @@ html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] {
     transition: transform 0.4s ease;
 }
 
-html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] svg {
-    fill: #00e0db; /* Brighter teal for dark mode */
-}
+/* Removed dark mode specific expander toggle svg fill */
+/* html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] svg {
+    fill: #00e0db;
+} */
 
 
 .stExpander > div[data-testid="stExpanderToggle"][aria-expanded="true"] svg {
@@ -418,10 +424,11 @@ html[data-theme="dark"] .stExpander > div[data-testid="stExpanderToggle"] svg {
     box-shadow: 0 0 0 4px rgba(0, 206, 201, 0.4);
 }
 
-html[data-theme="dark"] .stSelectbox > div > div:hover {
+/* Removed dark mode specific selectbox hover styles */
+/* html[data-theme="dark"] .stSelectbox > div > div:hover {
     border-color: #00e0db;
     box-shadow: 0 0 0 4px rgba(0, 224, 219, 0.5);
-}
+} */
 
 .stSelectbox > div > div:focus-within {
     border-color: #00cec9;
@@ -429,10 +436,11 @@ html[data-theme="dark"] .stSelectbox > div > div:hover {
     outline: none;
 }
 
-html[data-theme="dark"] .stSelectbox > div > div:focus-within {
+/* Removed dark mode specific selectbox focus styles */
+/* html[data-theme="dark"] .stSelectbox > div > div:focus-within {
     border-color: #00e0db;
     box-shadow: 0 0 0 5px rgba(0, 224, 219, 0.7);
-}
+} */
 
 .stSelectbox > label {
     font-weight: 600;
@@ -451,7 +459,7 @@ html[data-theme="dark"] .stSelectbox > div > div:focus-within {
 /* NEW: Styling for the dropdown options of selectbox */
 /* Target the actual text within the option items */
 div[data-baseweb="popover"] div[role="listbox"] div[role="option"] > div > span {
-    color: var(--text-color) !important;
+    color: #333333 !important; /* Explicitly set to a dark color for visibility */
 }
 
 /* Background for the dropdown options and hover state */
@@ -462,9 +470,10 @@ div[data-baseweb="popover"] div[role="listbox"] {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
 }
 
-html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] {
+/* Removed dark mode specific selectbox dropdown styles */
+/* html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
-}
+} */
 
 div[data-baseweb="popover"] div[role="listbox"] div[role="option"] {
     background-color: transparent !important;
@@ -474,9 +483,10 @@ div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
     background-color: rgba(0, 206, 201, 0.2) !important;
 }
 
-html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
+/* Removed dark mode specific selectbox dropdown hover styles */
+/* html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role="option"]:hover {
     background-color: rgba(0, 206, 201, 0.3) !important;
-}
+} */
 
 
 /* Text input and Text area styling */
@@ -496,10 +506,11 @@ html[data-theme="dark"] div[data-baseweb="popover"] div[role="listbox"] div[role
     opacity: 0.7; /* Make placeholder slightly transparent */
 }
 
-html[data-theme="dark"] .stTextInput > div > div > input::placeholder {
+/* Removed dark mode specific input placeholder styles */
+/* html[data-theme="dark"] .stTextInput > div > div > input::placeholder {
     color: var(--text-color) !important;
-    opacity: 0.5; /* Slightly more transparent in dark mode */
-}
+    opacity: 0.5;
+} */
 
 
 .stTextInput > div > div > input:focus,
@@ -509,21 +520,23 @@ html[data-theme="dark"] .stTextInput > div > div > input::placeholder {
     outline: none;
 }
 
-html[data-theme="dark"] .stTextInput > div > div > input:focus,
+/* Removed dark mode specific input focus styles */
+/* html[data-theme="dark"] .stTextInput > div > div > input:focus,
 html[data-theme="dark"] .stTextArea > div > div:focus-within {
     border-color: #00e0db;
     box-shadow: 0 0 0 5px rgba(0, 224, 219, 0.7);
-}
+} */
 
 .stTextInput > div > div > input:hover,
 .stTextArea > div > div:hover {
     border-color: #00b0a8;
 }
 
-html[data-theme="dark"] .stTextInput > div > div > input:hover,
+/* Removed dark mode specific input hover styles */
+/* html[data-theme="dark"] .stTextInput > div > div > input:hover,
 html[data-theme="dark"] .stTextArea > div > div:hover {
     border-color: #00e0db;
-}
+} */
 
 .stTextInput > label,
 .stTextArea > label {
@@ -560,9 +573,10 @@ html[data-theme="dark"] .stTextArea > div > div:hover {
     background: var(--card-background);
 }
 
-html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label {
+/* Removed dark mode specific sidebar radio styles */
+/* html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stSidebar .stRadio div[role="radiogroup"] label span:first-child {
     display: none;
@@ -574,10 +588,11 @@ html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
-html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label:hover {
+/* Removed dark mode specific sidebar radio hover styles */
+/* html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label:hover {
     background-color: rgba(0, 206, 201, 0.3);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-}
+} */
 
 /* Style for the selected radio button (using input:checked + div) */
 .stSidebar .stRadio div[role="radiogroup"] input:checked + div {
@@ -589,11 +604,12 @@ html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] label:hover {
     animation: sidebarSelectedPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] input:checked + div {
-    background-color: #00b0a8; /* Darker teal for selected in dark mode */
+/* Removed dark mode specific sidebar radio checked styles */
+/* html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] input:checked + div {
+    background-color: #00b0a8;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
     border: 1px solid #009a93;
-}
+} */
 
 
 @keyframes sidebarSelectedPop {
@@ -629,17 +645,19 @@ html[data-theme="dark"] .stSidebar .stRadio div[role="radiogroup"] input:checked
     background: var(--card-background);
 }
 
-html[data-theme="dark"] .stDataFrame {
+/* Removed dark mode specific dataframe styles */
+/* html[data-theme="dark"] .stDataFrame {
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
-}
+} */
 
 .stDataFrame:hover {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
-html[data-theme="dark"] .stDataFrame:hover {
+/* Removed dark mode specific dataframe hover styles */
+/* html[data-theme="dark"] .stDataFrame:hover {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-}
+} */
 
 .stDataFrame table {
     border-collapse: separate;
@@ -660,11 +678,12 @@ html[data-theme="dark"] .stDataFrame:hover {
     color: #333333; /* Light mode header text */
 }
 
-html[data-theme="dark"] .stDataFrame th {
+/* Removed dark mode specific dataframe header styles */
+/* html[data-theme="dark"] .stDataFrame th {
     background-color: #404040;
-    color: #00e0db; /* Brighter teal for dark mode */
+    color: #00e0db;
     border-bottom: 5px solid #00e0db;
-}
+} */
 
 .stDataFrame tbody tr:nth-child(odd) {
     background-color: var(--card-background);
@@ -674,9 +693,10 @@ html[data-theme="dark"] .stDataFrame th {
     background-color: rgba(0,0,0,0.03); /* Slightly darker for even rows in light mode */
 }
 
-html[data-theme="dark"] .stDataFrame tbody tr:nth-child(even) {
-    background-color: #202020; /* Darker for even rows in dark mode */
-}
+/* Removed dark mode specific dataframe even row styles */
+/* html[data-theme="dark"] .stDataFrame tbody tr:nth-child(even) {
+    background-color: #202020;
+} */
 
 
 .stDataFrame td {
@@ -686,17 +706,19 @@ html[data-theme="dark"] .stDataFrame tbody tr:nth-child(even) {
     color: var(--text-color); /* Ensure text color changes with theme */
 }
 
-html[data-theme="dark"] .stDataFrame td {
+/* Removed dark mode specific dataframe td border */
+/* html[data-theme="dark"] .stDataFrame td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
+} */
 
 .stDataFrame tbody tr:hover {
     background-color: rgba(0, 206, 201, 0.12) !important;
 }
 
-html[data-theme="dark"] .stDataFrame tbody tr:hover {
+/* Removed dark mode specific dataframe hover styles */
+/* html[data-theme="dark"] .stDataFrame tbody tr:hover {
     background-color: rgba(0, 206, 201, 0.18) !important;
-}
+} */
 
 
 /* Info/Warning/Error/Success boxes */
@@ -712,18 +734,20 @@ html[data-theme="dark"] .stDataFrame tbody tr:hover {
     overflow: hidden;
 }
 
-html[data-theme="dark"] .stAlert {
+/* Removed dark mode specific alert box shadow */
+/* html[data-theme="dark"] .stAlert {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stAlert:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
 
-html[data-theme="dark"] .stAlert:hover {
+/* Removed dark mode specific alert box hover shadow */
+/* html[data-theme="dark"] .stAlert:hover {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-}
+} */
 
 /* Specific alert types (Streamlit's internal classes are targeted) */
 .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
@@ -737,20 +761,22 @@ html[data-theme="dark"] .stAlert:hover {
     fill: #00BCD4;
 }
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
+/* Removed dark mode specific info alert box styles */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
     background-color: #2A3C4D;
     border-left: 8px solid #00B8D4;
-}
+} */
 
-/* Targeting the text inside the info alert more specifically */
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 p {
-    color: #E0F2F6 !important; /* Changed to a very light grey/off-white for better contrast */
-}
+/* Removed dark mode specific info alert text color */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 p {
+    color: #E0F2F6 !important;
+} */
 
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
+/* Removed dark mode specific info alert svg fill */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
     fill: #00B8D4;
-}
+} */
 
 .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
     /* Success */
@@ -763,15 +789,17 @@ html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
     fill: #4CAF50;
 }
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
+/* Removed dark mode specific success alert styles */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
     background-color: #2C472C;
     color: #A8D5A8;
     border-left: 8px solid #4CAF50;
-}
+} */
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
+/* Removed dark mode specific success alert svg fill */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
     fill: #4CAF50;
-}
+} */
 
 .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
     /* Warning */
@@ -784,15 +812,17 @@ html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
     fill: #FFC107;
 }
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
+/* Removed dark mode specific warning alert styles */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
     background-color: #4D422C;
     color: #EBD9A7;
     border-left: 8px solid #FFC107;
-}
+} */
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
+/* Removed dark mode specific warning alert svg fill */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
     fill: #FFC107;
-}
+} */
 
 .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
     /* Error */
@@ -805,15 +835,17 @@ html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
     fill: #F44336;
 }
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
+/* Removed dark mode specific error alert styles */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
     background-color: #4D2C2C;
     color: #EBA7A7;
     border-left: 8px solid #F44336;
-}
+} */
 
-html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
+/* Removed dark mode specific error alert svg fill */
+/* html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
     fill: #F44336;
-}
+} */
 
 /* Top Header Styles */
 .top-header {
@@ -830,10 +862,11 @@ html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
     animation: slideInDownFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-html[data-theme="dark"] .top-header {
+/* Removed dark mode specific top header styles */
+/* html[data-theme="dark"] .top-header {
     background: linear-gradient(145deg, #282828, #202020);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-}
+} */
 
 .top-header h1 {
     margin: 0;
@@ -844,10 +877,11 @@ html[data-theme="dark"] .top-header {
     text-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
-html[data-theme="dark"] .top-header h1 {
+/* Removed dark mode specific top header h1 styles */
+/* html[data-theme="dark"] .top-header h1 {
     color: #00e0db;
     text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .top-header .profile {
     font-size: 1.2rem;
@@ -865,18 +899,20 @@ html[data-theme="dark"] .top-header h1 {
     color: #00cec9; /* Link color */
 }
 
-html[data-theme="dark"] .top-header .profile a {
-    color: #00e0db; /* Brighter teal for links in dark mode */
-}
+/* Removed dark mode specific top header profile link styles */
+/* html[data-theme="dark"] .top-header .profile a {
+    color: #00e0db;
+} */
 
 .top-header .profile a:hover {
     color: #00b0a8;
     text-decoration: underline;
 }
 
-html[data-theme="dark"] .top-header .profile a:hover {
-    color: #00c9c2; /* Darker teal on hover for dark mode */
-}
+/* Removed dark mode specific top header profile link hover styles */
+/* html[data-theme="dark"] .top-header .profile a:hover {
+    color: #00c9c2;
+} */
 
 /* Additional User-Friendly Enhancements & Animations */
 
@@ -892,18 +928,20 @@ html[data-theme="dark"] .top-header .profile a:hover {
     background: var(--card-background);
 }
 
-html[data-theme="dark"] .stCard {
+/* Removed dark mode specific card styles */
+/* html[data-theme="dark"] .stCard {
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .stCard:hover {
     transform: translateY(-12px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
-html[data-theme="dark"] .stCard:hover {
+/* Removed dark mode specific card hover styles */
+/* html[data-theme="dark"] .stCard:hover {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-}
+} */
 
 /* Progress Bar Styling */
 .stProgress > div > div {
@@ -913,10 +951,11 @@ html[data-theme="dark"] .stCard:hover {
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
-html[data-theme="dark"] .stProgress > div > div {
-    background-color: rgba(0, 206, 201, 0.2); /* Slightly less opaque for dark mode */
+/* Removed dark mode specific progress bar styles */
+/* html[data-theme="dark"] .stProgress > div > div {
+    background-color: rgba(0, 206, 201, 0.2);
     box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.15);
-}
+} */
 
 .stProgress > div > div > div {
     background-color: #00cec9;
@@ -926,9 +965,10 @@ html[data-theme="dark"] .stProgress > div > div {
     overflow: hidden;
 }
 
-html[data-theme="dark"] .stProgress > div > div > div {
-    background-color: #00e0db; /* Brighter teal for dark mode */
-}
+/* Removed dark mode specific progress bar fill */
+/* html[data-theme="dark"] .stProgress > div > div > div {
+    background-color: #00e0db;
+} */
 
 .stProgress > div > div > div::after {
     content: '';
@@ -966,11 +1006,12 @@ html[data-theme="dark"] .stProgress > div > div > div {
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
-html[data-theme="dark"] .stCheckbox > label > div > span:first-child,
+/* Removed dark mode specific checkbox/radio button border/shadow */
+/* html[data-theme="dark"] .stCheckbox > label > div > span:first-child,
 html[data-theme="dark"] .stRadio > label > div > span:first-child {
     border-color: #00e0db;
     box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.15);
-}
+} */
 
 .stCheckbox > label > div > span:first-child svg,
 .stRadio > label > div > span:first-child svg {
@@ -979,10 +1020,11 @@ html[data-theme="dark"] .stRadio > label > div > span:first-child {
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-html[data-theme="dark"] .stCheckbox > label > div > span:first-child svg,
+/* Removed dark mode specific checkbox/radio button svg fill */
+/* html[data-theme="dark"] .stCheckbox > label > div > span:first-child svg,
 html[data-theme="dark"] .stRadio > label > div > span:first-child svg {
     fill: #00e0db;
-}
+} */
 
 .stCheckbox > label > div > input:checked + span:first-child,
 .stRadio > label > div > input:checked + span:first-child {
@@ -991,12 +1033,13 @@ html[data-theme="dark"] .stRadio > label > div > span:first-child svg {
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15), 0 0 0 5px rgba(0, 206, 201, 0.4);
 }
 
-html[data-theme="dark"] .stCheckbox > label > div > input:checked + span:first-child,
+/* Removed dark mode specific checkbox/radio button checked styles */
+/* html[data-theme="dark"] .stCheckbox > label > div > input:checked + span:first-child,
 html[data-theme="dark"] .stRadio > label > div > input:checked + span:first-child {
     background-color: #00e0db;
     border-color: #00e0db;
     box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.15), 0 0 0 5px rgba(0, 224, 219, 0.5);
-}
+} */
 
 /* Tooltip styling (for custom tooltips if added) */
 .stTooltip {
@@ -1013,11 +1056,12 @@ html[data-theme="dark"] .stRadio > label > div > input:checked + span:first-chil
     backdrop-filter: blur(8px);
 }
 
-html[data-theme="dark"] .stTooltip {
-    background-color: rgba(255, 255, 255, 0.9); /* Lighter background for dark mode tooltip */
-    color: #333333; /* Darker text for dark mode tooltip */
+/* Removed dark mode specific tooltip styles */
+/* html[data-theme="dark"] .stTooltip {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333333;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-}
+} */
 
 .stTooltip.show {
     opacity: 1;
@@ -1040,18 +1084,20 @@ a {
     font-weight: 600;
 }
 
-html[data-theme="dark"] a {
-    color: #00e0db; /* Brighter teal for links in dark mode */
-}
+/* Removed dark mode specific link styles */
+/* html[data-theme="dark"] a {
+    color: #00e0db;
+} */
 
 a:hover {
     color: #00b0a8;
     text-decoration: underline;
 }
 
-html[data-theme="dark"] a:hover {
-    color: #00c9c2; /* Darker teal on hover for dark mode */
-}
+/* Removed dark mode specific link hover styles */
+/* html[data-theme="dark"] a:hover {
+    color: #00c9c2;
+} */
 
 /* Utility Classes (can be added via st.markdown('<div class="my-class">...</div>', unsafe_allow_html=True)) */
 .text-center {
