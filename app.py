@@ -335,7 +335,7 @@ def main():
         # Create a clickable image that links to the HR portal
             st.markdown(f"""
             <a href="https://screenerpro.streamlit.app/" target="_self">
-                <img src="data:image/png;base64,{st.image(logo_path, width=215, use_column_width=False).image_bytes.decode('utf-8')}" alt="Go to HR Portal">
+                <img src="data:image/png;base64,{st.image(logo_path, width=215, use_container_width=False).image_bytes.decode('utf-8')}" alt="Go to HR Portal">
             </a>
             """, unsafe_allow_html=True)
         else:
