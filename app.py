@@ -21,19 +21,18 @@ from generate_fake_data import generate_fake_data_page
 # These values should be stored in your .streamlit/secrets.toml file or as environment variables
 # Example .streamlit/secrets.toml:
 # [firebase]
-# apiKey = "YOUR_FIREBASE_API_KEY"
-# projectId = "YOUR_FIREBASE_PROJECT_ID"
-# appId = "YOUR_APP_ID_FOR_FIRESTORE_PATH" # Use a consistent ID for your app's data in Firestore
+# APIKey = "YOUR_FIREBASE_API_KEY"
+# PROJECT_ID = "YOUR_FIREBASE_PROJECT_ID"
+# APP_ID = "YOUR_APP_ID_FOR_FIRESTORE_PATH" # Use a consistent ID for your app's data in Firestore
 
-# Get Firebase API Key and Project ID from Streamlit Secrets
-# If running locally without secrets.toml, these will be empty unless set as env vars.
-FIREBASE_API_KEY = st.secrets.get('firebase', {}).get('apiKey', '')
-FIREBASE_PROJECT_ID = st.secrets.get('firebase', {}).get('projectId', '')
-APP_ID = st.secrets.get('firebase', {}).get('appId', 'your-default-app-id') # Use a default if not provided
+# Get Firebase API Key and Project ID from Streamlit Secrets, matching capitalization
+FIREBASE_API_KEY = st.secrets.get('firebase', {}).get('APIKey', '')
+FIREBASE_PROJECT_ID = st.secrets.get('firebase', {}).get('PROJECT_ID', '')
+APP_ID = st.secrets.get('firebase', {}).get('APP_ID', 'your-default-app-id') # Use a default if not provided
 
 # Validate that API Key and Project ID are available
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
-    st.error("Firebase API Key or Project ID not found. Please configure them in .streamlit/secrets.toml under the [firebase] section.")
+    st.error("Firebase API Key or Project ID not found. Please configure them in .streamlit/secrets.toml under the [firebase] section with correct capitalization (APIKey, PROJECT_ID, APP_ID).")
     st.stop() # Stop the app if essential keys are missing
 
 # Firebase Authentication REST API Endpoints
