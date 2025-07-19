@@ -28,6 +28,10 @@
     --alert-error-text: #c62828;
     --card-background: #ffffff;
     --card-border: #e0e0e0;
+
+    /* Animation specific variables */
+    --animation-duration: 0.3s;
+    --animation-easing: ease-in-out;
 }
 
 body.dark-mode {
@@ -63,7 +67,8 @@ html, body, .stApp {
     color: var(--text-color);
     margin: 0;
     padding: 0;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
+    transition: background-color var(--animation-duration) var(--animation-easing),
+                color var(--animation-duration) var(--animation-easing); /* Smooth transition for theme change */
 }
 
 /* --- Typography --- */
@@ -85,7 +90,9 @@ p { line-height: 1.6; }
     color: var(--text-color);
     padding-top: 2rem;
     box-shadow: 2px 0 10px var(--shadow-light); /* Subtle shadow for depth */
-    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color var(--animation-duration) var(--animation-easing),
+                color var(--animation-duration) var(--animation-easing),
+                box-shadow var(--animation-duration) var(--animation-easing);
 }
 
 .stSidebar .stButton > button {
@@ -95,36 +102,26 @@ p { line-height: 1.6; }
     color: var(--text-color); /* Text color from theme */
     border: 1px solid var(--border-color); /* Subtle border */
     box-shadow: none; /* No shadow by default */
-    transition: all 0.2s ease-in-out;
+    transition: all var(--animation-duration) var(--animation-easing); /* Animation for all properties */
     font-weight: 500;
+    padding: 0.8rem 1.5rem; /* Consistent padding */
+    display: flex; /* For potential icon alignment if you add them later */
+    align-items: center;
+    justify-content: flex-start; /* Align text to start */
+    gap: 0.5rem; /* Space for icons */
 }
 
 .stSidebar .stButton > button:hover {
     background-color: var(--button-hover-bg); /* Accent color on hover */
     color: var(--button-text); /* White text on accent background */
     border-color: var(--button-hover-bg); /* Match border to background */
-    transform: translateY(-2px);
+    transform: translateX(5px); /* Slide effect */
     box-shadow: 0 4px 8px var(--shadow-medium); /* Subtle lift effect */
-}
-
-/* Highlight active sidebar button */
-/* Streamlit doesn't natively support active states for general buttons based on session_state.
-   You'd need custom JS or a more complex component for true active highlighting without reruns.
-   The current reruns on page change means the hover effect serves a similar purpose for visual feedback. */
-
-.sidebar-user-info {
-    padding: 1rem;
-    background-color: var(--card-background);
-    border-radius: 0.5rem;
-    margin: 1rem 0;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px var(--shadow-light);
 }
 
 /* Custom HR Portal Button in sidebar */
 .stSidebar a > button {
-    /* Override Streamlit's button styling for this specific external link button */
-    background-color: #4CAF50 !important; /* Green for HR portal */
+    background-color: #4CAF50 !important;
     color: white !important;
     border: none !important;
     border-radius: 0.5rem !important;
@@ -137,7 +134,7 @@ p { line-height: 1.6; }
     justify-content: center !important;
     gap: 10px !important;
     box-shadow: 0 4px 8px var(--shadow-medium) !important;
-    transition: all 0.2s ease-in-out !important;
+    transition: all var(--animation-duration) var(--animation-easing) !important;
 }
 
 .stSidebar a > button:hover {
@@ -148,10 +145,21 @@ p { line-height: 1.6; }
 
 /* --- Main Content Styling --- */
 .main .block-container {
-    padding-top: 1rem; /* Adjusted for hidden header */
+    padding-top: 1rem;
     padding-bottom: 2rem;
-    padding-left: 3rem; /* More generous side padding */
-    padding-right: 3rem; /* More generous side padding */
+    padding-left: 3rem;
+    padding-right: 3rem;
+    opacity: 0; /* Start hidden for fade-in */
+    transform: translateY(20px); /* Start slightly below for slide-up */
+    animation: fadeInSlideUp 0.7s var(--animation-easing) forwards; /* Apply animation */
+}
+
+/* Keyframe for page fade-in and slide-up */
+@keyframes fadeInSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Inputs (text_input, text_area, selectbox, multiselect) */
@@ -163,16 +171,18 @@ p { line-height: 1.6; }
     color: var(--text-color) !important;
     border: 1px solid var(--input-border) !important;
     border-radius: 0.5rem;
-    padding: 0.75rem 1rem; /* Consistent padding */
-    box-shadow: inset 0 1px 3px var(--shadow-light); /* Inner shadow for depth */
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 0.75rem 1rem;
+    box-shadow: inset 0 1px 3px var(--shadow-light);
+    transition: border-color var(--animation-duration) var(--animation-easing),
+                box-shadow var(--animation-duration) var(--animation-easing);
 }
 
 .stTextInput > div > div > input:focus,
 .stTextArea > div > div > textarea:focus {
-    border-color: var(--header-color) !important; /* Accent border on focus */
+    border-color: var(--header-color) !important;
     box-shadow: 0 0 0 0.2rem rgba(0, 206, 201, 0.25) !important; /* Glow effect on focus */
     outline: none !important;
+    transform: scale(1.01); /* Slight zoom on focus */
 }
 
 /* Labels for inputs */
@@ -186,7 +196,7 @@ p { line-height: 1.6; }
     color: var(--text-color) !important;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    display: block; /* Ensures label is on its own line above input */
+    display: block;
 }
 
 /* Buttons (main content area) */
@@ -197,15 +207,15 @@ p { line-height: 1.6; }
     border-radius: 0.5rem;
     padding: 0.8rem 1.5rem;
     font-weight: 600;
-    transition: all 0.2s ease-in-out;
+    transition: all var(--animation-duration) var(--animation-easing);
     box-shadow: 0 4px 8px var(--shadow-medium);
     cursor: pointer;
 }
 
 .stButton > button:hover {
     background-color: var(--button-hover-bg);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px var(--shadow-dark);
+    transform: translateY(-3px) scale(1.02); /* More pronounced lift and slight scale */
+    box-shadow: 0 8px 16px var(--shadow-dark); /* Deeper shadow on hover */
 }
 
 /* Expander background */
@@ -217,27 +227,26 @@ p { line-height: 1.6; }
     font-weight: 600;
     border: 1px solid var(--card-border);
     box-shadow: 0 2px 5px var(--shadow-light);
-    transition: all 0.2s ease;
+    transition: all var(--animation-duration) var(--animation-easing);
 }
 
 .streamlit-expanderHeader:hover {
-    background-color: var(--border-color); /* Slightly change background on hover */
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px var(--shadow-medium);
+    background-color: var(--border-color);
+    transform: translateY(-2px); /* Slight lift */
+    box-shadow: 0 4px 8px var(--shadow-medium);
 }
 
 .streamlit-expanderContent {
-    background-color: var(--background-color); /* Match main background for seamless look */
+    background-color: var(--background-color);
     color: var(--text-color);
-    border: 1px solid var(--card-border); /* Keep border for clarity */
-    border-top: none; /* No top border to connect with header */
+    border: 1px solid var(--card-border);
+    border-top: none;
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
     padding: 1rem;
     margin-top: -0.5rem;
-    box-shadow: 0 2px 5px var(--shadow-light); /* Retain shadow */
+    box-shadow: 0 2px 5px var(--shadow-light);
 }
-
 
 /* Info/Success/Warning/Error boxes */
 .stAlert {
@@ -246,33 +255,33 @@ p { line-height: 1.6; }
     margin-bottom: 1rem;
     font-weight: 500;
     box-shadow: 0 2px 5px var(--shadow-light);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color var(--animation-duration) var(--animation-easing),
+                color var(--animation-duration) var(--animation-easing);
 }
 .stAlert.stInfo {
     background-color: var(--alert-info-bg);
     color: var(--alert-info-text);
-    border-left: 5px solid #00bcd4; /* Specific accent for info */
+    border-left: 5px solid #00bcd4;
 }
 .stAlert.stSuccess {
     background-color: var(--alert-success-bg);
     color: var(--alert-success-text);
-    border-left: 5px solid #4caf50; /* Specific accent for success */
+    border-left: 5px solid #4caf50;
 }
 .stAlert.stWarning {
     background-color: var(--alert-warning-bg);
     color: var(--alert-warning-text);
-    border-left: 5px solid #ff9800; /* Specific accent for warning */
+    border-left: 5px solid #ff9800;
 }
 .stAlert.stError {
     background-color: var(--alert-error-bg);
     color: var(--alert-error-text);
-    border-left: 5px solid #f44336; /* Specific accent for error */
+    border-left: 5px solid #f44336;
 }
 
 .stAlert > div > div > div > div {
-    color: inherit; /* Inherit color from parent alert div */
+    color: inherit;
 }
-
 
 /* Dataframe styling */
 .stDataFrame {
@@ -282,6 +291,7 @@ p { line-height: 1.6; }
     border: 1px solid var(--border-color);
     margin-top: 1rem;
     margin-bottom: 1rem;
+    transition: all var(--animation-duration) var(--animation-easing); /* Smooth transition for theme change */
 }
 
 /* Metric boxes */
@@ -291,7 +301,12 @@ p { line-height: 1.6; }
     padding: 1.2rem;
     border: 1px solid var(--card-border);
     box-shadow: 0 2px 8px var(--shadow-light);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: all var(--animation-duration) var(--animation-easing); /* Smooth transition */
+}
+
+.stMetric:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px var(--shadow-medium);
 }
 
 /* Radio buttons and checkboxes */
@@ -301,7 +316,6 @@ p { line-height: 1.6; }
 }
 
 /* Custom styling for the "Open HR Portal" button in the main content area if used there */
-/* This ensures consistency for that specific button type */
 .hr-portal-button button {
     background-color: #4CAF50 !important;
     color: white !important;
@@ -316,7 +330,7 @@ p { line-height: 1.6; }
     justify-content: center !important;
     gap: 10px !important;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-    transition: all 0.2s ease-in-out !important;
+    transition: all var(--animation-duration) var(--animation-easing) !important;
 }
 .hr-portal-button button:hover {
     background-color: #45a049 !important;
@@ -341,7 +355,7 @@ header {
 /* Hide the hamburger menu (three lines button) */
 /* These classes are prone to change with Streamlit updates,
    so you might need to inspect the element if it reappears. */
-.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir { 
+.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir {
     visibility: hidden;
     display: none; /* Use display: none to remove it from layout flow entirely */
 }
