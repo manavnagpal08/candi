@@ -12,6 +12,8 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
+import base64
+import random # Import random for quotes
 
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
@@ -148,7 +150,7 @@ def register_section():
                     st.session_state.authenticated = True
                     st.session_state.username = new_username
                     st.session_state.user_company = new_company_name
-                    st.session_state.current_page = "resume_screen" # Redirect to Resume Screener after registration
+                    st.session_state.current_page = "welcome_dashboard" # Redirect to welcome dashboard after registration
                     st.rerun() # Rerun to apply the login and redirect
 
 def admin_registration_section():
@@ -244,6 +246,7 @@ def login_section():
 
 
     if st.session_state.authenticated:
+        # If already authenticated, just return True without showing login forms
         return True
 
     # Use st.radio to simulate tabs if st.tabs() default_index is not supported
@@ -274,7 +277,7 @@ def login_section():
                         st.session_state.authenticated = True
                         st.session_state.username = username
                         st.session_state.user_company = user_data.get("company", "N/A") # Store company name
-                        st.success("✅ Login successful!")
+                        st.session_state.current_page = "welcome_dashboard" # Redirect to welcome dashboard after login
                         st.rerun()
                     else:
                         st.error("❌ Invalid username or password.")
@@ -291,9 +294,137 @@ def logout_page():
         st.session_state.authenticated = False
         st.session_state.pop('username', None)
         st.session_state.pop('user_company', None)
+        st.session_state.pop('current_quote', None) # Clear the quote on logout
         st.session_state.active_login_tab_selection = "Login" # Reset to login tab
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
+
+# List of quotes for the welcome message
+QUOTES = [
+    "The only way to do great work is to love what you do. – Steve Jobs",
+    "Believe you can and you're halfway there. – Theodore Roosevelt",
+    "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts. – Winston Churchill",
+    "The best way to predict the future is to create it. – Peter Drucker",
+    "Innovation distinguishes between a leader and a follower. – Steve Jobs",
+    "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. – Steve Jobs",
+    "The mind is everything. What you think you become. – Buddha",
+    "Strive not to be a success, but rather to be of value. – Albert Einstein",
+    "The journey of a thousand miles begins with a single step. – Lao Tzu"
+]
+
+def display_welcome_dashboard():
+    """Displays the welcome message and a random quote."""
+    # Select a new quote if not already in session state
+    if "current_quote" not in st.session_state:
+        st.session_state.current_quote = random.choice(QUOTES)
+
+    st.markdown(
+        f"""
+        <style>
+            @keyframes fadeInScale {{
+                from {{ opacity: 0; transform: scale(0.9); }}
+                to {{ opacity: 1; transform; scale(1); }}
+            }}
+
+            .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%); /* Soft gradient background */
+                border-radius: 12px; /* More rounded corners */
+                padding: 30px;
+                margin-bottom: 25px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
+                text-align: center;
+                animation: fadeInScale 0.7s ease-out forwards; /* Apply animation */
+                position: relative; /* For the sparkle effect */
+                overflow: hidden; /* To contain the sparkle */
+            }}
+
+            .beautiful-greeting-card::before {{
+                content: '✨'; /* Add a subtle sparkle effect */
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+            .beautiful-greeting-card::after {{
+                content: '🌟'; /* Another sparkle */
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+
+            .beautiful-greeting-title {{
+                font-size: 2.2em; /* Larger title */
+                font-weight: 700; /* Bolder */
+                color: #2c3e50; /* Darker, more prominent color */
+                margin-bottom: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
+            }}
+
+            .beautiful-username {{
+                color: #3498db; /* Vibrant blue for username */
+                font-weight: 800; /* Extra bold */
+            }}
+
+            .beautiful-welcome-text {{
+                font-size: 1.15em; /* Slightly larger body text */
+                color: #555555; /* Softer text color */
+                line-height: 1.6;
+                margin-top: 15px;
+            }}
+            .beautiful-quote {{
+                font-style: italic;
+                color: #666;
+                margin-top: 20px;
+                font-size: 1.05em;
+            }}
+
+            .beautiful-emoji {{
+                font-size: 1.6em; /* Larger, more impactful emojis */
+                vertical-align: middle;
+                margin: 0 5px;
+            }}
+            /* Dark mode adjustments for the greeting card */
+            html[data-theme="dark"] .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #2c2c44 0%, #3a3a50 100%);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            }}
+            html[data-theme="dark"] .beautiful-greeting-title {{
+                color: #e0e0e0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }}
+            html[data-theme="dark"] .beautiful-username {{
+                color: #6fa8f7; /* Lighter blue for dark mode */
+            }}
+            html[data-theme="dark"] .beautiful-welcome-text {{
+                color: #a0a0a0;
+            }}
+            html[data-theme="dark"] .beautiful-quote {{
+                color: #b0b0b0;
+            }}
+        </style>
+
+        <div class="beautiful-greeting-card">
+            <h1 class="beautiful-greeting-title">
+                Welcome, <span class="beautiful-username">{st.session_state.username}</span>!
+            </h1>
+            <p class="beautiful-welcome-text">
+                <span class="beautiful-emoji">👋</span> We're absolutely thrilled to have you here!
+                Your journey with us officially begins now. <span class="beautiful-emoji">🚀</span>
+                Get ready to explore! <span class="beautiful-emoji">🎉</span>
+            </p>
+            <p class="beautiful-quote">
+                "{st.session_state.current_quote}"
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # --- Main Application Logic ---
@@ -303,7 +434,7 @@ def main():
 
     # Initialize session state for current page and theme
     if "current_page" not in st.session_state:
-        st.session_state.current_page = "resume_screen" # Default page after login, changed from Dashboard
+        st.session_state.current_page = "login_page" # Default to login page initially
     if "theme" not in st.session_state:
         st.session_state.theme = "light" # Default to light mode
 
@@ -311,7 +442,6 @@ def main():
     load_css("style.css")
 
     # Set the body class based on the current theme
-    # This needs to be called after load_css and theme is set
     set_body_class()
 
     # Ensure all admin users exist for testing/initial setup
@@ -323,279 +453,186 @@ def main():
             st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
     save_users(users)
 
-    # Authentication section
-    is_authenticated = login_section()
-
-    if not is_authenticated:
-        with st.sidebar:
-            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-            logo_path = "logo.png"  # Assuming logo is in the same directory
+    # --- Permanent Sidebar Content (Always Visible) ---
+    with st.sidebar:
+        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+        logo_path = "logo.png"  # Assuming logo is in the same directory
 
         if os.path.exists(logo_path):
-        # Create a clickable image that links to the HR portal
-            st.markdown(f"""
-            <a href="https://screenerpro.streamlit.app/" target="_self">
-                <img src="data:image/png;base64,{st.image(logo_path, width=215, use_column_width=False).image_bytes.decode('utf-8')}" alt="Go to HR Portal">
-            </a>
-            """, unsafe_allow_html=True)
+            try:
+                # Read the image file in binary mode
+                with open(logo_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+
+                # Create a clickable image that links to the HR portal
+                st.markdown(f"""
+                <a href="https://screenerpro.streamlit.app/" target="_self">
+                    <img src="data:image/png;base64,{encoded_string}" alt="Go to HR Portal" width="215">
+                </a>
+                """, unsafe_allow_html=True)
+            except FileNotFoundError:
+                st.warning(f"Logo file not found at: {logo_path}")
+            except Exception as e:
+                st.error(f"An error occurred while processing the logo: {e}")
+                st.info("Please ensure 'logo.png' is a valid PNG image.")
         else:
-            st.write("Logo not found.") # Optional: Handle case where logo is missing
+            st.warning(f"Logo file not found at: {logo_path}") # More specific message
 
         st.sidebar.write("---")
 
-        st.sidebar.info("Please log in or register to access the portal features.")
-        
-        return # Stop execution if not authenticated
+        # The login/register info is now handled by the login_section() call
+        # st.sidebar.info("Please log in or register to access the portal features.")
 
-    # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
-    # Sidebar Dark Mode Toggle
-    with st.sidebar:
-        # Streamlit's native toggle widget for Dark Mode
-        st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
-        if st.session_state.sidebar_dark_mode_toggle:
-            if st.session_state.theme != "dark":
-                st.session_state.theme = "dark"
-                st.rerun()
-        else:
-            if st.session_state.theme != "light":
-                st.session_state.theme = "light"
-                st.rerun()
+    # --- Main Content Area Logic ---
+    is_authenticated = login_section() # Call login_section first
 
-        # Logo and Name as seen in image
-        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-        logo_path = "logo.png" # Assuming logo is in the same directory
-        if os.path.exists(logo_path):
-            st.image(logo_path, width=215)
-        else:
-            st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
-        st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    if is_authenticated:
+        # If authenticated, display conditional sidebar content
+        with st.sidebar:
+            # Sidebar Dark Mode Toggle
+            st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
+            if st.session_state.sidebar_dark_mode_toggle:
+                if st.session_state.theme != "dark":
+                    st.session_state.theme = "dark"
+                    st.rerun()
+            else:
+                if st.session_state.theme != "light":
+                    st.session_state.theme = "light"
+                    st.rerun()
 
-        st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
+            # Logo and Name as seen in image (This seems redundant if the clickable logo is always there,
+            # but keeping it as per your original structure, assuming it's for the "ScreenerPro" text)
+            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+            logo_path = "logo.png" # Assuming logo is in the same directory
+            if os.path.exists(logo_path):
+                # This st.image is for the smaller logo next to "ScreenerPro" text
+                st.image(logo_path, width=35) # Adjusted width to be smaller
+            else:
+                st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
+            st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        # Navigation Buttons (using st.button and wrapping in custom div for styling)
-        # Removed Dashboard Button as requested
+            st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
-        # Resume Screener Button
-        if st.button("Resume Screener", key="nav_resume_screen"):
-            st.session_state.current_page = "resume_screen"
-        st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] > button {{ background-color: {"var(--color-accent-pink-soft)" if st.session_state.current_page == "resume_screen" else "transparent"} !important; color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "resume_screen" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "resume_screen" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_resume_screen"] > button i {{ color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Navigation Buttons (using st.button and wrapping in custom div for styling)
+            # Removed Dashboard Button as requested
 
-        # Top Leaderboard Button
-        if st.button("Top Leaderboard", key="nav_top_leaderboard"):
-            st.session_state.current_page = "top_leaderboard"
-        st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] > button {{ background-color: {"var(--color-accent-orange-soft)" if st.session_state.current_page == "top_leaderboard" else "transparent"} !important; color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "top_leaderboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "top_leaderboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_top_leaderboard"] > button i {{ color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Resume Screener Button
+            if st.button("Resume Screener", key="nav_resume_screen"):
+                st.session_state.current_page = "resume_screen"
+            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] > button {{ background-color: {"var(--color-accent-pink-soft)" if st.session_state.current_page == "resume_screen" else "transparent"} !important; color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "resume_screen" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "resume_screen" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_resume_screen"] > button i {{ color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-        # Certificate Verify Button
-        if st.button("Verify Certificate", key="nav_certificate_verify"):
-            st.session_state.current_page = "certificate_verify"
-        st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "certificate_verify" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "certificate_verify" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "certificate_verify" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_certificate_verify"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Top Leaderboard Button
+            if st.button("Top Leaderboard", key="nav_top_leaderboard"):
+                st.session_state.current_page = "top_leaderboard"
+            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] > button {{ background-color: {"var(--color-accent-orange-soft)" if st.session_state.current_page == "top_leaderboard" else "transparent"} !important; color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "top_leaderboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "top_leaderboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_top_leaderboard"] > button i {{ color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-        # Total Resumes Screened Button
-        if st.button("Total Resumes Screened", key="nav_total_screened"):
-            st.session_state.current_page = "total_screened"
-        st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "total_screened" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "total_screened" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "total_screened" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_total_screened"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Certificate Verify Button
+            if st.button("Verify Certificate", key="nav_certificate_verify"):
+                st.session_state.current_page = "certificate_verify"
+            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "certificate_verify" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "certificate_verify" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "certificate_verify" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_certificate_verify"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-        # About Us Button
-        if st.button("About Us", key="nav_about_us"):
-            st.session_state.current_page = "about_us"
-        st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "about_us" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "about_us" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "about_us" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_about_us"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Total Resumes Screened Button
+            if st.button("Total Resumes Screened", key="nav_total_screened"):
+                st.session_state.current_page = "total_screened"
+            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "total_screened" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "total_screened" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "total_screened" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_total_screened"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-        # Feedback Form Button
-        if st.button("Feedback Form", key="nav_feedback_form"):
-            st.session_state.current_page = "feedback_form"
-        st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "feedback_form" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "feedback_form" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "feedback_form" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_feedback_form"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # About Us Button
+            if st.button("About Us", key="nav_about_us"):
+                st.session_state.current_page = "about_us"
+            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "about_us" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "about_us" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "about_us" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_about_us"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-        # Logout Button
-        if st.button("Logout", key="nav_logout"):
-            st.session_state.current_page = "logout"
-        st.markdown(f'<style>div[data-testid="stButton-nav_logout"] > button {{ background-color: transparent !important; color: var(--color-text-primary-light) !important; font-weight: 500 !important; box-shadow: none !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_logout"] > button i {{ color: var(--color-text-primary-light) !important; }}</style>', unsafe_allow_html=True)
-        st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            # Feedback Form Button
+            if st.button("Feedback Form", key="nav_feedback_form"):
+                st.session_state.current_page = "feedback_form"
+            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "feedback_form" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "feedback_form" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "feedback_form" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_feedback_form"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # Logout Button
+            if st.button("Logout", key="nav_logout"):
+                st.session_state.current_page = "logout"
+            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] > button {{ background-color: transparent !important; color: var(--color-text-primary-light) !important; font-weight: 500 !important; box-shadow: none !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_logout"] > button i {{ color: var(--color-text-primary-light) !important; }}</style>', unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
 
-        # Logged in as: and Company: info
-        st.sidebar.markdown("---")
-        st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
-        if st.session_state.get('user_company'):
-            st.sidebar.info(f"Company: **{st.session_state.user_company}**")
-
-        # Admin Section in Sidebar
-        if is_current_user_admin():
+            # Logged in as: and Company: info
             st.sidebar.markdown("---")
-            st.sidebar.subheader("Admin Panel")
-            admin_tab_selection = st.sidebar.radio(
-                "Admin Actions:",
-                ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
-                key="admin_tabs"
-            )
+            st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
+            if st.session_state.get('user_company'):
+                st.sidebar.info(f"Company: **{st.session_state.user_company}**")
 
-    # --- Main Content Area ---
-    # The main content area will change based on the selected sidebar page
+            # Admin Section in Sidebar
+            if is_current_user_admin():
+                st.sidebar.markdown("---")
+                st.sidebar.subheader("Admin Panel")
+                admin_tab_selection = st.sidebar.radio(
+                    "Admin Actions:",
+                    ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
+                    key="admin_tabs"
+                )
 
-    # New Beautiful Greeting Card
-    if st.session_state.get("authenticated") and st.session_state.get("username"):
-        st.markdown(
-            f"""
-            <style>
-                @keyframes fadeInScale {{
-                    from {{ opacity: 0; transform: scale(0.9); }}
-                    to {{ opacity: 1; transform; scale(1); }}
-                }}
+        # Content for authenticated users
+        if st.session_state.current_page == "welcome_dashboard":
+            display_welcome_dashboard()
+        elif st.session_state.current_page == "resume_screen":
+            st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
+            resume_screener_page()
+        elif st.session_state.current_page == "top_leaderboard":
+            st.markdown('<h2 class="overview-dashboard-header">Top Leaderboard</h2>', unsafe_allow_html=True)
+            leaderboard_page()
+        elif st.session_state.current_page == "certificate_verify":
+            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
+            certificate_verifier_page()
+        elif st.session_state.current_page == "total_screened":
+            st.markdown('<h2 class="overview-dashboard-header">Total Resumes Screened</h2>', unsafe_allow_html=True)
+            total_screened_page()
+        elif st.session_state.current_page == "about_us":
+            st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
+            about_us_page()
+        elif st.session_state.current_page == "feedback_form":
+            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
+            feedback_and_help_page()
+        elif st.session_state.current_page == "logout":
+            logout_page()
 
-                .beautiful-greeting-card {{
-                    background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%); /* Soft gradient background */
-                    border-radius: 12px; /* More rounded corners */
-                    padding: 30px;
-                    margin-bottom: 25px;
-                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
-                    text-align: center;
-                    animation: fadeInScale 0.7s ease-out forwards; /* Apply animation */
-                    position: relative; /* For the sparkle effect */
-                    overflow: hidden; /* To contain the sparkle */
-                }}
+        # Admin Section (only visible to admins)
+        if is_current_user_admin():
+            st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
+            st.header("Admin Management")
 
-                .beautiful-greeting-card::before {{
-                    content: '✨'; /* Add a subtle sparkle effect */
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    font-size: 2em;
-                    opacity: 0.2;
-                    pointer-events: none;
-                }}
-                .beautiful-greeting-card::after {{
-                    content: '🌟'; /* Another sparkle */
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
-                    font-size: 2em;
-                    opacity: 0.2;
-                    pointer-events: none;
-                }}
-
-                .beautiful-greeting-title {{
-                    font-size: 2.2em; /* Larger title */
-                    font-weight: 700; /* Bolder */
-                    color: #2c3e50; /* Darker, more prominent color */
-                    margin-bottom: 10px;
-                    text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
-                }}
-
-                .beautiful-username {{
-                    color: #3498db; /* Vibrant blue for username */
-                    font-weight: 800; /* Extra bold */
-                }}
-
-                .beautiful-welcome-text {{
-                    font-size: 1.15em; /* Slightly larger body text */
-                    color: #555555; /* Softer text color */
-                    line-height: 1.6;
-                    margin-top: 15px;
-                }}
-
-                .beautiful-emoji {{
-                    font-size: 1.6em; /* Larger, more impactful emojis */
-                    vertical-align: middle;
-                    margin: 0 5px;
-                }}
-                /* Dark mode adjustments for the greeting card */
-                html[data-theme="dark"] .beautiful-greeting-card {{
-                    background: linear-gradient(135deg, #2c2c44 0%, #3a3a50 100%);
-                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-                }}
-                html[data-theme="dark"] .beautiful-greeting-title {{
-                    color: #e0e0e0;
-                    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-                }}
-                html[data-theme="dark"] .beautiful-username {{
-                    color: #6fa8f7; /* Lighter blue for dark mode */
-                }}
-                html[data-theme="dark"] .beautiful-welcome-text {{
-                    color: #a0a0a0;
-                }}
-            </style>
-
-            <div class="beautiful-greeting-card">
-                <h1 class="beautiful-greeting-title">
-                    Welcome, <span class="beautiful-username">{st.session_state.username}</span>!
-                </h1>
-                <p class="beautiful-welcome-text">
-                    <span class="beautiful-emoji">👋</span> We're absolutely thrilled to have you here!
-                    Your journey with us officially begins now. <span class="beautiful-emoji">🚀</span>
-                    Get ready to explore! <span class="beautiful-emoji">🎉</span>
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # The Dashboard content block is removed as requested
-    # if st.session_state.current_page == "Dashboard":
-    #     # ... (Dashboard content) ...
-
-    if st.session_state.current_page == "resume_screen":
-        st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
-        resume_screener_page()
-
-    elif st.session_state.current_page == "top_leaderboard":
-        st.markdown('<h2 class="overview-dashboard-header">Top Leaderboard</h2>', unsafe_allow_html=True)
-        leaderboard_page()
-
-    elif st.session_state.current_page == "certificate_verify":
-        st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
-        certificate_verifier_page()
-
-    elif st.session_state.current_page == "total_screened":
-        st.markdown('<h2 class="overview-dashboard-header">Total Resumes Screened</h2>', unsafe_allow_html=True)
-        total_screened_page()
-
-    elif st.session_state.current_page == "about_us":
-        st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
-        about_us_page()
-
-    elif st.session_state.current_page == "feedback_form":
-        st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
-        feedback_and_help_page()
-
-    elif st.session_state.current_page == "logout":
-        logout_page()
-
-    # Admin Section (only visible to admins)
-    if is_current_user_admin():
-        st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
-        st.header("Admin Management")
-
-        # Admin actions are controlled by the sidebar radio buttons
-        if st.session_state.get("admin_tabs") == "Create User":
-            admin_registration_section()
-        elif st.session_state.get("admin_tabs") == "Reset Password":
-            admin_password_reset_section()
-        elif st.session_state.get("admin_tabs") == "Toggle User Status":
-            admin_disable_enable_user_section()
-        elif st.session_state.get("admin_tabs") == "View All Users":
-            st.subheader("👥 All Registered Users:")
-            try:
-                users_data = load_users()
-                if users_data:
-                    display_users = []
-                    for user, data in users_data.items():
-                        # Ensure data is a dictionary before accessing keys
-                        hashed_pass = data.get("password", "") if isinstance(data, dict) else data
-                        status = data.get("status", "N/A") if isinstance(data, dict) else "N/A"
-                        company = data.get("company", "N/A") if isinstance(data, dict) else "N/A"
-                        display_users.append([user, hashed_pass, status, company])
-                    st.dataframe(pd.DataFrame(display_users, columns=["Email/Username", "Hashed Password (DO NOT EXPOSE)", "Status", "Company"]), use_container_width=True)
-                else:
-                    st.info("No users registered yet.")
-            except Exception as e:
-                st.error(f"Error loading user data for admin view: {e}")
+            # Admin actions are controlled by the sidebar radio buttons
+            if st.session_state.get("admin_tabs") == "Create User":
+                admin_registration_section()
+            elif st.session_state.get("admin_tabs") == "Reset Password":
+                admin_password_reset_section()
+            elif st.session_state.get("admin_tabs") == "Toggle User Status":
+                admin_disable_enable_user_section()
+            elif st.session_state.get("admin_tabs") == "View All Users":
+                st.subheader("👥 All Registered Users:")
+                try:
+                    users_data = load_users()
+                    if users_data:
+                        display_users = []
+                        for user, data in users_data.items():
+                            # Ensure data is a dictionary before accessing keys
+                            hashed_pass = data.get("password", "") if isinstance(data, dict) else data
+                            status = data.get("status", "N/A") if isinstance(data, dict) else "N/A"
+                            company = data.get("company", "N/A") if isinstance(data, dict) else "N/A"
+                            display_users.append([user, hashed_pass, status, company])
+                        st.dataframe(pd.DataFrame(display_users, columns=["Email/Username", "Hashed Password (DO NOT EXPOSE)", "Status", "Company"]), use_container_width=True)
+                    else:
+                        st.info("No users registered yet.")
+                except Exception as e:
+                    st.error(f"Error loading user data for admin view: {e}")
+    else:
+        # If not authenticated, only show the login/registration section
+        # The permanent sidebar content is already handled outside this if/else
+        pass # login_section() is called before this block and handles non-authenticated display
 
 if __name__ == "__main__":
     main()
