@@ -334,7 +334,7 @@ def main():
                 st.image(logo_path, width=215)
             
         st.sidebar.write("---")
-        
+        st.sidebar.markdown("[Go to Pen HR Portal](https://screenerpro.streamlit.app/)")
         st.sidebar.info("Please log in or register to access the portal features.")
         
         return # Stop execution if not authenticated
