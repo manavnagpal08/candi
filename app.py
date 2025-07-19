@@ -24,6 +24,16 @@ FIREBASE_CONFIG = json.loads(os.environ.get('__firebase_config', '{}'))
 FIREBASE_API_KEY = FIREBASE_CONFIG.get('apiKey', '')
 FIREBASE_PROJECT_ID = FIREBASE_CONFIG.get('projectId', '')
 
+# --- DEBUGGING: Display API Key and Project ID (REMOVE IN PRODUCTION) ---
+if not st.session_state.get("authenticated", False):
+    st.sidebar.markdown("---")
+    st.sidebar.warning("DEBUG INFO (REMOVE IN PRODUCTION):")
+    st.sidebar.write(f"API Key: `{FIREBASE_API_KEY}`")
+    st.sidebar.write(f"Project ID: `{FIREBASE_PROJECT_ID}`")
+    st.sidebar.markdown("---")
+# --- END DEBUGGING ---
+
+
 # Firebase Authentication REST API Endpoints
 AUTH_SIGNUP_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
 AUTH_SIGNIN_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
