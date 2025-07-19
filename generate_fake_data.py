@@ -1606,32 +1606,32 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     influenced by a provided Job Description.
     """
     first_names = [
-    "Sharma", "Verma", "Patel", "Singh", "Gupta", "Reddy", "Nair", "Kumar", "Mehta", "Desai",
-    "Joshi", "Kapoor", "Choudhary", "Tripathi", "Yadav", "Malhotra", "Agarwal", "Saxena", "Das", "Rastogi",
-    "Mishra", "Bose", "Pillai", "Bansal", "Tiwari", "Dey", "Menon", "Thakur", "Lal", "Roy",
-    "Bhatt", "Jain", "Sen", "Shetty", "Rawat", "Pandey", "Ghosh", "Dubey", "Mahajan", "Kulkarni",
-    "Shukla", "Chatterjee", "Banerjee", "Vyas", "Deshmukh", "Mundra", "Chauhan", "Mittal", "Bhatia", "Khanna",
-    "Nayak", "Naidu", "Joshi", "Barot", "Talwar", "Rastogi", "Sethi", "Agnihotri", "Vohra", "Suri",
-    "Bakshi", "Saxena", "Pathak", "Bhargava", "Makhija", "Goel", "Dwivedi", "Kaul", "Saran", "Sundar",
-    "Iyer", "Garg", "Bhardwaj", "Upadhyay", "Acharya",
+     "Akshay", "Bhanu", "Chandresh", "Dhananjay", "Eklavya", "Farhan", "Gauransh", "Hemraj", "Ishwar", "Jayesh",
+    "Kiran", "Lakshay", "Madhav", "Naman", "Omkar", "Pankaj", "Quamar", "Ravish", "Saket", "Tushant",
+    "Utkarsh", "Vansh", "Waseem", "Yogesh", "Zaid", "Anubhav", "Bhavin", "Chinmay", "Dilip", "Eshan",
+    "Faizan", "Gopalakrishnan", "Harjeet", "Inder", "Jaidev", "Kamlesh", "Lalitendra", "Manan", "Narayan", "Onkar",
+    "Prabhat", "Ranjeet", "Sahil", "Tanmay", "Umesh", "Vishwas", "Wasim", "Yatindra", "Zubair", "Ashutosh",
 
-    # Non-Indian (5)
-    "Smith", "Jones", "Brown", "Taylor", "Anderson"]
+    # Indian Female (50)
+    "Amrita", "Bhagyashree", "Chahak", "Damayanti", "Ekisha", "Faria", "Gungun", "Harleen", "Ishleen", "Jaspreet",
+    "Khusboo", "Lavina", "Monika", "Namrata", "Oindrila", "Pranita", "Quintisha", "Ragini", "Sushmita", "Tanisha",
+    "Urja", "Vibha", "Warda", "Yuvika", "Zulekha", "Arpita", "Bindiya", "Chitra", "Deepali", "Elisha",
+    "Fathima", "Garima", "Himani", "Indu", "Jaya", "Kasturi", "Leela", "Meghna", "Nikita", "Oorvashi",
+    "Purnima", "Ritika", "Sharvani", "Triparna", "Upasana", "Vaidehi", "Wamita", "Yoshita", "Zeenia", "Shanvika"]
 
 
     last_names = [
     # Common Indian Last Names (75)
-    "Sharma", "Verma", "Patel", "Singh", "Gupta", "Reddy", "Nair", "Kumar", "Mehta", "Desai",
-    "Joshi", "Kapoor", "Choudhary", "Tripathi", "Yadav", "Malhotra", "Agarwal", "Saxena", "Das", "Rastogi",
-    "Mishra", "Bose", "Pillai", "Bansal", "Tiwari", "Dey", "Menon", "Thakur", "Lal", "Roy",
-    "Bhatt", "Jain", "Sen", "Shetty", "Rawat", "Pandey", "Ghosh", "Dubey", "Mahajan", "Kulkarni",
-    "Shukla", "Chatterjee", "Banerjee", "Vyas", "Deshmukh", "Mundra", "Chauhan", "Mittal", "Bhatia", "Khanna",
-    "Nayak", "Naidu", "Joshi", "Barot", "Talwar", "Rastogi", "Sethi", "Agnihotri", "Vohra", "Suri",
-    "Bakshi", "Saxena", "Pathak", "Bhargava", "Makhija", "Goel", "Dwivedi", "Kaul", "Saran", "Sundar",
-    "Iyer", "Garg", "Bhardwaj", "Upadhyay", "Acharya",
-
-    # Non-Indian (5)
-    "Smith", "Jones", "Brown", "Taylor", "Anderson"]
+    "Ambani", "Bachchan", "Chatterji", "Dhamija", "Elhance", "Faujdar", "Gajjar", "Haksar", "Inamdar", "Jaisingh",
+    "Kamble", "Lohana", "Mahadevan", "Nayak", "Ojwani", "Phadke", "Qadri", "Ramaswamy", "Sardesai", "Tikoo",
+    "Uppal", "Vaswani", "Wasan", "Yerram", "Zuberi", "Ansal", "Bhide", "Chheda", "Dhoot", "Eshpuniyani",
+    "Fattepurkar", "Gadre", "Hiremath", "Irani", "Jambhulkar", "Karandikar", "Lankesh", "Mankad", "Naik", "Pachauri",
+    "Qureshi", "Rajguru", "Sachan", "Talnikar", "Udasi", "Varde", "Wadhwani", "Yagnik", "Zain", "Baraskar",
+    "Bhonsle", "Chandok", "Desai", "Erande", "Firodia", "Gadhvi", "Hingne", "Ismail", "Jhaveri", "Kamble",
+    "Londhe", "Meher", "Nayyar", "Oswal", "Panja", "Qureishi", "Rohira", "Sankhla", "Thombre", "Upadhyaya",
+    "Vemuri", "Wankhede", "Yendrembam", "Zariwala", "Alagh", "Bajpai", "Chitre", "Devkar", "Ekbote", "Ghatge",
+    "Halder", "Ikhar", "Jagatramka", "Korgaonkar", "Lalchandani", "Mirchandani", "Nanavati", "Pagaria", "Ranka", "Samra",
+    "Tamhankar", "Udhwani", "Vidyarthi", "Waghmare", "Yellanki", "Zingade", "Bhutada", "Chelani", "Deotale", "Gidwani"]
 
     email_domains = ["example.com", "mail.com", "techcorp.org", "devs.net"]
 
