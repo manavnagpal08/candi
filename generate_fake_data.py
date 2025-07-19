@@ -1606,20 +1606,17 @@ def generate_dummy_candidate_data(jd_text, jd_embedding, jd_raw_skills_set, max_
     influenced by a provided Job Description.
     """
     first_names = [
-    # Indian Male Names (40)
-    "Aarav", "Vivaan", "Aditya", "Krishna", "Aryan", "Kabir", "Ishaan", "Rohan", "Devansh", "Yug",
-    "Shaurya", "Laksh", "Parth", "Rudra", "Arjun", "Atharv", "Harsh", "Nikhil", "Manav", "Pranav",
-    "Om", "Veer", "Ansh", "Darsh", "Siddharth", "Raj", "Tanmay", "Samar", "Raghav", "Nirav",
-    "Bhavesh", "Chirag", "Yash", "Kunal", "Nitesh", "Ankit", "Tushar", "Gaurav", "Soham", "Vikram",
-
-    # Indian Female Names (35)
-    "Ananya", "Diya", "Ishita", "Kiara", "Saanvi", "Riya", "Tanya", "Aanya", "Meera", "Kavya",
-    "Sneha", "Pooja", "Priya", "Naina", "Radhika", "Ira", "Simran", "Navya", "Mahi", "Avni",
-    "Neha", "Swara", "Trisha", "Myra", "Reva", "Bhavya", "Ritika", "Ishika", "Shruti", "Aarohi",
-    "Niharika", "Vidhi", "Tanvi", "Lavanya", "Charvi",
+    "Sharma", "Verma", "Patel", "Singh", "Gupta", "Reddy", "Nair", "Kumar", "Mehta", "Desai",
+    "Joshi", "Kapoor", "Choudhary", "Tripathi", "Yadav", "Malhotra", "Agarwal", "Saxena", "Das", "Rastogi",
+    "Mishra", "Bose", "Pillai", "Bansal", "Tiwari", "Dey", "Menon", "Thakur", "Lal", "Roy",
+    "Bhatt", "Jain", "Sen", "Shetty", "Rawat", "Pandey", "Ghosh", "Dubey", "Mahajan", "Kulkarni",
+    "Shukla", "Chatterjee", "Banerjee", "Vyas", "Deshmukh", "Mundra", "Chauhan", "Mittal", "Bhatia", "Khanna",
+    "Nayak", "Naidu", "Joshi", "Barot", "Talwar", "Rastogi", "Sethi", "Agnihotri", "Vohra", "Suri",
+    "Bakshi", "Saxena", "Pathak", "Bhargava", "Makhija", "Goel", "Dwivedi", "Kaul", "Saran", "Sundar",
+    "Iyer", "Garg", "Bhardwaj", "Upadhyay", "Acharya",
 
     # Non-Indian (5)
-    "Alice", "Charlie", "Diana", "Ethan", "Julia"]
+    "Smith", "Jones", "Brown", "Taylor", "Anderson"]
 
 
     last_names = [
