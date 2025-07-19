@@ -740,7 +740,7 @@ html[data-theme="dark"] .stAlert:hover {
 
 html[data-theme="dark"] .stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
     background-color: #2A3C4D;
-    color: #A7D9EB;
+    color: #A7D9EB; /* Adjusted for better visibility in dark mode */
     border-left: 8px solid #00B8D4;
 }
 
