@@ -28,6 +28,7 @@ import time
 import pandas as pd
 import json
 import requests # Import requests for REST API calls
+from weasyprint import HTML # Import WeasyPrint for HTML to PDF conversion
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -1093,17 +1094,36 @@ The {sender_name}""")
 
 def send_certificate_email(recipient_email, candidate_name, score, certificate_html_content, certificate_public_url, gmail_address, gmail_app_password):
     """
-    Sends an email with the certificate embedded as HTML content and attached as an HTML file.
-    Includes a link to the publicly hosted certificate.
+    Sends an email with the certificate embedded as HTML content and attached as a PDF file.
+    Includes a link to the publicly hosted certificate (if applicable).
 
-    NOTE: Direct server-side conversion of HTML to image (PNG/JPG) or PDF
-    for email attachments is not feasible in this environment without complex
-    external dependencies (e.g., headless browsers like Puppeteer/Playwright
-    or dedicated rendering libraries like wkhtmltopdf), which are typically
-    not available or practical in Streamlit Cloud.
-    Therefore, the certificate is attached as an HTML file. Users can open
-    this HTML file in their browser and then use their browser's native
-    "Print to PDF" or screenshot functionality to get an image/PDF.
+    NOTE on WeasyPrint dependencies: WeasyPrint relies on external libraries like Cairo, Pango,
+    and GDK-Pixbuf. If deploying to a cloud environment (e.g., Streamlit Cloud), you might need
+    to use a custom Dockerfile to install these dependencies.
+    Example Dockerfile snippet:
+    FROM python:3.9-slim
+    RUN apt-get update && apt-get install -y \
+        build-essential \
+        libffi-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libjpeg-dev \
+        zlib1g-dev \
+        libpng-dev \
+        libfreetype6-dev \
+        liblcms2-dev \
+        libwebp-dev \
+        libharfbuzz-dev \
+        libfribidi-dev \
+        libcairo2-dev \
+        libpango1.0-dev \
+        libgdk-pixbuf2.0-dev \
+        shared-mime-info \
+        python3-dev \
+        python3-venv \
+        --no-install-recommends && \
+        rm -rf /var/lib/apt/lists/*
+    # ... rest of your Dockerfile (installing python dependencies, etc.)
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
@@ -1125,7 +1145,7 @@ We’re proud to award you an official certificate recognizing your skills and e
 
 You can view your certificate online here: {certificate_public_url}
 
-The certificate is also attached as an HTML file. You can save this HTML file, open it in your browser, and then print it to PDF or take a screenshot to share.
+The certificate is also attached as a PDF file for your convenience.
 
 Have questions? Contact us at support@screenerpro.in
 
@@ -1142,7 +1162,7 @@ Have questions? Contact us at support@screenerpro.in
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
             
             <p>You can view your certificate online here: <a href="{certificate_public_url}">{certificate_public_url}</a></p>
-            <p>The certificate is also attached to this email as an HTML file. You can download it, open it in your browser, and then print it to PDF or take a screenshot to share on LinkedIn or WhatsApp.</p>
+            <p>The certificate is also attached to this email as a PDF file.</p>
             
             <p>Have questions? Contact us at support@screenerpro.in</p>
             <p>🚀 Keep striving. Keep growing.</p>
@@ -1154,19 +1174,27 @@ Have questions? Contact us at support@screenerpro.in
     msg_alternative.attach(MIMEText(html_body, 'html'))
     msg.attach(msg_alternative)
 
-    # Attach the HTML certificate file
-    part = MIMEBase('application', 'octet-stream')
-    part.set_payload(certificate_html_content.encode('utf-8')) # Encode HTML content
+    # Generate PDF using WeasyPrint
+    try:
+        pdf_bytes = HTML(string=certificate_html_content).write_pdf()
+    except Exception as e:
+        st.error(f"❌ Error generating PDF for email attachment: {e}")
+        st.info("WeasyPrint requires system dependencies (like Cairo, Pango, GDK-Pixbuf). If deploying, ensure these are installed in your environment (e.g., via a custom Dockerfile).")
+        return False
+
+    # Attach the PDF certificate file
+    part = MIMEBase('application', 'pdf')
+    part.set_payload(pdf_bytes)
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f'attachment; filename="ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.html"')
-    part.add_header('Content-Type', 'text/html; charset=utf-8') # Specify content type as HTML
+    part.add_header('Content-Disposition', f'attachment; filename="ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.pdf"')
+    part.add_header('Content-Type', 'application/pdf; charset=utf-8') # Specify content type as PDF
     msg.attach(part)
     
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(gmail_address, gmail_app_password)
             smtp.send_message(msg)
-        st.success(f"✅ Certificate email sent to {recipient_email} with HTML attachment!")
+        st.success(f"✅ Certificate email sent to {recipient_email} with PDF attachment!")
         return True
     except smtplib.SMTPAuthenticationError:
         st.error("❌ Failed to send email: Authentication error. Please check your Gmail address and App Password.")
@@ -1813,10 +1841,10 @@ def resume_screener_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for display
 
-                # Construct the public URL for the certificate
-                # IMPORTANT: This assumes you have a mechanism to upload the HTML file
-                # to CERTIFICATE_HOSTING_URL/certificate_id.html
-                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.html"
+                # Construct the public URL for the certificate (if you plan to host them)
+                # For this implementation, the PDF is generated on-the-fly for download/email.
+                # If you need to host PDFs, you'd need a separate storage mechanism (e.g., AWS S3, GitHub Pages for PDFs).
+                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.pdf" # Changed to .pdf extension
 
                 # --- Automatic Email Sending ---
                 candidate_email = candidate_data.get('Email')
@@ -1832,7 +1860,7 @@ def resume_screener_page():
                                 candidate_email, 
                                 candidate_data['Candidate Name'], 
                                 candidate_data['Score (%)'], 
-                                certificate_html_content, # Pass HTML content
+                                certificate_html_content, # Pass HTML content for WeasyPrint
                                 certificate_public_url, # Pass public URL
                                 gmail_address, 
                                 gmail_app_password
@@ -1847,16 +1875,20 @@ def resume_screener_page():
                 col_cert_download, col_share_linkedin, col_share_whatsapp = st.columns(3)
                 
                 with col_cert_download:
-                    st.download_button(
-                        label="⬇️ Download Certificate (HTML)",
-                        data=certificate_html_content,
-                        file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.html",
-                        mime="text/html",
-                        key="download_cert_button",
-                        help="Download the certificate as an HTML file. You can open it in your browser and print to PDF."
-                    )
-                    # Updated info message to clarify image/PDF generation
-                    st.info("💡 To get an **image (PNG/JPG)** or **PDF** of your certificate, open the downloaded HTML file in your browser and use your browser's **'Print to PDF'** or **screenshot functionality**.")
+                    # Generate PDF bytes for download
+                    try:
+                        pdf_download_bytes = HTML(string=certificate_html_content).write_pdf()
+                        st.download_button(
+                            label="⬇️ Download Certificate (PDF)",
+                            data=pdf_download_bytes,
+                            file_name=f"ScreenerPro_Certificate_{candidate_data['Candidate Name'].replace(' ', '_')}.pdf",
+                            mime="application/pdf",
+                            key="download_cert_button",
+                            help="Download the certificate as a PDF file."
+                        )
+                    except Exception as e:
+                        st.error(f"❌ Error generating PDF for download: {e}")
+                        st.info("PDF generation requires system dependencies. If deploying, ensure these are installed.")
                 
                 # Share message for social media
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
