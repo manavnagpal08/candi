@@ -3340,7 +3340,7 @@ def generate_certificate_html(candidate_data):
 </head>
 <body>
   <div class="certificate">
-    <img class="logo" src="https://raw.githubusercontent.com/manavnagpal08/candi/main/logo.png" alt="ScreenerPro Logo" />
+    <img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhhq_OCSv-QmuBjXeRQXr60EfsvVA4chRPCNslo3NhjVQkoKjUtiRfTPpGoQjyQXS7sMsJifQC6Yq34cAhNbq9lMwBXZqIIbCij1adyXSuNoyxuzOTDfrPU2dnna0baimldd7Y1KCkvaAfrWC1yLGxp25SJ9s4exJ-JAc8kNcTyUSgkLWbW2DdvhpWH4GlO/s320/logo.png" alt="ScreenerPro Logo" />
 
     <h1>CERTIFICATE OF EXCELLENCE</h1>
     <h2>Presented by ScreenerPro</h2>
