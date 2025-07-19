@@ -1374,7 +1374,7 @@ def suggest_courses_for_skills(missing_skills_list):
 
     st.subheader("📚 Suggested Courses for Missing Skills")
     if not missing_skills_list:
-        st.info("Great! You have no significant missing skills based on the Job Description.")
+        st.("Great! You have no significant missing skills based on the Job Description.")
         return
 
     st.write("Based on the skills missing from your resume compared to the Job Description, here are some suggested courses or learning resources:")
@@ -1727,7 +1727,7 @@ def resume_screener_page():
         st.success("Resume analysis complete. Displaying your results.")
         
         total_screening_end_time = time.time()
-        st.info(f"Total screening time: {total_screening_end_time - total_screening_start_time:.2f} seconds.")
+        
 
         st.markdown("---")
         st.markdown("## 👑 Your AI Assessment")
