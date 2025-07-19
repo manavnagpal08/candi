@@ -2066,14 +2066,15 @@ def resume_screener_page():
 
     all_master_skills = sorted(list(MASTER_SKILLS)) 
 
-    if 'screening_cutoff_score' not in st.session_state:
-        st.session_state['screening_cutoff_score'] = 75
-    if 'screening_min_experience' not in st.session_state:
-        st.session_state['screening_min_experience'] = 2
-    if 'screening_max_experience' not in st.session_state:
-        st.session_state['screening_max_experience'] = 10
-    if 'screening_min_cgpa' not in st.session_state:
-        st.session_state['screening_min_cgpa'] = 2.5
+    # Removed st.session_state initializations for filters
+    # if 'screening_cutoff_score' not in st.session_state:
+    #     st.session_state['screening_cutoff_score'] = 75
+    # if 'screening_min_experience' not in st.session_state:
+    #     st.session_state['screening_min_experience'] = 2
+    # if 'screening_max_experience' not in st.session_state:
+    #     st.session_state['screening_max_experience'] = 10
+    # if 'screening_min_cgpa' not in st.session_state:
+    #     st.session_state['screening_min_cgpa'] = 2.5
     
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
@@ -2133,21 +2134,22 @@ def resume_screener_page():
             st.markdown("---")
 
 
-    with col2:
-        cutoff = st.slider("📈 **Minimum Score Cutoff (%)**", 0, 100, 75, key="min_score_cutoff_slider", help="Candidates scoring below this percentage will be flagged for closer review or considered less suitable.")
-        st.session_state['screening_cutoff_score'] = cutoff
+    # Removed the entire col2 block, as it contained all the filters
+    # with col2:
+    #     cutoff = st.slider("📈 **Minimum Score Cutoff (%)**", 0, 100, 75, key="min_score_cutoff_slider", help="Candidates scoring below this percentage will be flagged for closer review or considered less suitable.")
+    #     st.session_state['screening_cutoff_score'] = cutoff
 
-        min_experience = st.slider("💼 **Minimum Experience Required (Years)**", 0, 15, 2, key="min_exp_slider", help="Candidates with less than this experience will be noted.")
-        st.session_state['screening_min_experience'] = min_experience
+    #     min_experience = st.slider("💼 **Minimum Experience Required (Years)**", 0, 15, 2, key="min_exp_slider", help="Candidates with less than this experience will be noted.")
+    #     st.session_state['screening_min_experience'] = min_experience
 
-        max_experience = st.slider("⬆️ **Maximum Experience Allowed (Years)**", 0, 20, 10, key="max_exp_slider", help="Candidates with more than this experience might be considered overqualified or outside the target range.")
-        st.session_state['screening_max_experience'] = max_experience
+    #     max_experience = st.slider("⬆️ **Maximum Experience Allowed (Years)**", 0, 20, 10, key="max_exp_slider", help="Candidates with more than this experience might be considered overqualified or outside the target range.")
+    #     st.session_state['screening_max_experience'] = max_experience
 
-        min_cgpa = st.slider("🎓 **Minimum CGPA Required (4.0 Scale)**", 0.0, 4.0, 2.5, 0.1, key="min_cgpa_slider", help="Candidates with CGPA below this value (normalized to 4.0) will be noted.")
-        st.session_state['screening_min_cgpa'] = min_cgpa
+    #     min_cgpa = st.slider("🎓 **Minimum CGPA Required (4.0 Scale)**", 0.0, 4.0, 2.5, 0.1, key="min_cgpa_slider", help="Candidates with CGPA below this value (normalized to 4.0) will be noted.")
+    #     st.session_state['screening_min_cgpa'] = min_cgpa
 
-        st.markdown("---")
-        st.info("Once criteria are set, upload your resume below to begin screening.")
+    #     st.markdown("---")
+    #     st.info("Once criteria are set, upload your resume below to begin screening.")
 
     st.markdown("## 🎯 Skill Prioritization (Optional)")
     st.caption("Assign higher importance to specific skills in the Job Description.")
@@ -2208,9 +2210,11 @@ def resume_screener_page():
         st.success("Embedding generation complete.")
 
         with st.spinner(f"Analyzing your resume with AI models..."):
+            # Fixed max_experience to a default value since the slider is removed
+            default_max_experience = 15 
             result = _process_single_resume_for_screener_page(
                 file_name, resume_text, jd_text, jd_embedding, resume_embedding,
-                jd_name_for_results, high_priority_skills, medium_priority_skills, max_experience,
+                jd_name_for_results, high_priority_skills, medium_priority_skills, default_max_experience,
                 global_ml_model, target_company_name # Pass target_company_name
             )
             
