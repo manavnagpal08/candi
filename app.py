@@ -363,7 +363,7 @@ def main():
         st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
-    "
+    
     if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
         st.session_state.current_page = "feedback_form"
     
