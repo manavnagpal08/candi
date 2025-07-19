@@ -208,10 +208,10 @@ SKILL_CATEGORIES = {
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
-APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+APP_BASE_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 # This URL should be where your generated HTML certificates are publicly accessible.
 # For example, if you upload them to a GitHub Pages repository.
-CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
+CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/" # <--- UPDATED URL
 
 # --- Firebase REST API Functions ---
 
@@ -1113,7 +1113,7 @@ We’re proud to award you an official certificate recognizing your skills and e
 
 You can view your certificate online here: {certificate_public_url}
 
-Have questions? Contact us at support@screenerpro.in
+Have questions? Contact us at screenerpro.ai@gmail.com
 
 🚀 Keep striving. Keep growing.
 
@@ -1129,7 +1129,7 @@ Have questions? Contact us at support@screenerpro.in
             
             <p>You can view your certificate online here: <a href="{certificate_public_url}">{certificate_public_url}</a></p>
             
-            <p>Have questions? Contact us at support@screenerpro.in</p>
+            <p>Have questions? Contact us at screenerpro.ai@gmail.com</p>
             <p>🚀 Keep striving. Keep growing.</p>
             <p>– Team ScreenerPro</p>
         </body>
@@ -1198,6 +1198,14 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
 
         resume_raw_skills_set, resume_categorized_skills = extract_relevant_keywords(text, MASTER_SKILLS)
         jd_raw_skills_set, jd_categorized_skills = extract_relevant_keywords(jd_text, MASTER_SKILLS)
+
+        # Defensive checks for sets
+        if not isinstance(resume_raw_skills_set, set):
+            print(f"DEBUG: resume_raw_skills_set is not a set. Type: {type(resume_raw_skills_set)}. Defaulting to empty set.")
+            resume_raw_skills_set = set()
+        if not isinstance(jd_raw_skills_set, set):
+            print(f"DEBUG: jd_raw_skills_set is not a set. Type: {type(jd_raw_skills_set)}. Defaulting to empty set.")
+            jd_raw_skills_set = set()
 
         matched_keywords = list(resume_raw_skills_set.intersection(jd_raw_skills_set))
         
@@ -1733,10 +1741,18 @@ def resume_screener_page():
                 st.write("No categorized matched skills found.")
 
             st.markdown("#### Missing Skills Breakdown (from JD):")
-            jd_raw_skills_set, jd_categorized_skills_for_top = extract_relevant_keywords(jd_text, all_master_skills)
+            # Defensive checks for sets before performing set operations
+            jd_raw_skills_set_for_display, jd_categorized_skills_for_top = extract_relevant_keywords(jd_text, all_master_skills)
             resume_raw_skills_set_for_top, _ = extract_relevant_keywords(candidate_data['Resume Raw Text'], all_master_skills)
+
+            if not isinstance(jd_raw_skills_set_for_display, set):
+                print(f"DEBUG: jd_raw_skills_set_for_display is not a set. Type: {type(jd_raw_skills_set_for_display)}. Defaulting to empty set.")
+                jd_raw_skills_set_for_display = set()
+            if not isinstance(resume_raw_skills_set_for_top, set):
+                print(f"DEBUG: resume_raw_skills_set_for_top is not a set. Type: {type(resume_raw_skills_set_for_top)}. Defaulting to empty set.")
+                resume_raw_skills_set_for_top = set()
             
-            missing_skills_for_current = list(jd_raw_skills_set.difference(resume_raw_skills_set_for_top))
+            missing_skills_for_current = list(jd_raw_skills_set_for_display.difference(resume_raw_skills_set_for_top))
             
             if missing_skills_for_current:
                 missing_categorized = collections.defaultdict(list)
@@ -1756,7 +1772,7 @@ def resume_screener_page():
                 else:
                     st.write("No categorized missing skills found for this candidate relative to the JD.")
             else:
-                st.write("No missing skills found for this candidate relative to the JD.")
+                st.write("No missing skills found for this candidate relative to the JD.") # This is line 1759 in the original
             
             st.markdown("---")
             # Course Suggestions based on missing skills
@@ -1775,7 +1791,7 @@ def resume_screener_page():
                 # Construct the public URL for the certificate (if you plan to host them)
                 # For this implementation, the PDF is generated on-the-fly for download/email.
                 # If you need to host PDFs, you'd need a separate storage mechanism (e.g., AWS S3, GitHub Pages for PDFs).
-                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.html" # Changed to .html extension
+                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}certificates/{candidate_data['Certificate ID']}.html" # Changed to .html extension, added /certificates/ path
 
                 # --- Automatic Email Sending ---
                 candidate_email = candidate_data.get('Email')
@@ -1821,7 +1837,7 @@ def resume_screener_page():
 After uploading my resume, I was evaluated across multiple hiring parameters using AI-powered screening technology.
 
 I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}%, which reflects the strength of my profile in today's job market.
-Check out my certificate here: {certificate_public_url}
+View my certificate online: {certificate_public_url}
 
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
