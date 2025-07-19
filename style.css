@@ -468,6 +468,11 @@ div[data-baseweb="popover"] div[role="listbox"] div[role="option"] span {
     color: #333333 !important; /* Explicitly set to a dark color for visibility */
 }
 
+/* NEW: Force text color for the input field itself within the selectbox */
+.stSelectbox input[type="text"] {
+    color: #333333 !important; /* Force dark text color for visibility */
+    -webkit-text-fill-color: #333333 !important; /* For Safari/Chrome autocomplete */
+}
 
 /* Background for the dropdown options and hover state */
 div[data-baseweb="popover"] div[role="listbox"] {
