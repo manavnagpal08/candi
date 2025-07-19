@@ -14,7 +14,7 @@ from certificate_verify import certificate_verifier_page
 from total_screened_page import total_screened_page
 import base64
 import random # Import random for quotes
-
+from generate_fake_data import generate_fake_data_page 
 # --- CSS Loading and Body Class Functions ---
 def load_css(file_name="style.css"):
     """
@@ -564,7 +564,7 @@ def main():
                 st.sidebar.subheader("Admin Panel")
                 admin_tab_selection = st.sidebar.radio(
                     "Admin Actions:",
-                    ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
+                    ("Create User", "Reset Password", "Toggle User Status", "View All Users", "Generate Fake Data")),
                     key="admin_tabs"
                 )
 
@@ -605,6 +605,8 @@ def main():
             
             elif st.session_state.get("admin_tabs") == "Toggle User Status":
                 admin_disable_enable_user_section()
+            elif st.session_state.get("admin_tabs") == ""Generate Fake Data":
+                generate_fake_data_page()
             elif st.session_state.get("admin_tabs") == "View All Users":
                 st.subheader("👥 All Registered Users:")
                 try:
