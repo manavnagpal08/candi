@@ -1,4 +1,4 @@
-/* style.css - The "Soft & Organic Modernism" Edition */
+/* style.css - The "Soft & Organic Modernism" Edition (Full Version with Enhanced Sidebar) */
 
 /* --- Google Fonts Import --- */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Comfortaa:wght@400;500;600;700&display=swap');
@@ -18,13 +18,13 @@
     --color-accent-light: #81C784; /* Lighter green */
     --color-accent-subtle: rgba(76, 175, 80, 0.1); /* Very light accent tint */
 
-    /* Soft UI Shadows - Light Mode */
-    --soft-shadow-light: 6px 6px 12px rgba(174, 174, 192, 0.4),
-                         -6px -6px 12px rgba(255, 255, 255, 0.8);
-    --soft-shadow-pressed: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
-                           inset -3px -3px 6px rgba(255, 255, 255, 0.7);
-    --soft-shadow-inner: inset 2px 2px 5px rgba(174, 174, 192, 0.2),
-                         inset -2px -2px 5px rgba(255, 255, 255, 0.6);
+    /* Soft UI Shadows - Light Mode (Slightly more pronounced for general elements) */
+    --soft-shadow-light: 8px 8px 16px rgba(174, 174, 192, 0.45), /* Increased spread */
+                         -8px -8px 16px rgba(255, 255, 255, 0.85); /* Increased spread */
+    --soft-shadow-pressed: inset 4px 4px 8px rgba(174, 174, 192, 0.4), /* Deeper inset */
+                           inset -4px -4px 8px rgba(255, 255, 255, 0.8); /* Deeper inset */
+    --soft-shadow-inner: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
+                         inset -3px -3px 6px rgba(255, 255, 255, 0.7);
 
     /* Animation Variables */
     --transition-speed: 0.35s; /* Slightly slower for organic feel */
@@ -41,13 +41,13 @@ body.dark-mode {
 
     /* Accent remains consistent */
 
-    /* Soft UI Shadows - Dark Mode */
-    --soft-shadow-light: 6px 6px 12px rgba(0, 0, 0, 0.4),
-                         -6px -6px 12px rgba(60, 60, 80, 0.8);
-    --soft-shadow-pressed: inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-                           inset -3px -3px 6px rgba(60, 60, 80, 0.7);
-    --soft-shadow-inner: inset 2px 2px 5px rgba(0, 0, 0, 0.2),
-                         inset -2px -2px 5px rgba(60, 60, 80, 0.6);
+    /* Soft UI Shadows - Dark Mode (Slightly more pronounced for general elements) */
+    --soft-shadow-light: 8px 8px 16px rgba(0, 0, 0, 0.45),
+                         -8px -8px 16px rgba(60, 60, 80, 0.85);
+    --soft-shadow-pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+                           inset -4px -4px 8px rgba(60, 60, 80, 0.8);
+    --soft-shadow-inner: inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+                         inset -3px -3px 6px rgba(60, 60, 80, 0.7);
 }
 
 /* --- Global Base Styles --- */
@@ -115,43 +115,67 @@ body.dark-mode p { color: var(--color-text-secondary-dark); }
 a { color: var(--color-accent-main); text-decoration: none; transition: all var(--transition-speed) var(--transition-ease); }
 a:hover { color: var(--color-accent-dark); text-decoration: underline; transform: translateY(-1px); }
 
-/* --- Sidebar Styling (Soft UI) --- */
+/* --- Sidebar Styling (Soft UI - Enhanced) --- */
 .stSidebar {
-    background-color: var(--color-bg-primary-light); /* Blends with background */
-    border-right: none; /* No harsh border */
-    box-shadow: var(--soft-shadow-light); /* Extruded effect */
-    padding-top: 2rem;
+    /* Slightly more complex background for depth */
+    background: linear-gradient(135deg, var(--color-bg-primary-light) 0%, var(--color-bg-secondary-light) 100%);
+    border-right: none;
+    box-shadow: 10px 10px 20px rgba(174, 174, 192, 0.4), /* Deeper light shadow */
+                -10px -10px 20px rgba(255, 255, 255, 0.9); /* Deeper dark shadow */
+    padding-top: 2.5rem; /* More top padding */
     color: var(--color-text-primary-light);
     transition: all var(--transition-speed) var(--transition-ease);
-    border-radius: 0 1.5rem 1.5rem 0; /* Rounded outer edge */
+    border-radius: 0 2rem 2rem 0; /* More rounded outer edge */
+    overflow: hidden; /* To contain pseudo-elements */
+    position: relative;
+    z-index: 1; /* Ensure content is above potential pseudo-elements */
 }
 
 body.dark-mode .stSidebar {
-    background-color: var(--color-bg-primary-dark);
-    box-shadow: var(--soft-shadow-light);
+    background: linear-gradient(135deg, var(--color-bg-primary-dark) 0%, var(--color-bg-secondary-dark) 100%);
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4),
+                -10px -10px 20px rgba(60, 60, 80, 0.9);
     color: var(--color-text-primary-dark);
 }
 
+/* Optional: Subtle inner shimmer for premium feel */
+.stSidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+body.dark-mode .stSidebar::before {
+    background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.01), transparent 40%);
+}
+
+
 .stSidebar .stButton > button {
-    width: calc(100% - 2.5rem); /* Consistent padding */
-    margin: 0.5rem 1.25rem;
-    background-color: var(--color-bg-primary-light); /* Blends with sidebar */
+    width: calc(100% - 3rem); /* More horizontal padding */
+    margin: 0.6rem 1.5rem;
+    background-color: var(--color-bg-secondary-light); /* Slightly lighter background for buttons */
     color: var(--color-text-primary-light);
     border: none;
     box-shadow: var(--soft-shadow-light); /* Soft extruded button */
     transition: all var(--transition-speed) var(--transition-ease);
     font-weight: 500;
-    padding: 0.9rem 1.2rem;
-    border-radius: 1rem; /* Softly rounded button */
+    padding: 1rem 1.5rem; /* More vertical padding */
+    border-radius: 1.2rem; /* More rounded button */
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem; /* More space for icon/text */
     cursor: pointer;
+    transform: translateZ(0); /* For smoother animation */
 }
 
 body.dark-mode .stSidebar .stButton > button {
-    background-color: var(--color-bg-primary-dark);
+    background-color: var(--color-bg-secondary-dark);
     color: var(--color-text-primary-dark);
     box-shadow: var(--soft-shadow-light);
 }
@@ -159,37 +183,42 @@ body.dark-mode .stSidebar .stButton > button {
 .stSidebar .stButton > button:hover {
     box-shadow: var(--soft-shadow-pressed); /* Pressed in effect */
     color: var(--color-accent-main);
-    background-color: var(--color-accent-subtle); /* Slight tint on hover */
-    transform: scale(0.98); /* Subtle scale for tactile feel */
+    background-color: var(--color-accent-subtle); /* Subtle tint on hover */
+    transform: scale(0.985); /* Very subtle scale for tactile feel */
 }
 
 .stSidebar .stButton > button:active {
     box-shadow: var(--soft-shadow-pressed); /* Maintain pressed effect */
-    transform: scale(0.97);
+    transform: scale(0.97); /* Deeper press */
 }
 
-/* Custom HR Portal Button in sidebar */
+/* Custom HR Portal Button in sidebar (More prominent) */
 .stSidebar a > button {
-    background-color: var(--color-accent-main) !important; /* Accent color for primary action */
+    background-color: var(--color-accent-main) !important;
     color: white !important;
     border: none !important;
-    border-radius: 1rem !important;
-    padding: 1rem 1.5rem !important;
-    font-weight: 600 !important;
-    width: calc(100% - 2.5rem) !important;
-    margin: 1.5rem 1.25rem !important;
+    border-radius: 1.2rem !important; /* Consistent with other buttons */
+    padding: 1.2rem 2rem !important; /* More prominent padding */
+    font-weight: 700 !important; /* Bolder text */
+    width: calc(100% - 3rem) !important;
+    margin: 2rem 1.5rem !important; /* More margin to stand out */
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px !important;
-    box-shadow: var(--soft-shadow-light) !important; /* Extruded */
+    gap: 12px !important;
+    box-shadow: 8px 8px 16px rgba(76, 175, 80, 0.4), -8px -8px 16px rgba(129, 199, 132, 0.7) !important; /* Accent-colored shadow */
     transition: all var(--transition-speed) var(--transition-ease) !important;
+    transform: translateZ(0);
+}
+
+body.dark-mode .stSidebar a > button {
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.4), -8px -8px 16px rgba(60, 60, 80, 0.7) !important;
 }
 
 .stSidebar a > button:hover {
-    background-color: var(--color-accent-dark) !important; /* Darker accent on hover */
-    box-shadow: var(--soft-shadow-pressed) !important; /* Pressed in effect */
+    background-color: var(--color-accent-dark) !important;
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.2) !important; /* Pressed in effect for accent button */
     transform: scale(0.98) !important;
 }
 .stSidebar a > button:active {
@@ -451,12 +480,6 @@ body.dark-mode .stSlider > div > div > div > div {
 body.dark-mode .stRadio div[role="radiogroup"] label, body.dark-mode .stCheckbox label {
     color: var(--color-text-primary-dark);
 }
-
-/* Custom Checkbox/Radio styling (more complex, targets specific elements if possible) */
-/* This requires knowing Streamlit's internal checkbox structure. If the default is not working,
-   you might need more specific selector or a custom component for full neumorphism.
-   For now, focusing on text and outer container. */
-
 
 /* Custom progress bar (Soft UI) */
 .stProgress > div > div {
