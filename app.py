@@ -324,23 +324,28 @@ def main():
             st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
     save_users(users)
 
-    # --- Permanent Sidebar Content (Always Visible) ---
+    # Authentication section
+    is_authenticated = login_section()
+
+
+
     with st.sidebar:
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
         logo_path = "logo.png"  # Assuming logo is in the same directory
 
         if os.path.exists(logo_path):
             try:
-                # Read the image file in binary mode
+            # Read the image file in binary mode
                 with open(logo_path, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode()
 
-                # Create a clickable image that links to the HR portal
+            # Create a clickable image that links to the HR portal
                 st.markdown(f"""
                 <a href="https://screenerpro.streamlit.app/" target="_self">
-                    <img src="data:image/png;base64,{encoded_string}" alt="Go to HR Portal" width="215">
+                    <img src="data:image/png;base66,{encoded_string}" alt="Go to HR Portal" width="215">
                 </a>
                 """, unsafe_allow_html=True)
+            # You can remove the st.image(logo_path) call here, as we are embedding it directly
             except FileNotFoundError:
                 st.warning(f"Logo file not found at: {logo_path}")
             except Exception as e:
@@ -353,103 +358,100 @@ def main():
 
         st.sidebar.info("Please log in or register to access the portal features.")
 
-    # Authentication section (now after the permanent sidebar content)
-    is_authenticated = login_section()
+        return  # Stop execution if not authenticated
 
-    # --- Conditional Sidebar Content (Only visible if authenticated) ---
-    if is_authenticated:
-        with st.sidebar:
-            # Sidebar Dark Mode Toggle
-            st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
-            if st.session_state.sidebar_dark_mode_toggle:
-                if st.session_state.theme != "dark":
-                    st.session_state.theme = "dark"
-                    st.rerun()
-            else:
-                if st.session_state.theme != "light":
-                    st.session_state.theme = "light"
-                    st.rerun()
+    # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
+    # Sidebar Dark Mode Toggle
+    with st.sidebar:
+        # Streamlit's native toggle widget for Dark Mode
+        st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="sidebar_dark_mode_toggle")
+        if st.session_state.sidebar_dark_mode_toggle:
+            if st.session_state.theme != "dark":
+                st.session_state.theme = "dark"
+                st.rerun()
+        else:
+            if st.session_state.theme != "light":
+                st.session_state.theme = "light"
+                st.rerun()
 
-            # Logo and Name as seen in image (This seems redundant if the clickable logo is always there,
-            # but keeping it as per your original structure, assuming it's for the "ScreenerPro" text)
-            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-            logo_path = "logo.png" # Assuming logo is in the same directory
-            if os.path.exists(logo_path):
-                # This st.image is for the smaller logo next to "ScreenerPro" text
-                st.image(logo_path, width=35) # Adjusted width to be smaller
-            else:
-                st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
-            st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Logo and Name as seen in image
+        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+        logo_path = "logo.png" # Assuming logo is in the same directory
+        if os.path.exists(logo_path):
+            st.image(logo_path, width=215)
+        else:
+            st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
+        st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
+        st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
 
-            # Navigation Buttons (using st.button and wrapping in custom div for styling)
-            # Removed Dashboard Button as requested
+        # Navigation Buttons (using st.button and wrapping in custom div for styling)
+        # Removed Dashboard Button as requested
 
-            # Resume Screener Button
-            if st.button("Resume Screener", key="nav_resume_screen"):
-                st.session_state.current_page = "resume_screen"
-            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] > button {{ background-color: {"var(--color-accent-pink-soft)" if st.session_state.current_page == "resume_screen" else "transparent"} !important; color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "resume_screen" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "resume_screen" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_resume_screen"] > button i {{ color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Resume Screener Button
+        if st.button("Resume Screener", key="nav_resume_screen"):
+            st.session_state.current_page = "resume_screen"
+        st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] > button {{ background-color: {"var(--color-accent-pink-soft)" if st.session_state.current_page == "resume_screen" else "transparent"} !important; color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "resume_screen" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "resume_screen" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_resume_screen"] > button i {{ color: {"var(--color-accent-pink)" if st.session_state.current_page == "resume_screen" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # Top Leaderboard Button
-            if st.button("Top Leaderboard", key="nav_top_leaderboard"):
-                st.session_state.current_page = "top_leaderboard"
-            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] > button {{ background-color: {"var(--color-accent-orange-soft)" if st.session_state.current_page == "top_leaderboard" else "transparent"} !important; color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "top_leaderboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "top_leaderboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_top_leaderboard"] > button i {{ color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Top Leaderboard Button
+        if st.button("Top Leaderboard", key="nav_top_leaderboard"):
+            st.session_state.current_page = "top_leaderboard"
+        st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] > button {{ background-color: {"var(--color-accent-orange-soft)" if st.session_state.current_page == "top_leaderboard" else "transparent"} !important; color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "top_leaderboard" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "top_leaderboard" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_top_leaderboard"] > button i {{ color: {"var(--color-accent-orange)" if st.session_state.current_page == "top_leaderboard" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # Certificate Verify Button
-            if st.button("Verify Certificate", key="nav_certificate_verify"):
-                st.session_state.current_page = "certificate_verify"
-            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "certificate_verify" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "certificate_verify" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "certificate_verify" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_certificate_verify"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Certificate Verify Button
+        if st.button("Verify Certificate", key="nav_certificate_verify"):
+            st.session_state.current_page = "certificate_verify"
+        st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "certificate_verify" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "certificate_verify" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "certificate_verify" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_certificate_verify"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "certificate_verify" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # Total Resumes Screened Button
-            if st.button("Total Resumes Screened", key="nav_total_screened"):
-                st.session_state.current_page = "total_screened"
-            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "total_screened" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "total_screened" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "total_screened" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_total_screened"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Total Resumes Screened Button
+        if st.button("Total Resumes Screened", key="nav_total_screened"):
+            st.session_state.current_page = "total_screened"
+        st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "total_screened" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "total_screened" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "total_screened" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_total_screened"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "total_screened" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # About Us Button
-            if st.button("About Us", key="nav_about_us"):
-                st.session_state.current_page = "about_us"
-            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "about_us" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "about_us" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "about_us" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_about_us"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # About Us Button
+        if st.button("About Us", key="nav_about_us"):
+            st.session_state.current_page = "about_us"
+        st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "about_us" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "about_us" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "about_us" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_about_us"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "about_us" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # Feedback Form Button
-            if st.button("Feedback Form", key="nav_feedback_form"):
-                st.session_state.current_page = "feedback_form"
-            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "feedback_form" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "feedback_form" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "feedback_form" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_feedback_form"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Feedback Form Button
+        if st.button("Feedback Form", key="nav_feedback_form"):
+            st.session_state.current_page = "feedback_form"
+        st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] > button {{ background-color: {"var(--color-accent-blue-soft)" if st.session_state.current_page == "feedback_form" else "transparent"} !important; color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; font-weight: {"600" if st.session_state.current_page == "feedback_form" else "500"} !important; box-shadow: {"var(--shadow-card)" if st.session_state.current_page == "feedback_form" else "none"} !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_feedback_form"] > button i {{ color: {"var(--color-accent-blue)" if st.session_state.current_page == "feedback_form" else "var(--color-text-primary-light)"} !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
-            # Logout Button
-            if st.button("Logout", key="nav_logout"):
-                st.session_state.current_page = "logout"
-            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] > button {{ background-color: transparent !important; color: var(--color-text-primary-light) !important; font-weight: 500 !important; box-shadow: none !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_logout"] > button i {{ color: var(--color-text-primary-light) !important; }}</style>', unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+        # Logout Button
+        if st.button("Logout", key="nav_logout"):
+            st.session_state.current_page = "logout"
+        st.markdown(f'<style>div[data-testid="stButton-nav_logout"] > button {{ background-color: transparent !important; color: var(--color-text-primary-light) !important; font-weight: 500 !important; box-shadow: none !important; border-radius: 9999px !important; padding: 0.7rem 1.2rem !important; text-align: left !important; display: flex !important; align-items: center !important; gap: 0.8rem !important; width: 100% !important; }} div[data-testid="stButton-nav_logout"] > button i {{ color: var(--color-text-primary-light) !important; }}</style>', unsafe_allow_html=True)
+        st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
 
 
-            # Logged in as: and Company: info
+        # Logged in as: and Company: info
+        st.sidebar.markdown("---")
+        st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
+        if st.session_state.get('user_company'):
+            st.sidebar.info(f"Company: **{st.session_state.user_company}**")
+
+        # Admin Section in Sidebar
+        if is_current_user_admin():
             st.sidebar.markdown("---")
-            st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
-            if st.session_state.get('user_company'):
-                st.sidebar.info(f"Company: **{st.session_state.user_company}**")
-
-            # Admin Section in Sidebar
-            if is_current_user_admin():
-                st.sidebar.markdown("---")
-                st.sidebar.subheader("Admin Panel")
-                admin_tab_selection = st.sidebar.radio(
-                    "Admin Actions:",
-                    ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
-                    key="admin_tabs"
-                )
+            st.sidebar.subheader("Admin Panel")
+            admin_tab_selection = st.sidebar.radio(
+                "Admin Actions:",
+                ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
+                key="admin_tabs"
+            )
 
     # --- Main Content Area ---
     # The main content area will change based on the selected sidebar page
 
-    # New Beautiful Greeting Card (only shown if authenticated)
+    # New Beautiful Greeting Card
     if st.session_state.get("authenticated") and st.session_state.get("username"):
         st.markdown(
             f"""
@@ -610,4 +612,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
