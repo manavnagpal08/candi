@@ -1,18 +1,31 @@
 import streamlit as st
+import json
+import bcrypt
 import os
+import re # Import regex for email validation
+import pandas as pd # Ensure pandas is imported for DataFrame display
 
-# Function to load CSS from a file
+# Import your page functions
+# Ensure these files are in the same directory as app.py or adjust paths
+from resume_screen import resume_screener_page
+from top_leaderboard import leaderboard_page
+from about_us import about_us_page
+from feedback_form import feedback_and_help_page
+from certificate_verify import certificate_verifier_page
+from total_screened_page import total_screened_page
+
+
+# --- CSS Loading and Body Class Functions ---
 def load_css(file_name):
+    """Loads CSS from an external file and injects it into the Streamlit app."""
     try:
         with open(file_name) as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
         st.error(f"Error: CSS file '{file_name}' not found. Make sure it's in the same directory as your app.py.")
 
-# Function to inject custom HTML for body class
 def set_body_class(class_name):
-    # This script adds/removes a class from the body tag
-    # using JavaScript, which is executed when Streamlit renders the markdown.
+    """Injects JavaScript to add/remove a class from the <body> tag for theme switching."""
     js_code = f"""
     <script>
         var body = window.parent.document.querySelector('body');
@@ -24,225 +37,405 @@ def set_body_class(class_name):
     """
     st.markdown(js_code, unsafe_allow_html=True)
 
+# --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
-def main():
-    st.set_page_config(
-        page_title="ScreenerPro Candidate Portal",
-        layout="wide",
-        initial_sidebar_state="expanded",
-        # Updated Favicon URL
-        page_icon="https://raw.githubusercontent.com/manavnagpal08/candi/3b4afa84eed486bc2f70ffe8dc224f0a6a5f30894/logo.png"
+# File to store user credentials
+USER_DB_FILE = "users.json"
+# Define your admin usernames here as a tuple of strings
+ADMIN_USERNAME = ("admin@forscreenerpro", "admin@forscreenerpro2", "manav.nagpal2005@gmail.com") 
+
+def load_users():
+    """Loads user data from the JSON file, handling potential corruption or emptiness."""
+    if not os.path.exists(USER_DB_FILE):
+        with open(USER_DB_FILE, "w") as f:
+            json.dump({}, f)
+        return {} # Return empty dict if file was just created
+
+    try:
+        with open(USER_DB_FILE, "r") as f:
+            users = json.load(f)
+            # Ensure each user has a 'status' key and 'company' key for backward compatibility
+            for username, data in users.items():
+                if isinstance(data, str): # Old format: "username": "hashed_password"
+                    users[username] = {"password": data, "status": "active", "company": "N/A"}
+                elif "status" not in data:
+                    data["status"] = "active"
+                if "company" not in data: # Add company field if missing
+                    data["company"] = "N/A"
+            return users
+    except json.JSONDecodeError:
+        # If the file is empty or malformed JSON, re-initialize it
+        st.warning(f"⚠️ '{USER_DB_FILE}' is empty or corrupted. Re-initializing with an empty user database.")
+        with open(USER_DB_FILE, "w") as f:
+            json.dump({}, f)
+        return {}
+    except Exception as e:
+        st.error(f"❌ An unexpected error occurred while loading users: {e}")
+        return {}
+
+
+def save_users(users):
+    """Saves user data to the JSON file."""
+    with open(USER_DB_FILE, "w") as f:
+        json.dump(users, f, indent=4)
+
+def hash_password(password):
+    """Hashes a password using bcrypt."""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def check_password(password, hashed_password):
+    """Checks a password against its bcrypt hash."""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def is_valid_email(email):
+    """Basic validation for email format."""
+    # Regex for a simple email check (covers @ and at least one . after @)
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+def register_section():
+    """Public self-registration form."""
+    st.subheader("📝 Create New Account")
+    with st.form("registration_form", clear_on_submit=True):
+        new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
+        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public") # New field
+        new_password = st.text_input("Choose Password", type="password", key="new_password_reg_public")
+        confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password_reg_public")
+        register_button = st.form_submit_button("Register New Account")
+
+        if register_button:
+            if not new_username or not new_password or not confirm_password or not new_company_name:
+                st.error("Please fill in all fields.")
+            elif not is_valid_email(new_username): # Email format validation
+                st.error("Please enter a valid email address for the username.")
+            elif new_password != confirm_password:
+                st.error("Passwords do not match.")
+            else:
+                users = load_users()
+                if new_username in users:
+                    st.error("Username already exists. Please choose a different one.")
+                else:
+                    users[new_username] = {
+                        "password": hash_password(new_password),
+                        "status": "active",
+                        "company": new_company_name # Store company name
+                    }
+                    save_users(users)
+                    st.success("✅ Registration successful! You are now logged in.")
+                    
+                    # Automatically log in the user
+                    st.session_state.authenticated = True
+                    st.session_state.username = new_username
+                    st.session_state.user_company = new_company_name
+                    st.session_state.current_page = "resume_screen" # Redirect to a default page
+                    st.rerun() # Rerun to apply the login and redirect
+                    
+def admin_registration_section():
+    """Admin-driven user creation form."""
+    st.subheader("➕ Create New User Account (Admin Only)")
+    with st.form("admin_registration_form", clear_on_submit=True):
+        new_username = st.text_input("New User's Username (Email)", key="new_username_admin_reg")
+        new_company_name = st.text_input("New User's Company Name", key="new_company_name_admin_reg") # New field
+        new_password = st.text_input("New User's Password", type="password", key="new_password_admin_reg")
+        admin_register_button = st.form_submit_button("Add New User")
+
+    if admin_register_button:
+        if not new_username or not new_password or not new_company_name:
+            st.error("Please fill in all fields.")
+        elif not is_valid_email(new_username): # Email format validation
+            st.error("Please enter a valid email address for the username.")
+        else:
+            users = load_users()
+            if new_username in users:
+                st.error(f"User '{new_username}' already exists.")
+            else:
+                users[new_username] = {
+                    "password": hash_password(new_password),
+                    "status": "active",
+                    "company": new_company_name
+                }
+                save_users(users)
+                st.success(f"✅ User '{new_username}' added successfully!")
+
+def admin_password_reset_section():
+    """Admin-driven password reset form."""
+    st.subheader("🔑 Reset User Password (Admin Only)")
+    users = load_users()
+    # Exclude all admin usernames from the list of users whose passwords can be reset
+    user_options = [user for user in users.keys() if user not in ADMIN_USERNAME] 
+    
+    if not user_options:
+        st.info("No other users to reset passwords for.")
+        return
+
+    with st.form("admin_reset_password_form", clear_on_submit=True):
+        selected_user = st.selectbox("Select User to Reset Password For", user_options, key="reset_user_select")
+        new_password = st.text_input("New Password", type="password", key="new_password_reset")
+        reset_button = st.form_submit_button("Reset Password")
+
+        if reset_button:
+            if not new_password:
+                st.error("Please enter a new password.")
+            else:
+                users[selected_user]["password"] = hash_password(new_password)
+                save_users(users)
+                st.success(f"✅ Password for '{selected_user}' has been reset.")
+
+def admin_disable_enable_user_section():
+    """Admin-driven user disable/enable form."""
+    st.subheader("⛔ Toggle User Status (Admin Only)")
+    users = load_users()
+    # Exclude all admin usernames from the list of users whose status can be toggled
+    user_options = [user for user in users.keys() if user not in ADMIN_USERNAME] 
+
+    if not user_options:
+        st.info("No other users to manage status for.")
+        return
+        
+    with st.form("admin_toggle_user_status_form", clear_on_submit=False): # Keep values after submit for easier toggling
+        selected_user = st.selectbox("Select User to Toggle Status", user_options, key="toggle_user_select")
+        
+        current_status = users[selected_user]["status"]
+        st.info(f"Current status of '{selected_user}': **{current_status.upper()}**")
+
+        if st.form_submit_button(f"Toggle to {'Disable' if current_status == 'active' else 'Enable'} User"):
+            new_status = "disabled" if current_status == "active" else "active"
+            users[selected_user]["status"] = new_status
+            save_users(users)
+            st.success(f"✅ User '{selected_user}' status set to **{new_status.upper()}**.")
+            st.rerun() # Rerun to update the displayed status immediately
+
+
+def login_section():
+    """Handles user login and public registration."""
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if "username" not in st.session_state:
+        st.session_state.username = None
+    
+    # Initialize active_login_tab_selection if not present
+    if "active_login_tab_selection" not in st.session_state:
+        # Default to 'Register' if no users, otherwise 'Login'
+        if not os.path.exists(USER_DB_FILE) or len(load_users()) == 0:
+            st.session_state.active_login_tab_selection = "Register"
+        else:
+            st.session_state.active_login_tab_selection = "Login"
+
+
+    if st.session_state.authenticated:
+        return True
+
+    # Use st.radio to simulate tabs if st.tabs() default_index is not supported
+    tab_selection = st.radio(
+        "Select an option:",
+        ("Login", "Register"),
+        key="login_register_radio",
+        index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
+    if tab_selection == "Login":
+        st.subheader("🔐 HR Login")
+        st.info("If you don't have an account, please go to the 'Register' option first.") # Added instructional message
+        with st.form("login_form", clear_on_submit=False):
+            username = st.text_input("Username", key="username_login")
+            password = st.text_input("Password", type="password", key="password_login")
+            submitted = st.form_submit_button("Login")
+
+            if submitted:
+                users = load_users()
+                if username not in users:
+                    st.error("❌ Invalid username or password. Please register if you don't have an account.")
+                else:
+                    user_data = users[username]
+                    if user_data["status"] == "disabled":
+                        st.error("❌ Your account has been disabled. Please contact an administrator.")
+                    elif check_password(password, user_data["password"]):
+                        st.session_state.authenticated = True
+                        st.session_state.username = username
+                        st.session_state.user_company = user_data.get("company", "N/A") # Store company name
+                        st.success("✅ Login successful!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Invalid username or password.")
+    
+    elif tab_selection == "Register": # This will be the initially selected option for new users
+        register_section()
+
+    return st.session_state.authenticated
+
+# Helper function to check if the current user is an admin
+def is_current_user_admin():
+    # Check if the current username is in the ADMIN_USERNAME tuple
+    return st.session_state.get("authenticated", False) and st.session_state.get("username") in ADMIN_USERNAME
+
+def logout_page():
+    st.title("👋 Logging Out...")
+    st.write("You are about to be logged out. Thank you for using ScreenerPro!")
+    if st.button("Confirm Logout"):
+        st.session_state.authenticated = False
+        st.session_state.pop('username', None)
+        st.session_state.pop('user_company', None)
+        st.session_state.active_login_tab_selection = "Login" # Reset to login tab
+        st.rerun()
+    st.info("You will be redirected to the login page shortly if you don't confirm.")
+
+
+# --- Main Application Logic ---
+
+def main():
+    st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
+
+    # Initialize session state for current page and theme
     if "current_page" not in st.session_state:
-        st.session_state.current_page = "resume_screen"
+        st.session_state.current_page = "resume_screen" # Default page after login
     if "theme" not in st.session_state:
         st.session_state.theme = "light" # Default to light mode
 
-    # Load the external CSS file once
+    # Load the external CSS file
+    # This replaces the hardcoded style blocks
     load_css("style.css")
 
     # Set the body class based on the current theme
+    # This is crucial for style.css to apply dark-mode specific rules
     if st.session_state.theme == "dark":
         set_body_class("dark-mode")
     else:
-        set_body_class("light-mode") # You might not strictly need 'light-mode' class if it's the default, but it's good practice for clarity.
+        set_body_class("light-mode") # Add a light-mode class too for consistency
 
-    # Theme toggle in the sidebar
-    with st.sidebar:
-        st.title("ScreenerPro")
-        # Toggle button for theme
-        if st.session_state.theme == "light":
-            if st.button("🌙 Dark Mode"):
-                st.session_state.theme = "dark"
-                st.rerun() # Rerun to apply new theme
-        else:
-            if st.button("☀️ Light Mode"):
-                st.session_state.theme = "light"
-                st.rerun() # Rerun to apply new theme
+    # Ensure all admin users exist for testing/initial setup
+    users = load_users()
+    default_admin_password = "adminpass" 
+    for admin_user in ADMIN_USERNAME:
+        if admin_user not in users:
+            users[admin_user] = {"password": hash_password(default_admin_password), "status": "active", "company": "AdminCo"}
+            st.sidebar.info(f"Created default admin user: {admin_user} with password '{default_admin_password}'")
+    save_users(users)
 
-        # Display user info if logged in (placeholder)
-        if st.session_state.get('logged_in_user'):
-            st.markdown(f"""
-            <div class="sidebar-user-info">
-                Welcome, <strong>{st.session_state.logged_in_user['username']}</strong>!<br>
-                Role: {st.session_state.logged_in_user['role'].capitalize()}
-            </div>
-            """, unsafe_allow_html=True)
+    # Authentication section
+    # This must run first to determine authentication status
+    is_authenticated = login_section()
 
-        st.divider()
-        st.header("Navigation")
-        # Navigation buttons
-        if st.button("📄 Resume Screening", key="nav_resume_screen"):
-            st.session_state.current_page = "resume_screen"
-        if st.button("📊 Analytics Dashboard", key="nav_analytics"):
-            st.session_state.current_page = "analytics"
-        if st.session_state.get('logged_in_user') and st.session_state.logged_in_user.get('role') == 'hr':
-            if st.button("⭐ HR Portal", key="nav_hr_portal", help="Access HR-specific features"):
-                st.session_state.current_page = "hr_portal"
-        if st.button("⚙️ Settings", key="nav_settings"):
-            st.session_state.current_page = "settings"
-        if st.button("🚪 Logout", key="nav_logout"):
-            # Clear session state on logout
-            st.session_state.clear()
-            st.session_state.current_page = "login" # Redirect to login
+    if not is_authenticated:
+        # Only show this message if not authenticated
+        st.sidebar.write("---")
+        st.sidebar.info("Please log in or register to access the portal features.")
+        return # Stop execution if not authenticated
+
+    # --- ONLY RENDER BELOW THIS IF AUTHENTICATED ---
+    st.sidebar.title("ScreenerPro Portal") # Moved inside authenticated block
+
+    # Dark Mode Toggle in Sidebar (Moved inside authenticated block)
+    st.sidebar.markdown("---")
+    dark_mode_checkbox = st.sidebar.checkbox("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
+    if dark_mode_checkbox:
+        if st.session_state.theme != "dark": # Only rerun if theme actually changes
+            st.session_state.theme = "dark"
+            st.rerun() 
+    else:
+        if st.session_state.theme != "light": # Only rerun if theme actually changes
+            st.session_state.theme = "light"
             st.rerun()
 
-    # Main content rendering based on current_page
-    if st.session_state.current_page == "login":
-        render_login_register()
-    elif st.session_state.current_page == "resume_screen":
-        if not st.session_state.get('logged_in_user'):
-            st.warning("Please login to access the resume screening feature.")
-            render_login_register()
-        else:
-            render_resume_screen()
-    elif st.session_state.current_page == "analytics":
-        if not st.session_state.get('logged_in_user'):
-            st.warning("Please login to access the analytics dashboard.")
-            render_login_register()
-        else:
-            render_analytics_dashboard()
-    elif st.session_state.current_page == "hr_portal":
-        if not (st.session_state.get('logged_in_user') and st.session_state.logged_in_user.get('role') == 'hr'):
-            st.warning("You do not have permission to access the HR Portal. Please login as an HR.")
-            render_login_register()
-        else:
-            render_hr_portal()
-    elif st.session_state.current_page == "settings":
-        if not st.session_state.get('logged_in_user'):
-            st.warning("Please login to access settings.")
-            render_login_register()
-        else:
-            render_settings()
+    st.sidebar.markdown("---")
+    # New button for HR Portal - moved to the top after dark mode toggle
+    st.sidebar.markdown(
+        """
+        <a href="https://screenerpro.streamlit.app/" target="_blank">
+            <button style="background-color:#4CAF50;color:white;border:none;border-radius:0.5rem;padding:0.8rem 1.5rem;font-weight:600;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+                <img src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="HR Portal Logo" style="height:20px;"/>
+                Open HR Portal
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
+    st.sidebar.markdown("---")
 
-# Define your other rendering functions (render_login_register, render_resume_screen, etc.) here
-# ... (These functions would contain the actual Streamlit UI elements for each page) ...
-def render_login_register():
-    st.markdown("<h1 class='hero-title'>Welcome to ScreenerPro</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Your ultimate AI-powered candidate screening solution.</p>", unsafe_allow_html=True)
+    st.sidebar.subheader("Navigation")
+    
+    # Navigation buttons (already conditional by being after the return)
+    if st.sidebar.button("📄 Resume Screen", key="nav_resume"):
+        st.session_state.current_page = "resume_screen"
+    if st.sidebar.button("🏆 Top Leaderboard", key="nav_leaderboard"):
+        st.session_state.current_page = "top_leaderboard"
+    if st.sidebar.button("✅ Verify Certificate", key="nav_certificate_verify"): # New button
+        st.session_state.current_page = "certificate_verify"
+    if st.sidebar.button("📊 Total Resumes Screened", key="nav_total_screened"): # NEW: Total Resumes Screened button
+        st.session_state.current_page = "total_screened"
+    if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
+        st.session_state.current_page = "about_us"
+    "
+    if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
+        st.session_state.current_page = "feedback_form"
+    
+    st.sidebar.markdown("---")
+    if st.sidebar.button("➡️ Logout", key="nav_logout"):
+        st.session_state.current_page = "logout"
+        # Logout logic handled by logout_page function
 
-    tab1, tab2 = st.tabs(["Login", "Register"])
+    # Moved "Logged in as:" and "Company:" below navigation buttons
+    st.sidebar.success(f"Logged in as: **{st.session_state.username}**") # Bold username
+    if st.session_state.get('user_company'):
+        st.sidebar.info(f"Company: **{st.session_state.user_company}**") # Bold company
 
-    with tab1:
-        st.header("Login")
-        username = st.text_input("Username", key="login_username")
-        password = st.text_input("Password", type="password", key="login_password")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Login", key="login_button"):
-                # Simple authentication (replace with actual backend/DB lookup)
-                if username == "user" and password == "pass":
-                    st.session_state.logged_in_user = {"username": username, "role": "candidate"}
-                    st.success("Logged in successfully as Candidate!")
-                    st.session_state.current_page = "resume_screen"
-                    st.rerun()
-                elif username == "hr" and password == "hrpass":
-                    st.session_state.logged_in_user = {"username": username, "role": "hr"}
-                    st.success("Logged in successfully as HR!")
-                    st.session_state.current_page = "hr_portal"
-                    st.rerun()
+    # Render the selected page
+    if st.session_state.current_page == "resume_screen":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        resume_screener_page()
+    elif st.session_state.current_page == "top_leaderboard":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        leaderboard_page()
+    elif st.session_state.current_page == "certificate_verify": # New page rendering
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        certificate_verifier_page()
+    elif st.session_state.current_page == "total_screened": # NEW: Render total screened page
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        total_screened_page()
+    elif st.session_state.current_page == "about_us":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        about_us_page()
+    elif st.session_state.current_page == "feedback_form":
+        st.markdown(f"## Hello, {st.session_state.username}!") # Personalized greeting
+        feedback_and_help_page()
+    
+    elif st.session_state.current_page == "logout":
+        logout_page()
+
+    # Admin Section (only visible to admins)
+    if is_current_user_admin():
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("Admin Panel")
+        admin_tab_selection = st.sidebar.radio(
+            "Admin Actions:",
+            ("Create User", "Reset Password", "Toggle User Status", "View All Users"),
+            key="admin_tabs"
+        )
+        
+        st.markdown("---") # Separator for admin content in main area
+        st.header("Admin Management")
+        
+        if admin_tab_selection == "Create User":
+            admin_registration_section()
+        elif admin_tab_selection == "Reset Password":
+            admin_password_reset_section()
+        elif admin_tab_selection == "Toggle User Status":
+            admin_disable_enable_user_section()
+        elif admin_tab_selection == "View All Users":
+            st.subheader("👥 All Registered Users:")
+            try:
+                users_data = load_users()
+                if users_data:
+                    display_users = []
+                    for user, data in users_data.items():
+                        # Ensure data is a dictionary before accessing keys
+                        hashed_pass = data.get("password", "") if isinstance(data, dict) else data
+                        status = data.get("status", "N/A") if isinstance(data, dict) else "N/A"
+                        company = data.get("company", "N/A") if isinstance(data, dict) else "N/A"
+                        display_users.append([user, hashed_pass, status, company]) 
+                    st.dataframe(pd.DataFrame(display_users, columns=["Email/Username", "Hashed Password (DO NOT EXPOSE)", "Status", "Company"]), use_container_width=True) 
                 else:
-                    st.error("Invalid username or password.")
-        with col2:
-            st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True) # Spacer
-            st.info("Hint: Try 'user' / 'pass' for Candidate or 'hr' / 'hrpass' for HR")
-
-    with tab2:
-        st.header("Register")
-        new_username = st.text_input("New Username", key="register_username")
-        new_password = st.text_input("New Password", type="password", key="register_password")
-        confirm_password = st.text_input("Confirm Password", type="password", key="register_confirm_password")
-        role = st.selectbox("Register as", ["Candidate", "HR"], key="register_role")
-
-        if st.button("Register", key="register_button"):
-            if new_password == confirm_password:
-                # In a real app, you'd save this to a database
-                st.success(f"User '{new_username}' registered as {role.lower()}. Please login.")
-                st.session_state.current_page = "login"
-                st.rerun()
-            else:
-                st.error("Passwords do not match.")
-
-def render_resume_screen():
-    st.markdown("<h1 class='hero-title'>Resume Screening</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload a resume and job description for AI-powered matching.</p>", unsafe_allow_html=True)
-
-    st.warning("This is a placeholder for the Resume Screening feature.")
-    st.write("Upload your resume (PDF) and provide a job description. Our AI will analyze and score the match.")
-
-    uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
-    job_description = st.text_area("Job Description", height=200, placeholder="Paste your job description here...")
-
-    if uploaded_file and job_description:
-        st.success("Files uploaded and job description provided. Processing...")
-        # Placeholder for AI processing
-        with st.spinner("Analyzing resume and job description..."):
-            import time
-            time.sleep(3) # Simulate processing time
-        st.info("Analysis complete! (Detailed results would appear here)")
-        st.metric(label="Match Score", value="85%", delta="Excellent Match!")
-        st.json({"Extracted Skills": ["Python", "Machine Learning", "Data Analysis"], "Missing Skills": ["Cloud Computing"]})
-
-
-def render_analytics_dashboard():
-    st.markdown("<h1 class='hero-title'>Analytics Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Insights into your candidate pipeline and screening performance.</p>", unsafe_allow_html=True)
-
-    st.warning("This is a placeholder for the Analytics Dashboard.")
-    st.write("Here you would see charts and graphs related to candidate demographics, screening efficiency, skill gaps, etc.")
-
-    st.metric("Total Candidates Processed", "1,234")
-    st.metric("Average Match Score", "72%", "📈 +5% from last month")
-
-    st.subheader("Candidate Status Distribution")
-    # Placeholder for a bar chart
-    st.bar_chart({"Applied": 500, "Screened": 300, "Interviewed": 150, "Hired": 50})
-
-    st.subheader("Top Skills Identified")
-    # Placeholder for a table or list
-    st.dataframe({"Skill": ["Python", "SQL", "Project Management", "Communication"], "Count": [800, 650, 400, 700]})
-
-
-def render_hr_portal():
-    st.markdown("<h1 class='hero-title'>HR Portal</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Exclusive tools for HR professionals.</p>", unsafe_allow_html=True)
-
-    st.success("Welcome to the HR Portal! This is only visible to HR users.")
-    st.write("This section could include features like managing job postings, reviewing all candidates, setting screening criteria, etc.")
-
-    st.subheader("Manage Job Postings")
-    job_title = st.text_input("New Job Title")
-    job_desc = st.text_area("New Job Description (for AI screening)")
-    if st.button("Create Job Posting"):
-        st.info(f"Job '{job_title}' created. (Placeholder: In a real app, this would be saved).")
-
-    st.subheader("View All Candidates")
-    st.dataframe({
-        "Candidate Name": ["Alice", "Bob", "Charlie"],
-        "Last Scored Job": ["Software Engineer", "Data Scientist", "Product Manager"],
-        "Match Score": ["92%", "78%", "85%"],
-        "Status": ["Interviewing", "Screened", "Hired"]
-    })
-
-def render_settings():
-    st.markdown("<h1 class='hero-title'>Settings</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Adjust your application preferences.</p>", unsafe_allow_html=True)
-
-    st.warning("This is a placeholder for user settings.")
-
-    st.subheader("Account Settings")
-    st.text_input("Email", value="user@example.com")
-    st.text_input("Change Password", type="password")
-    if st.button("Update Account"):
-        st.success("Account settings updated.")
-
-    st.subheader("Notification Preferences")
-    st.checkbox("Receive email notifications for new matches", value=True)
-    st.checkbox("Receive daily summary reports")
-    if st.button("Save Preferences"):
-        st.success("Notification preferences saved.")
-
+                    st.info("No users registered yet.")
+            except Exception as e:
+                st.error(f"Error loading user data for admin view: {e}")
 
 if __name__ == "__main__":
     main()
