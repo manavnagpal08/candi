@@ -327,11 +327,14 @@ def main():
     is_authenticated = login_section()
 
     if not is_authenticated:
+        with st.sidebar:
+            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+            logo_path = "logo.png" # Assuming logo is in the same directory
+            if os.path.exists(logo_path):
+                st.image(logo_path, width=215)
+            
         st.sidebar.write("---")
-        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-        logo_path = "logo.png" # Assuming logo is in the same directory
-        if os.path.exists(logo_path):
-            st.image(logo_path, width=215)
+        
         st.sidebar.info("Please log in or register to access the portal features.")
         
         return # Stop execution if not authenticated
