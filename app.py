@@ -107,6 +107,7 @@ def get_user_profile_from_firestore(uid, id_token):
         return None
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching user profile from Firestore: {e}")
+        print(f"Firestore Fetch Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
         return None
 
 def set_user_profile_in_firestore(uid, id_token, profile_data):
@@ -132,6 +133,7 @@ def set_user_profile_in_firestore(uid, id_token, profile_data):
         return True
     except requests.exceptions.RequestException as e:
         st.error(f"Error setting user profile in Firestore: {e}")
+        print(f"Firestore Set Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
         return False
 
 # --- Authentication and User Management Functions ---
@@ -170,8 +172,9 @@ def register_user_firebase(email, password, company_name):
             return {"success": False, "message": "Failed to save user profile to Firestore."}
     except requests.exceptions.RequestException as e:
         error_message = "Registration failed."
-        if response.status_code == 400:
+        if 'response' in locals(): # Check if response object exists
             error_data = response.json()
+            print(f"Firebase Auth Registration Error Response: {error_data}") # Added for debugging
             if "error" in error_data and "message" in error_data["error"]:
                 error_message = f"Registration failed: {error_data['error']['message']}"
         st.error(error_message)
@@ -202,8 +205,9 @@ def sign_in_user_firebase(email, password):
             return {"success": False, "message": "User profile not found."}
     except requests.exceptions.RequestException as e:
         error_message = "Login failed."
-        if response.status_code == 400:
+        if 'response' in locals(): # Check if response object exists
             error_data = response.json()
+            print(f"Firebase Auth Sign-in Error Response: {error_data}") # Added for debugging
             if "error" in error_data and "message" in error_data["error"]:
                 error_message = f"Login failed: {error_data['error']['message']}"
         st.error(error_message)
@@ -222,8 +226,9 @@ def send_password_reset_email_firebase(email):
         return True
     except requests.exceptions.RequestException as e:
         error_message = "Failed to send password reset email."
-        if response.status_code == 400:
+        if 'response' in locals(): # Check if response object exists
             error_data = response.json()
+            print(f"Firebase Auth Reset Password Error Response: {error_data}") # Added for debugging
             if "error" in error_data and "message" in error_data["error"]:
                 error_message = f"Failed to send password reset email: {error_data['error']['message']}"
         st.error(error_message)
@@ -259,6 +264,7 @@ def get_all_user_profiles_from_firestore():
         return users_list
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching all user profiles from Firestore: {e}")
+        print(f"Firestore Get All Users Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
         return []
 
 def get_uid_from_email_firestore(email):
@@ -292,6 +298,7 @@ def get_uid_from_email_firestore(email):
         return None
     except requests.exceptions.RequestException as e:
         st.error(f"Error finding UID by email in Firestore: {e}")
+        print(f"Firestore Get UID by Email Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
         return None
 
 def register_section():
@@ -324,8 +331,7 @@ def register_section():
                     st.session_state.id_token = result["idToken"] # Store ID Token
                     st.session_state.current_page = "welcome_dashboard" # Redirect
                     st.rerun()
-                else:
-                    st.error(f"❌ {result['message']}")
+                # Error message is handled within register_user_firebase
 
 
 def admin_registration_section():
@@ -347,8 +353,7 @@ def admin_registration_section():
             result = register_user_firebase(new_username, new_password, new_company_name)
             if result["success"]:
                 st.success(f"✅ User '{new_username}' added successfully!")
-            else:
-                st.error(f"❌ {result['message']}")
+            # Error message is handled within register_user_firebase
 
 def admin_password_reset_section():
     """Admin-driven password reset form."""
@@ -465,6 +470,7 @@ def login_section():
                 else:
                     result = sign_in_user_firebase(username, password)
                     if result["success"]:
+                        st.success("✅ Login successful!")
                         st.session_state.authenticated = True
                         st.session_state.username = result["email"]
                         st.session_state.user_company = result["company"]
