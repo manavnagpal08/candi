@@ -16,26 +16,144 @@ from total_screened_page import total_screened_page
 
 
 # --- CSS Loading and Body Class Functions ---
-def load_css(file_name):
-    """Loads CSS from an external file and injects it into the Streamlit app."""
+def load_css(file_name="style.css"):
+    """
+    Loads a CSS file from the same directory as the app.py.
+    Also ensures Font Awesome is loaded for icons.
+    """
     try:
-        with open(file_name) as f:
+        current_dir = os.path.dirname(__file__)
+        css_file_path = os.path.join(current_dir, file_name)
+        with open(css_file_path) as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
-        st.error(f"Error: CSS file '{file_name}' not found. Make sure it's in the same directory as your app.py.")
+        st.error(f"Error: '{file_name}' not found. Please ensure it's in the same directory as app.py.")
 
-def set_body_class(class_name):
-    """Injects JavaScript to add/remove a class from the <body> tag for theme switching."""
-    js_code = f"""
-    <script>
-        var body = window.parent.document.querySelector('body');
-        if (body) {{
-            body.className = ''; // Clear existing classes
-            body.classList.add('{class_name}'); // Add the new class
-        }}
-    </script>
+    # Ensure Font Awesome is loaded for icons if you use them (e.g., in buttons)
+    st.markdown(
+        '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">',
+        unsafe_allow_html=True
+    )
+
+def set_body_class():
     """
-    st.markdown(js_code, unsafe_allow_html=True)
+    Sets a class on the body element based on the Streamlit theme
+    to enable light/dark mode styling.
+    """
+    is_dark = st.get_option("theme.base") == "dark"
+    body_class = "dark-mode" if is_dark else "light-mode"
+    # Use st.markdown with unsafe_allow_html=True to inject the body class
+    st.markdown(f'<body class="{body_class}">', unsafe_allow_html=True)
+
+
+# --- Main Streamlit Application ---
+
+def main():
+    # Apply the custom CSS and theme class at the very beginning
+    # This needs to be called before most other st functions to apply styles correctly.
+    load_css()
+    set_body_class()
+
+    st.title("The Ultra-Sleek & Fluid App")
+    st.markdown("Experience modern minimalism.")
+
+    st.markdown("""
+    <p>This UI focuses on clarity, speed, and a refined user experience. Every element is designed to be purposeful and visually clean.</p>
+    """, unsafe_allow_html=True)
+
+    # --- Metrics Section ---
+    st.write("### Key Performance Indicators")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("Users Active", "15,234", "+1,200")
+    with col2:
+        st.metric("Conversion Rate", "18.2%", "+1.1%")
+    with col3:
+        st.metric("Load Time", "0.8s", "-0.2s")
+
+    st.write("---") # Simple separator
+
+    # --- Interactive Elements ---
+    st.write("### User Interaction Demo")
+    st.button("Get Started")
+
+    st.text_input("Enter your name", placeholder="John Doe")
+    st.text_area("Your Message", placeholder="Type your message here...")
+
+    st.selectbox("Select an Option", ["Option 1", "Option 2", "Option 3"], index=0)
+    st.multiselect("Choose Multiple", ["Apple", "Banana", "Cherry", "Date"], ["Apple", "Cherry"])
+
+    st.slider("Adjust Value", 0, 100, 75)
+
+    st.radio("Preferred Contact Method", ["Email", "Phone", "SMS"])
+    st.checkbox("Agree to Terms and Conditions")
+
+    # --- Expander Section ---
+    st.write("### Collapsible Content")
+    with st.expander("View More Details"):
+        st.write("""
+        This section demonstrates a collapsible panel, perfect for hiding additional information until needed.
+        Notice the clean animation and subtle hover effects.
+        """)
+        st.write("More content inside the expander...")
+        st.date_input("Select a Date")
+        st.time_input("Select a Time")
+
+    st.write("---")
+
+    # --- Alerts Section ---
+    st.write("### System Alerts")
+    st.info("Information: This is a key update for a cleaner interface.")
+    st.success("Success! Data loaded efficiently.")
+    st.warning("Heads up: Some features are undergoing optimization.")
+    st.error("Error: Please verify your input.")
+
+    st.write("---")
+
+    # --- Progress & Spinner Demo ---
+    st.write("### Loading Indicators")
+    if st.button("Simulate Data Processing"):
+        with st.spinner("Processing data..."):
+            import time
+            for i in range(101):
+                time.sleep(0.02) # Faster progress for sleek feel
+                st.progress(i)
+        st.success("Process complete!")
+
+    st.write("---")
+
+    # --- Dataframe Example ---
+    st.write("### Sample Data Table")
+    import pandas as pd
+    data = {'Column A': [1, 2, 3, 4],
+            'Column B': ['X', 'Y', 'Z', 'W'],
+            'Column C': [10.5, 20.3, 30.1, 40.8]}
+    df = pd.DataFrame(data)
+    st.dataframe(df)
+
+    st.write("---")
+
+    # --- Custom HR Portal Button (as shown in CSS) ---
+    st.header("Quick Links & Actions")
+    st.markdown(
+        f'<a href="https://example.com/your-resources" target="_blank" style="text-decoration: none;">'
+        f'<button class="stSidebar a > button" style="width: 100%;">' # Re-using the sidebar button class for consistency
+        f'<i class="fa-solid fa-link"></i> Access Your Resources'
+        f'</button>'
+        f'</a>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<a href="https://example.com/contact" target="_blank" style="text-decoration: none;">'
+        f'<button class="stSidebar a > button" style="width: 100%; background-color: #6c757d !important; ">' # A secondary grey button
+        f'<i class="fa-solid fa-envelope"></i> Contact Support'
+        f'</button>'
+        f'</a>',
+        unsafe_allow_html=True
+    )
+
+    st.write("") # Add some space at the bottom
 
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
