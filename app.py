@@ -14,6 +14,7 @@ from feedback_form import feedback_and_help_page
 from certificate_verify import certificate_verifier_page # New import
 from total_screened_page import total_screened_page # NEW: Import the total screened page
 from generate_fake_data import generate_fake_data_page
+
 # --- Functions from your login.py (included directly for simplicity in this single file structure) ---
 
 # File to store user credentials
@@ -275,19 +276,35 @@ def main():
             <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
 
+            :root {
+                --primary-color: #00cec9;
+                --secondary-color: #00b0a8;
+                --background-color-dark: #1a1a1a;
+                --surface-color-dark: #262626;
+                --card-background-dark: #2D2D2D;
+                --input-background-dark: #3A3A3A;
+                --text-color-dark: #f0f0f0;
+                --border-color-dark: #555555;
+                --shadow-light: rgba(0,0,0,0.2);
+                --shadow-dark: rgba(0,0,0,0.3);
+            }
+
             html, body, .stApp {
                 font-family: 'Inter', sans-serif;
-                background-color: #1a1a1a;
-                color: #f0f0f0;
+                background-color: var(--background-color-dark);
+                color: var(--text-color-dark);
             }
             .stSidebar {
-                background-color: #262626;
-                color: #f0f0f0;
-                padding-top: 2rem;
+                background-color: var(--surface-color-dark);
+                color: var(--text-color-dark);
+                padding: 2rem 1rem; /* Added horizontal padding */
+                box-shadow: 2px 0 5px rgba(0,0,0,0.2); /* Subtle shadow for sidebar */
             }
             h1, h2, h3, h4, h5, h6 {
                 font-family: 'Playfair Display', serif;
-                color: #00cec9; /* Accent color for headers */
+                color: var(--primary-color);
+                margin-top: 1.5rem;
+                margin-bottom: 1rem;
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -297,11 +314,12 @@ def main():
             .stSlider .stSliderHandle,
             .stRadio > label > div,
             .stCheckbox > label > div {
-                background-color: #3A3A3A !important;
-                color: #f0f0f0 !important;
-                border: 1px solid #555555 !important;
+                background-color: var(--input-background-dark) !important;
+                color: var(--text-color-dark) !important;
+                border: 1px solid var(--border-color-dark) !important;
                 border-radius: 0.5rem;
-                padding: 0.75rem; /* Added padding */
+                padding: 0.75rem;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow for depth */
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -311,92 +329,133 @@ def main():
             .stSlider label,
             .stRadio label,
             .stCheckbox label {
-                color: #f0f0f0 !important;
+                color: var(--text-color-dark) !important;
                 font-weight: 500;
-                margin-bottom: 0.5rem; /* Added margin */
+                margin-bottom: 0.5rem;
             }
             /* Buttons */
             .stButton>button {
-                background-color: #00cec9;
+                background-color: var(--primary-color);
                 color: white;
                 border: none;
                 border-radius: 0.5rem;
-                padding: 0.8rem 1.5rem; /* Increased padding */
+                padding: 0.8rem 1.5rem;
                 font-weight: 600;
                 transition: all 0.2s ease-in-out;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Added shadow */
+                box-shadow: 0 4px 8px var(--shadow-light);
+                width: 100%; /* Make sidebar buttons full width */
+                margin-bottom: 0.5rem; /* Spacing between buttons */
             }
             .stButton>button:hover {
-                background-color: #00b0a8;
-                transform: translateY(-2px); /* More noticeable lift */
-                box-shadow: 0 6px 12px rgba(0,0,0,0.3); /* Darker shadow on hover */
+                background-color: var(--secondary-color);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px var(--shadow-dark);
             }
             /* Expander background */
             .streamlit-expanderHeader {
-                background-color: #3A3A3A;
-                color: #f0f0f0;
+                background-color: var(--input-background-dark);
+                color: var(--text-color-dark);
                 border-radius: 0.5rem;
                 padding: 0.8rem 1rem;
                 font-weight: 600;
+                border: 1px solid var(--border-color-dark); /* Added border */
             }
             .streamlit-expanderContent {
-                background-color: #2D2D2D;
-                color: #f0f0f0;
+                background-color: var(--card-background-dark);
+                color: var(--text-color-dark);
                 border-radius: 0.5rem;
                 padding: 1rem;
-                margin-top: -0.5rem; /* Overlap with header border-radius */
+                margin-top: 0.5rem; /* Small gap to avoid overlap issues */
+                border: 1px solid var(--border-color-dark); /* Added border */
             }
             /* Info/Success/Error boxes */
             .stAlert {
-                background-color: #3A3A3A;
-                color: #f0f0f0;
+                background-color: var(--input-background-dark);
+                color: var(--text-color-dark);
                 border-radius: 0.5rem;
                 padding: 1rem;
+                border: 1px solid var(--border-color-dark);
             }
             .stAlert > div > div > div > div {
-                color: #f0f0f0; /* Text inside alert */
+                color: var(--text-color-dark);
             }
             /* Dataframe styling */
             .stDataFrame {
                 border-radius: 0.5rem;
-                overflow: hidden; /* Ensures rounded corners are applied */
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Added shadow */
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                border: 1px solid var(--border-color-dark); /* Added border */
+            }
+            .stDataFrame section.main tr:nth-child(even) {
+                background-color: var(--surface-color-dark); /* Zebra striping */
             }
             /* Metric boxes */
             .stMetric {
-                background-color: #2D2D2D;
+                background-color: var(--card-background-dark);
                 border-radius: 0.5rem;
-                padding: 1.2rem; /* Increased padding */
-                border: 1px solid #555555;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Added shadow */
+                padding: 1.2rem;
+                border: 1px solid var(--border-color-dark);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
             /* Radio buttons and checkboxes */
             .stRadio div[role="radiogroup"] label, .stCheckbox label {
                 padding: 0.5rem 0;
+            }
+            /* Horizontal Rule */
+            hr {
+                border-top: 1px solid var(--border-color-dark);
+                margin: 1rem 0;
+            }
+            /* Specific style for the HR Portal button in sidebar */
+            .hr-portal-button button {
+                background-color: #4CAF50 !important; /* Green */
+                color: white !important;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            }
+            .hr-portal-button button:hover {
+                background-color: #45a049 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
             }
             </style>
             """,
             unsafe_allow_html=True
         )
-    else:
+    else: # Light Mode
         st.markdown(
             """
             <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
 
+            :root {
+                --primary-color: #00cec9;
+                --secondary-color: #00b0a8;
+                --background-color-light: #f0f2f6;
+                --surface-color-light: #ffffff;
+                --card-background-light: #f8f8f8;
+                --input-background-light: #ffffff;
+                --text-color-light: #333333;
+                --border-color-light: #ccc;
+                --shadow-light: rgba(0,0,0,0.1);
+                --shadow-dark: rgba(0,0,0,0.15);
+            }
+
             html, body, .stApp {
                 font-family: 'Inter', sans-serif;
-                background-color: #f0f2f6;
-                color: #333333;
+                background-color: var(--background-color-light);
+                color: var(--text-color-light);
             }
             .stSidebar {
-                background-color: #ffffff;
-                color: #333333;
-                padding-top: 2rem;
+                background-color: var(--surface-color-light);
+                color: var(--text-color-light);
+                padding: 2rem 1rem;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             }
             h1, h2, h3, h4, h5, h6 {
                 font-family: 'Playfair Display', serif;
-                color: #00cec9; /* Accent color for headers */
+                color: var(--primary-color);
+                margin-top: 1.5rem;
+                margin-bottom: 1rem;
             }
             /* Text input, text area, selectbox, etc. */
             .stTextInput>div>div>input,
@@ -406,11 +465,12 @@ def main():
             .stSlider .stSliderHandle,
             .stRadio > label > div,
             .stCheckbox > label > div {
-                background-color: #ffffff !important;
-                color: #333333 !important;
-                border: 1px solid #ccc !important;
+                background-color: var(--input-background-light) !important;
+                color: var(--text-color-light) !important;
+                border: 1px solid var(--border-color-light) !important;
                 border-radius: 0.5rem;
-                padding: 0.75rem; /* Added padding */
+                padding: 0.75rem;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
             }
             /* Labels for inputs */
             .stTextInput label,
@@ -420,68 +480,93 @@ def main():
             .stSlider label,
             .stRadio label,
             .stCheckbox label {
-                color: #333333 !important;
+                color: var(--text-color-light) !important;
                 font-weight: 500;
-                margin-bottom: 0.5rem; /* Added margin */
+                margin-bottom: 0.5rem;
             }
             /* Buttons */
             .stButton>button {
-                background-color: #00cec9;
+                background-color: var(--primary-color);
                 color: white;
                 border: none;
                 border-radius: 0.5rem;
-                padding: 0.8rem 1.5rem; /* Increased padding */
+                padding: 0.8rem 1.5rem;
                 font-weight: 600;
                 transition: all 0.2s ease-in-out;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Added shadow */
+                box-shadow: 0 4px 8px var(--shadow-light);
+                width: 100%; /* Make sidebar buttons full width */
+                margin-bottom: 0.5rem;
             }
             .stButton>button:hover {
-                background-color: #00b0a8;
-                transform: translateY(-2px); /* More noticeable lift */
-                box-shadow: 0 6px 12px rgba(0,0,0,0.15); /* Darker shadow on hover */
+                background-color: var(--secondary-color);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px var(--shadow-dark);
             }
             /* Expander background */
             .streamlit-expanderHeader {
                 background-color: #e0e0e0;
-                color: #333333;
+                color: var(--text-color-light);
                 border-radius: 0.5rem;
                 padding: 0.8rem 1rem;
                 font-weight: 600;
+                border: 1px solid var(--border-color-light);
             }
             .streamlit-expanderContent {
-                background-color: #f8f8f8;
-                color: #333333;
+                background-color: var(--card-background-light);
+                color: var(--text-color-light);
                 border-radius: 0.5rem;
                 padding: 1rem;
-                margin-top: -0.5rem; /* Overlap with header border-radius */
+                margin-top: 0.5rem;
+                border: 1px solid var(--border-color-light);
             }
             /* Info/Success/Error boxes */
             .stAlert {
-                background-color: #ffffff;
-                color: #333333;
+                background-color: var(--surface-color-light);
+                color: var(--text-color-light);
                 border-radius: 0.5rem;
                 padding: 1rem;
+                border: 1px solid var(--border-color-light);
             }
             .stAlert > div > div > div > div {
-                color: #333333; /* Text inside alert */
+                color: var(--text-color-light);
             }
             /* Dataframe styling */
             .stDataFrame {
                 border-radius: 0.5rem;
-                overflow: hidden; /* Ensures rounded corners are applied */
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Added shadow */
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                border: 1px solid var(--border-color-light);
+            }
+            .stDataFrame section.main tr:nth-child(even) {
+                background-color: #f5f5f5; /* Zebra striping */
             }
             /* Metric boxes */
             .stMetric {
-                background-color: #ffffff;
+                background-color: var(--surface-color-light);
                 border-radius: 0.5rem;
-                padding: 1.2rem; /* Increased padding */
-                border: 1px solid #ccc;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Added shadow */
+                padding: 1.2rem;
+                border: 1px solid var(--border-color-light);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             }
             /* Radio buttons and checkboxes */
             .stRadio div[role="radiogroup"] label, .stCheckbox label {
                 padding: 0.5rem 0;
+            }
+            /* Horizontal Rule */
+            hr {
+                border-top: 1px solid var(--border-color-light);
+                margin: 1rem 0;
+            }
+            /* Specific style for the HR Portal button in sidebar */
+            .hr-portal-button button {
+                background-color: #4CAF50 !important; /* Green */
+                color: white !important;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+            }
+            .hr-portal-button button:hover {
+                background-color: #45a049 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
             }
             </style>
             """,
@@ -523,12 +608,14 @@ def main():
     # New button for HR Portal - moved to the top after dark mode toggle
     st.sidebar.markdown(
         """
-        <a href="https://screenerpro.streamlit.app/" target="_blank">
-            <button style="background-color:#4CAF50;color:white;border:none;border-radius:0.5rem;padding:0.8rem 1.5rem;font-weight:600;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
-                <img src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="HR Portal Logo" style="height:20px;"/>
-                Open HR Portal
-            </button>
-        </a>
+        <div class="hr-portal-button">
+            <a href="https://screenerpro.streamlit.app/" target="_blank">
+                <button>
+                    <img src="https://raw.githubusercontent.com/manavnagpal08/yg/main/logo.png" alt="HR Portal Logo" style="height:20px;margin-right:8px;"/>
+                    Open HR Portal
+                </button>
+            </a>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -547,9 +634,9 @@ def main():
         st.session_state.current_page = "total_screened"
     if st.sidebar.button("ℹ️ About Us", key="nav_about_us"):
         st.session_state.current_page = "about_us"
-    if st.sidebar.button("💬 Feedback Form", key="nav_generate_fake_data"):
+    if st.sidebar.button("📝 Generate Fake Data (Dev)", key="nav_generate_fake_data"):
         st.session_state.current_page = "generate_fake_data"
-    if st.sidebar.button("💬 Feedback Form", key="nav_feedback_form"):
+    if st.sidebar.button("💬 Feedback & Help", key="nav_feedback_form"): # Renamed for clarity
         st.session_state.current_page = "feedback_form"
     
     st.sidebar.markdown("---")
