@@ -18,7 +18,7 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase # Import MIMEBase for PDF attachment (though we'll use HTML)
+from email.mime.base import MIMEBase # Import MIMEBase for file attachment
 from email import encoders
 import tempfile
 import shutil
@@ -210,6 +210,8 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
 APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS YOUR APP'S PUBLIC URL**
+# This URL should be where your generated HTML certificates are publicly accessible.
+# For example, if you upload them to a GitHub Pages repository.
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
 # --- Firebase REST API Functions ---
@@ -518,23 +520,8 @@ def extract_years_of_experience(text):
     return 0.0
 
 def extract_email(text):
-    text = text.lower()
-
-    text = text.replace("gmaill.com", "gmail.com").replace("gmai.com", "gmail.com")
-    text = text.replace("yah00", "yahoo").replace("outiook", "outlook")
-    text = text.replace("coim", "com").replace("hotmai", "hotmail")
-
-    text = re.sub(r'[^\w\s@._+-]', ' ', text)
-
-    possible_emails = EMAIL_PATTERN.findall(text) # Use pre-compiled pattern
-
-    if possible_emails:
-        for email in possible_emails:
-            if "gmail" in email or "manav" in email: # Specific filter, consider removing or making configurable
-                return email
-        return possible_emails[0]
-    
-    return None
+    match = EMAIL_PATTERN.search(text) # Use pre-compiled pattern
+    return match.group(0) if match else None
 
 def extract_phone_number(text):
     match = PHONE_PATTERN.search(text) # Use pre-compiled pattern
@@ -1104,18 +1091,22 @@ Best regards,
 The {sender_name}""")
     return f"mailto:{recipient_email}?subject={subject}&body={body}"
 
-def send_certificate_email(recipient_email, candidate_name, score, certificate_html_content, gmail_address, gmail_app_password):
+def send_certificate_email(recipient_email, candidate_name, score, certificate_html_content, certificate_public_url, gmail_address, gmail_app_password):
     """
-    Sends an email with the certificate embedded as HTML content.
+    Sends an email with the certificate embedded as HTML content and attached as an HTML file.
+    Includes a link to the publicly hosted certificate.
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
         return False
 
-    msg = MIMEMultipart('alternative') # Use 'alternative' for plain text and HTML versions
+    msg = MIMEMultipart('mixed') # Use 'mixed' for attachments
     msg['Subject'] = f"🎉 Congratulations, {candidate_name}! Your ScreenerPro Certificate is Here!"
     msg['From'] = gmail_address
     msg['To'] = recipient_email
+
+    # Create the alternative part (plain text + HTML)
+    msg_alternative = MIMEMultipart('alternative')
 
     plain_text_body = f"""Hi {candidate_name},
 
@@ -1123,9 +1114,9 @@ Congratulations on successfully clearing the ScreenerPro resume screening proces
 
 We’re proud to award you an official certificate recognizing your skills and employability.
 
-You can save this HTML file, add it to your resume, LinkedIn, or share it with employers to stand out.
+You can view your certificate online here: {certificate_public_url}
 
-To view your certificate online, visit: {APP_BASE_URL}
+The certificate is also attached as an HTML file. You can save this HTML file, open it in your browser, and then print it to PDF or take a screenshot to share.
 
 Have questions? Contact us at support@screenerpro.in
 
@@ -1134,21 +1125,15 @@ Have questions? Contact us at support@screenerpro.in
 – Team ScreenerPro
 """
 
-    # Embed the certificate HTML directly into the email's HTML part
     html_body = f"""
     <html>
         <body>
             <p>Hi {candidate_name},</p>
             <p>Congratulations on successfully clearing the ScreenerPro resume screening process with a score of <strong>{score:.1f}%</strong>!</p>
             <p>We’re proud to award you an official certificate recognizing your skills and employability.</p>
-            <p>You can save this certificate (attached below or viewable online) to your resume, LinkedIn, or share it with employers to stand out.</p>
             
-            <p>To view your certificate online, please visit: <a href="{APP_BASE_URL}">{APP_BASE_URL}</a></p>
-            
-            <p>Here is your certificate:</p>
-            <hr/>
-            {certificate_html_content}
-            <hr/>
+            <p>You can view your certificate online here: <a href="{certificate_public_url}">{certificate_public_url}</a></p>
+            <p>The certificate is also attached to this email as an HTML file. You can download it, open it in your browser, and then print it to PDF or take a screenshot to share on LinkedIn or WhatsApp.</p>
             
             <p>Have questions? Contact us at support@screenerpro.in</p>
             <p>🚀 Keep striving. Keep growing.</p>
@@ -1156,15 +1141,23 @@ Have questions? Contact us at support@screenerpro.in
         </body>
     </html>
     """
+    msg_alternative.attach(MIMEText(plain_text_body, 'plain'))
+    msg_alternative.attach(MIMEText(html_body, 'html'))
+    msg.attach(msg_alternative)
 
-    msg.attach(MIMEText(plain_text_body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
+    # Attach the HTML certificate file
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload(certificate_html_content.encode('utf-8')) # Encode HTML content
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', f'attachment; filename="ScreenerPro_Certificate_{candidate_name.replace(" ", "_")}.html"')
+    part.add_header('Content-Type', 'text/html; charset=utf-8') # Specify content type as HTML
+    msg.attach(part)
     
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(gmail_address, gmail_app_password)
             smtp.send_message(msg)
-        st.success(f"✅ Certificate email sent to {recipient_email}!")
+        st.success(f"✅ Certificate email sent to {recipient_email} with HTML attachment!")
         return True
     except smtplib.SMTPAuthenticationError:
         st.error("❌ Failed to send email: Authentication error. Please check your Gmail address and App Password.")
@@ -1607,7 +1600,7 @@ def resume_screener_page():
     with col1:
         jd_text = ""
         job_roles = {"Upload my own": None}
-        if os.path.exists("data"):
+        if os.path.exists("data"): # Assuming 'data' directory for pre-loaded JDs
             for fname in os.listdir("data"):
                 if fname.endswith(".txt"):
                     job_roles[fname.replace(".txt", "").replace("_", " ").title()] = os.path.join("data", fname)
@@ -1811,6 +1804,11 @@ def resume_screener_page():
                 certificate_html_content = generate_certificate_html(candidate_data)
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for display
 
+                # Construct the public URL for the certificate
+                # IMPORTANT: This assumes you have a mechanism to upload the HTML file
+                # to CERTIFICATE_HOSTING_URL/certificate_id.html
+                certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.html"
+
                 # --- Automatic Email Sending ---
                 candidate_email = candidate_data.get('Email')
                 if candidate_email and candidate_email != "Not Found":
@@ -1826,6 +1824,7 @@ def resume_screener_page():
                                 candidate_data['Candidate Name'], 
                                 candidate_data['Score (%)'], 
                                 certificate_html_content, # Pass HTML content
+                                certificate_public_url, # Pass public URL
                                 gmail_address, 
                                 gmail_app_password
                             ):
@@ -1847,24 +1846,27 @@ def resume_screener_page():
                         key="download_cert_button",
                         help="Download the certificate as an HTML file. You can open it in your browser and print to PDF."
                     )
+                    st.info("💡 To get an image (PNG/JPG) of your certificate, open the downloaded HTML file in your browser and use your browser's 'Print to PDF' or screenshot functionality.")
                 
                 # Share message for social media
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
 After uploading my resume, I was evaluated across multiple hiring parameters using AI-powered screening technology.
 
 I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}%, which reflects the strength of my profile in today's job market.
+Check out my certificate here: {certificate_public_url}
+
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
 #resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
 🌐 Learn more about the tool: For candidate login: {urllib.parse.quote(APP_BASE_URL)} and for HR login: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
-                # LinkedIn Share Button
-                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(APP_BASE_URL)}&title={urllib.parse.quote('ScreenerPro Certificate of Excellence')}&summary={urllib.parse.quote(share_message)}"
+                # LinkedIn Share Button (now shares the public certificate URL)
+                linkedin_share_url = f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(certificate_public_url)}&title={urllib.parse.quote('ScreenerPro Certificate of Excellence')}&summary={urllib.parse.quote(share_message)}"
                 with col_share_linkedin:
                     st.markdown(f'<a href="{linkedin_share_url}" target="_blank"><button style="background-color:#0077B5;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on LinkedIn</button></a>', unsafe_allow_html=True)
 
-                # WhatsApp Share Button
+                # WhatsApp Share Button (now shares the public certificate URL)
                 whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
                 with col_share_whatsapp:
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
@@ -1897,4 +1899,3 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
     resume_screener_page()
-
