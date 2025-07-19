@@ -349,7 +349,7 @@ def main():
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
         logo_path = "logo.png" # Assuming logo is in the same directory
         if os.path.exists(logo_path):
-            st.image(logo_path, width=195)
+            st.image(logo_path, width=215)
         else:
             st.markdown(f'<img src="https://placehold.co/35x35/00cec9/ffffff?text=SP" alt="ScreenerPro Logo" style="height:35px; object-fit:contain;">', unsafe_allow_html=True)
         st.markdown('<span>ScreenerPro</span>', unsafe_allow_html=True)
