@@ -328,13 +328,21 @@ def main():
 
     if not is_authenticated:
         with st.sidebar:
-            st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
-            logo_path = "logo.png" # Assuming logo is in the same directory
-            if os.path.exists(logo_path):
-                st.image(logo_path, width=215)
-            
+        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+        logo_path = "logo.png"  # Assuming logo is in the same directory
+
+        if os.path.exists(logo_path):
+        # Create a clickable image that links to the HR portal
+            st.markdown(f"""
+            <a href="https://screenerpro.streamlit.app/" target="_self">
+                <img src="data:image/png;base64,{st.image(logo_path, width=215, use_column_width=False).image_bytes.decode('utf-8')}" alt="Go to HR Portal">
+            </a>
+            """, unsafe_allow_html=True)
+        else:
+            st.write("Logo not found.") # Optional: Handle case where logo is missing
+
         st.sidebar.write("---")
-        st.sidebar.markdown("[Go to Pen HR Portal](https://screenerpro.streamlit.app/)")
+
         st.sidebar.info("Please log in or register to access the portal features.")
         
         return # Stop execution if not authenticated
