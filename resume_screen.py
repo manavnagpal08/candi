@@ -18,16 +18,14 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase # Import MIMEBase for file attachment
+from email.mime.base import MIMEBase
 from email import encoders
-import tempfile
-import shutil
 from io import BytesIO
 import traceback
 import time
 import pandas as pd
 import json
-import requests # Import requests for REST API calls
+import requests
 from weasyprint import HTML # Import WeasyPrint for HTML to PDF conversion
 
 # CRITICAL: Disable Hugging Face tokenizers parallelism to avoid deadlocks with ProcessPoolExecutor
@@ -39,7 +37,7 @@ try:
 except LookupError:
     nltk.download('stopwords')
 
-# Define global constants
+# Define global constants (copy from app.py to ensure consistency in this module)
 MASTER_CITIES = set([
     "Bengaluru", "Mumbai", "Delhi", "Chennai", "Hyderabad", "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
     "Chandigarh", "Kochi", "Coimbatore", "Nagpur", "Bhopal", "Indore", "Gurgaon", "Noida", "Surat", "Visakhapatnam",
@@ -215,119 +213,11 @@ APP_BASE_URL = "https://screenerpro-app.streamlit.app" # <--- **ENSURE THIS IS Y
 # For example, if you upload them to a GitHub Pages repository.
 CERTIFICATE_HOSTING_URL = "https://manav-jain.github.io/screenerpro-certs"
 
-# --- Firebase REST API Functions ---
-
-# Helper function to convert Python data to Firestore REST API format
-def _convert_to_firestore_rest_format(data):
-    """
-    Converts a Python dictionary to the Firestore REST API document format.
-    Handles basic types (string, int, float, bool) and lists of strings.
-    Nested dictionaries are converted to mapValue.
-    """
-    fields = {}
-    for key, value in data.items():
-        if value is None:
-            fields[key] = {"nullValue": None}
-        elif isinstance(value, bool):
-            fields[key] = {"booleanValue": value}
-        elif isinstance(value, int):
-            fields[key] = {"integerValue": str(value)} # Firestore REST API expects integerValue as string
-        elif isinstance(value, float):
-            fields[key] = {"doubleValue": value}
-        elif isinstance(value, str):
-            fields[key] = {"stringValue": value}
-        elif isinstance(value, list):
-            list_values = []
-            for item in value:
-                # Recursively convert items in list if they are complex, otherwise stringValue
-                if isinstance(item, dict):
-                    list_values.append({"mapValue": {"fields": _convert_to_firestore_rest_format(item)["fields"]}})
-                elif isinstance(item, list):
-                    # Handle nested lists by stringifying for simplicity, or implement deeper recursion
-                    list_values.append({"stringValue": json.dumps(item)})
-                elif isinstance(item, (int, float)):
-                    list_values.append({"doubleValue": float(item)})
-                elif isinstance(item, bool):
-                    list_values.append({"booleanValue": item})
-                else:
-                    list_values.append({"stringValue": str(item)})
-            fields[key] = {"arrayValue": {"values": list_values}}
-        elif isinstance(value, dict):
-            fields[key] = {"mapValue": {"fields": _convert_to_firestore_rest_format(value)["fields"]}}
-        else:
-            fields[key] = {"stringValue": str(value)} # Fallback for other types
-    return {"fields": fields}
-
-def save_screening_result_to_firestore_rest(result_data):
-    """
-    Saves a single screening result to Firestore using the REST API.
-    Requires FIREBASE_PROJECT_ID and FIREBASE_API_KEY in st.secrets.
-    """
-    try:
-        project_id = st.secrets["FIREBASE_PROJECT_ID"]
-        api_key = st.secrets["FIREBASE_API_KEY"]
-        
-        # Firestore collection path (using 'leaderboard' as before)
-        # Note: For public data, your Firestore security rules must allow unauthenticated writes
-        # or you need to implement user authentication and pass an ID token.
-        collection_id = "leaderboard" 
-        
-        # Firestore REST API endpoint for creating a document with an auto-generated ID
-        # To specify an ID, you'd use PATCH /v1/projects/{project_id}/databases/(default)/documents/{collection_id}/{document_id}
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key=${api_key}"
-
-        # Prepare data for Firestore REST API
-        # Ensure 'Matched Keywords (Categorized)' and 'Missing Skills (Categorized)' are dicts, not JSON strings
-        data_to_send = result_data.copy()
-        if isinstance(data_to_send.get('Matched Keywords (Categorized)'), str):
-            try:
-                data_to_send['Matched Keywords (Categorized)'] = json.loads(data_to_send['Matched Keywords (Categorized)'])
-            except json.JSONDecodeError:
-                data_to_send['Matched Keywords (Categorized)'] = {} # Fallback
-        if isinstance(data_to_send.get('Missing Skills (Categorized)'), str):
-            try:
-                data_to_send['Missing Skills (Categorized)'] = json.loads(data_to_send['Missing Skills (Categorized)'])
-            except json.JSONDecodeError:
-                data_to_send['Missing Skills (Categorized)'] = {} # Fallback
-
-        # Convert datetime.date objects to string for JSON serialization
-        if isinstance(data_to_send.get('Date Screened'), (datetime, date)):
-            data_to_send['Date Screened'] = data_to_send['Date Screened'].strftime("%Y-%m-%d")
-
-        # Remove raw text if it's too large or not needed in leaderboard
-        data_to_send.pop('Resume Raw Text', None)
-
-        firestore_payload = _convert_to_firestore_rest_format(data_to_send)
-
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        response = requests.post(url, headers=headers, data=json.dumps(firestore_payload))
-        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
-
-        st.success(f"📈 Your score has been added to the leaderboard via REST API!")
-        st.info("Remember: For write access, your Firestore security rules must allow it. For production, consider secure authentication.")
-
-    except KeyError as e:
-        st.error(f"❌ Firebase REST API configuration error: Missing secret key '{e}'.")
-        st.info("Please ensure 'FIREBASE_PROJECT_ID' and 'FIREBASE_API_KEY' are correctly set in your secrets.toml or Streamlit Cloud secrets.")
-    except requests.exceptions.HTTPError as e:
-        st.error(f"❌ Failed to save results to leaderboard via REST API: HTTP Error {e.response.status_code}")
-        st.error(f"Response: {e.response.text}")
-        st.warning("This often indicates an issue with Firestore security rules (e.g., write access denied) or incorrect API key/project ID.")
-    except Exception as e:
-        st.error(f"❌ An unexpected error occurred while saving to leaderboard via REST API: {e}")
-        st.exception(e)
-
-
 # Global variable for app ID (as provided by the environment)
 # This assumes __app_id is available in the Streamlit environment.
 # If running locally without this, you might need to hardcode a default or set it via env var.
 appId = os.environ.get('__app_id', 'default-screener-pro-app')
 
-
-# Removed get_tesseract_cmd as Tesseract is no longer used.
 
 # Load ML models once using st.cache_resource
 @st.cache_resource
@@ -1096,34 +986,6 @@ def send_certificate_email(recipient_email, candidate_name, score, certificate_h
     """
     Sends an email with the certificate embedded as HTML content and attached as a PDF file.
     Includes a link to the publicly hosted certificate (if applicable).
-
-    NOTE on WeasyPrint dependencies: WeasyPrint relies on external libraries like Cairo, Pango,
-    and GDK-Pixbuf. If deploying to a cloud environment (e.g., Streamlit Cloud), you might need
-    to use a custom Dockerfile to install these dependencies.
-    Example Dockerfile snippet:
-    FROM python:3.9-slim
-    RUN apt-get update && apt-get install -y \
-        build-essential \
-        libffi-dev \
-        libxml2-dev \
-        libxslt1-dev \
-        libjpeg-dev \
-        zlib1g-dev \
-        libpng-dev \
-        libfreetype6-dev \
-        liblcms2-dev \
-        libwebp-dev \
-        libharfbuzz-dev \
-        libfribidi-dev \
-        libcairo2-dev \
-        libpango1.0-dev \
-        libgdk-pixbuf2.0-dev \
-        shared-mime-info \
-        python3-dev \
-        python3-venv \
-        --no-install-recommends && \
-        rm -rf /var/lib/apt/lists/*
-    # ... rest of your Dockerfile (installing python dependencies, etc.)
     """
     if not gmail_address or not gmail_app_password:
         st.error("❌ Email sending is not configured. Please ensure your Gmail address and App Password secrets are set in Streamlit.")
@@ -1179,7 +1041,7 @@ Have questions? Contact us at support@screenerpro.in
         pdf_bytes = HTML(string=certificate_html_content).write_pdf()
     except Exception as e:
         st.error(f"❌ Error generating PDF for email attachment: {e}")
-        st.info("WeasyPrint requires system dependencies (like Cairo, Pango, GDK-Pixbuf). If deploying, ensure these are installed in your environment (e.g., via a custom Dockerfile).")
+        st.info("WeasyPrint requires system dependencies (like Cairo, Pango, GDK-Pixbuf). Ensure these are listed in your `packages.txt` file.")
         return False
 
     # Attach the PDF certificate file
@@ -1603,16 +1465,8 @@ def generate_certificate_html(candidate_data):
     return html_content
 
 def resume_screener_page():
-    # Display the greeting card at the top of the page
-    # from app import display_greeting_card # Removed to avoid circular import if app.py imports this
-    # display_greeting_card() # Removed call to avoid circular import
-
-    # Personalized greeting for the logged-in user
-
     st.title("🧠 ScreenerPro – AI-Powered Resume Screener")
 
-    # Define all_master_skills at the beginning of the function
-    # Corrected to use MASTER_SKILLS directly as MASTER_SKILL_CATEGORIES was not defined globally
     all_master_skills = sorted(list(MASTER_SKILLS)) 
 
     if 'screening_cutoff_score' not in st.session_state:
@@ -1626,7 +1480,6 @@ def resume_screener_page():
     
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
-    # Initialize 'show_certificate_preview' in session state
     if 'show_certificate_preview' not in st.session_state:
         st.session_state['show_certificate_preview'] = False
 
@@ -1648,7 +1501,6 @@ def resume_screener_page():
         if jd_option == "Upload my own":
             jd_file = st.file_uploader("Upload Job Description (TXT, PDF)", type=["txt", "pdf"], help="Upload a .txt or .pdf file containing the job description.")
             if jd_file:
-                # For JD, we read and extract text directly as it's a single file
                 jd_text = extract_text_from_file(jd_file.read(), jd_file.name, jd_file.type)
                 jd_name_for_results = jd_file.name.replace('.pdf', '').replace('.txt', '')
             else:
@@ -1703,7 +1555,7 @@ def resume_screener_page():
     st.markdown("## 🎯 Skill Prioritization (Optional)")
     st.caption("Assign higher importance to specific skills in the Job Description.")
     
-    # all_master_skills is now defined at the top of the function
+    all_master_skills = sorted(list(MASTER_SKILLS)) 
     col_weights_1, col_weights_2 = st.columns(2)
     with col_weights_1:
         high_priority_skills = st.multiselect(
@@ -1718,14 +1570,11 @@ def resume_screener_page():
             help="Select skills that are very important, but not as critical as high priority ones."
         )
 
-    # Changed to single file uploader
     uploaded_resume_file = st.file_uploader("📄 **Upload Your Resume (PDF)**", type=["pdf"], help="Upload your resume (text-selectable PDF only). File must be less than 1MB.")
     
     if jd_text and uploaded_resume_file:
-        # Start overall timer
         total_screening_start_time = time.time()
 
-        # --- PHASE 1: Text Extraction ---
         file_data_bytes = uploaded_resume_file.read()
         file_name = uploaded_resume_file.name
         file_type = uploaded_resume_file.type
@@ -1743,7 +1592,6 @@ def resume_screener_page():
         
         st.success("Text extraction complete.")
 
-        # --- PHASE 2: Embedding Generation ---
         with st.spinner(f"Generating embeddings for resume and JD..."):
             jd_clean = clean_text(jd_text)
             jd_embedding = global_sentence_model.encode([jd_clean])[0]
@@ -1752,9 +1600,7 @@ def resume_screener_page():
         
         st.success("Embedding generation complete.")
 
-        # --- PHASE 3: Individual Resume Analysis ---
         with st.spinner(f"Analyzing your resume with AI models..."):
-            # Direct call to processing function (no ProcessPoolExecutor)
             result = _process_single_resume_for_screener_page(
                 file_name, resume_text, jd_text, jd_embedding, resume_embedding,
                 jd_name_for_results, high_priority_skills, medium_priority_skills, max_experience,
@@ -1779,7 +1625,6 @@ def resume_screener_page():
             st.markdown(f"### **{candidate_data['Candidate Name']}**")
             st.markdown(f"**Score:** {candidate_data['Score (%)']:.2f}% | **Experience:** {candidate_data['Years Experience']:.1f} years | **CGPA:** {cgpa_display} (4.0 Scale) | **Semantic Similarity:** {semantic_sim_display}")
             
-            # Certificate display and email logic now includes 50% threshold
             if candidate_data.get('Certificate Rank') != "Not Applicable" and candidate_data['Score (%)'] >= 50:
                 st.markdown(f"**ScreenerPro Certification:** {candidate_data['Certificate Rank']}")
 
@@ -1842,14 +1687,11 @@ def resume_screener_page():
                 st.session_state['certificate_html_content'] = certificate_html_content # Store for display
 
                 # Construct the public URL for the certificate (if you plan to host them)
-                # For this implementation, the PDF is generated on-the-fly for download/email.
-                # If you need to host PDFs, you'd need a separate storage mechanism (e.g., AWS S3, GitHub Pages for PDFs).
                 certificate_public_url = f"{CERTIFICATE_HOSTING_URL}/{candidate_data['Certificate ID']}.pdf" # Changed to .pdf extension
 
                 # --- Automatic Email Sending ---
                 candidate_email = candidate_data.get('Email')
                 if candidate_email and candidate_email != "Not Found":
-                    # Check if email has already been sent for this session and candidate
                     email_sent_key = f"email_sent_{candidate_data['Certificate ID']}"
                     if not st.session_state.get(email_sent_key, False):
                         with st.spinner(f"Sending certificate to {candidate_email}..."):
@@ -1888,7 +1730,7 @@ def resume_screener_page():
                         )
                     except Exception as e:
                         st.error(f"❌ Error generating PDF for download: {e}")
-                        st.info("PDF generation requires system dependencies. If deploying, ensure these are installed.")
+                        st.info("PDF generation requires system dependencies. Ensure these are listed in your `packages.txt` file.")
                 
                 # Share message for social media
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
@@ -1899,7 +1741,7 @@ Check out my certificate here: {certificate_public_url}
 
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
 
-#resume #jobsearch #ai #careergrowth #certified #ScreenerPro #LinkedIn
+#resume #jobsearch #ai #caregrowth #certified #ScreenerPro #LinkedIn
 🌐 Learn more about the tool: For candidate login: {urllib.parse.quote(APP_BASE_URL)} and for HR login: {urllib.parse.quote(APP_BASE_URL)}
 """
                 
@@ -1914,14 +1756,12 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                     st.markdown(f'<a href="{whatsapp_share_url}" target="_blank"><button style="background-color:#25D366;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
                 # --- Firestore Save for Leaderboard (using REST API) ---
-                # This will attempt to save the data via REST API
                 save_screening_result_to_firestore_rest(candidate_data)
                 # --- End of Firestore save section ---
 
                 # --- Automatic HTML Preview Display ---
                 st.markdown("---")
                 st.markdown("### Generated Certificate Preview (HTML)")
-                # Removed height and set scrolling to False to allow full display
                 st.components.v1.html(st.session_state['certificate_html_content'], height=1200, scrolling=False) 
                 st.markdown("---")
 
@@ -1933,11 +1773,7 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
         else:
             st.info("No results to display for the candidate.")
 
-    # This block ensures the preview is hidden if the input is cleared or no resume is uploaded
     if not uploaded_resume_file and st.session_state['certificate_html_content']:
         st.session_state['certificate_html_content'] = ""
-        st.rerun() # Rerun to clear the display immediately
+        st.rerun()
 
-if __name__ == "__main__":
-    st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
-    resume_screener_page()
