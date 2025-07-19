@@ -415,7 +415,7 @@ def main():
     # Set the body class based on the current theme
     # This is crucial for style.css to apply dark-mode specific rules
     if st.session_state.theme == "dark":
-        set_body_class("")
+        set_body_class()
     else:
         set_body_class() # Add a light-mode class too for consistency
 
