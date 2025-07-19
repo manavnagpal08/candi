@@ -207,7 +207,7 @@ SKILL_CATEGORIES = {
 
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
-# --- NEW: Company Skill Profiles (Simplified for Demonstration) ---
+# --- NEW: Company Skill Profiles (Expanded for Demonstration) ---
 # This dictionary maps company names to a list of keywords/phrases
 # that represent their typical tech stack, industry focus, or values.
 # In a real-world scenario, this would be a much larger, dynamically updated database.
@@ -243,6 +243,30 @@ COMPANY_SKILL_PROFILES = {
     "Generic Tech Startup": {
         "description": "A fast-paced, innovative technology company, often focused on new technologies and agile development.",
         "keywords": ["Agile", "Scrum", "Fast-paced", "Innovation", "MVP", "Growth Hacking", "Fullstack", "React", "Node.js", "Python", "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Problem Solving", "Adaptability", "Entrepreneurship"]
+    },
+    "IBM": {
+        "description": "A global technology and consulting company, known for enterprise solutions, AI (Watson), and hybrid cloud.",
+        "keywords": ["IBM Cloud", "AI", "Watson", "Hybrid Cloud", "Enterprise Solutions", "Consulting", "Java", "Python", "Red Hat", "OpenShift", "Blockchain", "Quantum Computing", "Data Science", "Security"]
+    },
+    "Oracle": {
+        "description": "A multinational computer technology corporation best known for its database software and cloud engineered systems.",
+        "keywords": ["Oracle Database", "SQL", "Oracle Cloud Infrastructure", "OCI", "Java", "Enterprise Applications", "ERP", "CRM", "Cloud Computing", "Data Management", "Middleware", "Fusion Applications"]
+    },
+    "SAP": {
+        "description": "A German multinational software corporation that makes enterprise software to manage business operations and customer relations.",
+        "keywords": ["SAP ERP", "SAP S/4HANA", "SAP HANA", "ABAP", "Cloud ERP", "Business Intelligence", "CRM", "Supply Chain Management", "SuccessFactors", "SAP Fiori", "Enterprise Software"]
+    },
+    "Cisco": {
+        "description": "A global technology conglomerate that designs, manufactures, and sells networking equipment.",
+        "keywords": ["Networking", "Routers", "Switches", "Cybersecurity", "Collaboration Tools", "Webex", "IoT", "Cloud Networking", "SD-WAN", "Network Security", "CCNA", "CCNP"]
+    },
+    "Adobe": {
+        "description": "A multinational computer software company, known for its creative and multimedia software products.",
+        "keywords": ["Creative Cloud", "Photoshop", "Illustrator", "Premiere Pro", "Experience Cloud", "Marketing Automation", "Digital Media", "UI/UX Design", "Web Development", "Analytics", "AEM"]
+    },
+    "NVIDIA": {
+        "description": "A multinational technology company known for designing graphics processing units (GPUs) for the gaming and professional markets, as well as AI and data center solutions.",
+        "keywords": ["GPU", "CUDA", "Deep Learning", "AI", "Machine Learning", "Computer Graphics", "Gaming", "Data Center", "High Performance Computing", "HPC", "Robotics", "Autonomous Vehicles", "TensorRT"]
     }
 }
 # Convert all company keywords to lowercase for consistent matching
@@ -1074,7 +1098,7 @@ def generate_company_fit_assessment(candidate_name, company_name, resume_embeddi
     
     company_name_lower = company_name.lower()
     if company_name_lower not in [k.lower() for k in COMPANY_SKILL_PROFILES.keys()]:
-        return f"Company '{company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup)."
+        return f"Company '{company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup, IBM, Oracle, SAP, Cisco, Adobe, NVIDIA)."
 
     # Calculate semantic similarity
     semantic_similarity = cosine_similarity(resume_embedding.reshape(1, -1), company_profile_embedding.reshape(1, -1))[0][0]
@@ -1417,7 +1441,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
                     company_keywords=company_profile["keywords"]
                 )
             else:
-                company_fit_assessment_text = f"Company '{target_company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup)."
+                company_fit_assessment_text = f"Company '{target_company_name}' not found in our predefined profiles. Please try one of the examples (e.g., Google, Microsoft, Amazon, Generic Tech Startup, IBM, Oracle, SAP, Cisco, Adobe, NVIDIA)."
         # --- END NEW: Company Fit Assessment Logic ---
 
 
@@ -1499,18 +1523,18 @@ def suggest_courses_for_skills(missing_skills_list):
     database or an LLM call.
     """
     course_suggestions = {
-        "Python": "Python for Everybody (Coursera), Automate the Boring Stuff with Python (Udemy)",
-        "Java": "Java Programming Masterclass (Udemy), Object-Oriented Programming in Java (Coursera)",
-        "JavaScript": "The Complete JavaScript Course (Udemy), JavaScript Basics (freeCodeCamp)",
-        "React": "React - The Complete Guide (Udemy), React Basics (egghead.io)",
-        "SQL": "SQL for Data Science (Coursera), Learn SQL (Codecademy)",
-        "AWS": "AWS Certified Cloud Practitioner (Udemy), AWS Fundamentals (Coursera)",
-        "Docker": "Docker & Kubernetes: The Practical Guide (Udemy), Docker Essentials (Pluralsight)",
-        "Machine Learning": "Machine Learning (Coursera by Andrew Ng), Applied Machine Learning (edX)",
-        "Data Analysis": "Google Data Analytics Professional Certificate (Coursera), Data Analyst with Python (DataCamp)",
-        "Cybersecurity": "CompTIA Security+ (Udemy), Introduction to Cybersecurity (Coursera)",
-        "Project Management": "Project Management Professional (PMP) Certification (various providers), Agile with Atlassian Jira (Coursera)",
-        "Communication Skills": "Effective Communication (Coursera), Public Speaking (edX)",
+        "Python": "[Python for Everybody (Coursera)](https://www.coursera.org/learn/python), [Automate the Boring Stuff with Python (Udemy)](https://www.udemy.com/course/automate/)",
+        "Java": "[Java Programming Masterclass (Udemy)](https://www.udemy.com/course/java-the-complete-java-developer-course/), [Object-Oriented Programming in Java (Coursera)](https://www.coursera.org/learn/object-oriented-programming-java)",
+        "JavaScript": "[The Complete JavaScript Course (Udemy)](https://www.udemy.com/course/the-complete-javascript-course/), [JavaScript Basics (freeCodeCamp)](https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/)",
+        "React": "[React - The Complete Guide (Udemy)](https://www.udemy.com/course/react-the-complete-guide-incl-redux/), [React Basics (egghead.io)](https://egghead.io/courses/react-basics)",
+        "SQL": "[SQL for Data Science (Coursera)](https://www.coursera.org/learn/sql-for-data-science), [Learn SQL (Codecademy)](https://www.codecademy.com/learn/learn-sql)",
+        "AWS": "[AWS Certified Cloud Practitioner (Udemy)](https://www.udemy.com/course/aws-certified-cloud-practitioner-clf-c01/), [AWS Fundamentals (Coursera)](https://www.coursera.org/specializations/aws-fundamentals)",
+        "Docker": "[Docker & Kubernetes: The Practical Guide (Udemy)](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/), [Docker Essentials (Pluralsight)](https://www.pluralsight.com/courses/docker-essentials)",
+        "Machine Learning": "[Machine Learning (Coursera by Andrew Ng)](https://www.coursera.org/learn/machine-learning), [Applied Machine Learning (edX)](https://www.edx.org/learn/machine-learning/columbia-university-applied-machine-learning)",
+        "Data Analysis": "[Google Data Analytics Professional Certificate (Coursera)](https://www.coursera.org/professional-certificates/google-data-analytics), [Data Analyst with Python (DataCamp)](https://www.datacamp.com/tracks/data-analyst-with-python)",
+        "Cybersecurity": "[CompTIA Security+ (Udemy)](https://www.udemy.com/course/comptia-security-sy0-601-cert-prep-course/), [Introduction to Cybersecurity (Coursera)](https://www.coursera.org/learn/introduction-to-cybersecurity)",
+        "Project Management": "[Project Management Professional (PMP) Certification (various providers)](https://www.pmi.org/certifications/project-management-pmp), [Agile with Atlassian Jira (Coursera)](https://www.coursera.org/learn/agile-atlassian-jira)",
+        "Communication Skills": "[Effective Communication (Coursera)](https://www.coursera.org/learn/uva-darden-effective-communication), [Public Speaking (edX)](https://www.edx.org/learn/public-speaking/rochester-institute-of-technology-public-speaking)",
         # Add more mappings as needed
     }
 
@@ -1522,15 +1546,21 @@ def suggest_courses_for_skills(missing_skills_list):
     st.write("Based on the skills missing from your resume compared to the Job Description, here are some suggested courses or learning resources:")
     
     found_suggestions = False
-    for skill in missing_skills_list: # Corrected variable name from 'missing_skills' to 'missing_skills_list'
+    # Only suggest 5 courses with links as requested
+    suggested_count = 0
+    for skill in missing_skills_list:
+        if suggested_count >= 5: # Limit to 5 courses
+            break
         # Normalize skill name for lookup (e.g., "python" -> "Python")
         normalized_skill = skill.title() 
         if normalized_skill in course_suggestions:
             st.markdown(f"- **{normalized_skill}:** {course_suggestions[normalized_skill]}")
             found_suggestions = True
-        else:
+            suggested_count += 1
+        elif suggested_count < 5: # Offer generic suggestion if specific link not found and limit not reached
             st.markdown(f"- **{normalized_skill}:** Consider exploring courses on Coursera, Udemy, or edX to develop this skill.")
-            found_suggestions = True # Mark as found suggestion even if generic
+            found_suggestions = True
+            suggested_count += 1
 
     if not found_suggestions:
         st.info("We couldn't find specific course suggestions for all missing skills, but continuous learning is key!")
