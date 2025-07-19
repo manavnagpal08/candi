@@ -1456,6 +1456,8 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             certificate_rank = "✅ Good Fit"
         elif score >= 65: # Added new elif block for "Low Fit"
             certificate_rank = "⚪ Low Fit"
+        elif score >= 50:
+            certificate_rank = "🟡 Basic Fit"
         
         # Determine Tag
         tag = "❌ Limited Match"
