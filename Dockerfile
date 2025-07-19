@@ -1,11 +1,12 @@
-# Use a slim Python base image
-FROM python:3.9-slim
+# Use a slim Python base image, matching Python 3.13 as seen in your error traceback
+FROM python:3.13-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
 
 # Install system dependencies for WeasyPrint
 # These include libraries for rendering text, graphics, and images
+# Ensure these are compatible with the Debian/Ubuntu version that python:3.13-slim is based on.
 RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
