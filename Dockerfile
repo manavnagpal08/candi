@@ -1,12 +1,13 @@
-# Use a slim Python base image, matching Python 3.13 as seen in your error traceback
-FROM python:3.13-slim
+# Use a more stable Python base image (e.g., 3.10-slim) for better compatibility with WeasyPrint's dependencies.
+# Python 3.13 is a very new release and might have compatibility issues with some C-extension libraries.
+FROM python:3.10-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
 
 # Install system dependencies for WeasyPrint
-# These include libraries for rendering text, graphics, and images
-# Ensure these are compatible with the Debian/Ubuntu version that python:3.13-slim is based on.
+# These include libraries for rendering text, graphics, and images.
+# libpangocairo-1.0-0 is explicitly added for robustness.
 RUN apt-get update && apt-get install -y \
     build-essential \
     libffi-dev \
@@ -23,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf2.0-dev \
+    libpangocairo-1.0-0 \
     shared-mime-info \
     python3-dev \
     --no-install-recommends && \
