@@ -1,198 +1,241 @@
-/* style.css - The "100x More Beautiful" Edition */
+/* style.css - The "Ultra Modern & Immersive" Edition */
 
 /* --- Google Fonts Import --- */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700;800&display=swap');
 
 /* --- Root Variables (Light and Dark Mode) --- */
 :root {
-    /* Light Mode Palette */
-    --primary-bg-light: #f0f4f8; /* Muted light blue-grey */
-    --secondary-bg-light: #ffffff; /* Pure white for cards/sidebar */
-    --accent-color: #4A90E2; /* Deep Sky Blue - a modern, vibrant blue */
-    --accent-hover: #357ABD; /* Darker blue on hover */
-    --text-primary-light: #333333; /* Dark grey for main text */
-    --text-secondary-light: #5a5a5a; /* Lighter grey for secondary text */
-    --border-color-light: #e0e0e0; /* Light grey border */
-    --input-bg-light: #fdfdfd;
-    --input-border-light: #dcdcdc;
+    /* Base Colors - Light Mode */
+    --color-bg-primary-light: #f7fafd; /* Very light blue-grey */
+    --color-bg-secondary-light: #ffffff; /* Pure white for main elements */
+    --color-text-primary-light: #2c3e50; /* Dark charcoal */
+    --color-text-secondary-light: #7f8c8d; /* Muted grey */
+    --color-border-light: #e0e6ed; /* Soft border */
 
-    /* Shadows - Multi-layered for depth */
-    --shadow-sm-light: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md-light: 0 4px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-lg-light: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-    --shadow-xl-light: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.08);
+    /* Accent Color (Consistent for both modes) */
+    --color-accent-main: #4285F4; /* Google Blue */
+    --color-accent-dark: #3367d6; /* Slightly darker */
+    --color-accent-light: #6fa8f7; /* Slightly lighter */
+    --color-accent-fade: rgba(66, 133, 244, 0.1);
 
-    /* Alert Colors */
-    --info-bg-light: #e3f2fd; --info-text-light: #1976d2; --info-border-light: #90caf9;
-    --success-bg-light: #e8f5e9; --success-text-light: #388e3c; --success-border-light: #a5d6a7;
-    --warning-bg-light: #fffde7; --warning-text-light: #fbc02d; --warning-border-light: #ffe082;
-    --error-bg-light: #ffebee; --error-text-light: #d32f2f; --error-border-light: #ef9a9a;
+    /* Shadows - Deep and layered for "floating" effect */
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-2: 0 4px 8px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.08);
+    --shadow-inset: inset 0 1px 3px rgba(0,0,0,0.05);
 
-    /* Animation */
-    --transition-speed: 0.4s;
-    --transition-ease: cubic-bezier(0.25, 0.8, 0.25, 1); /* Material Design ease */
+    /* Glassmorphism Effect */
+    --glass-blur: 15px;
+    --glass-bg-light: rgba(255, 255, 255, 0.7);
+    --glass-border-light: rgba(255, 255, 255, 0.4);
+
+    /* Animation Variables */
+    --transition-duration: 0.5s;
+    --transition-ease: cubic-bezier(0.2, 0.8, 0.2, 1); /* More elastic ease */
 }
 
 body.dark-mode {
-    /* Dark Mode Palette */
-    --primary-bg-dark: #121212; /* Very dark grey */
-    --secondary-bg-dark: #1e1e1e; /* Slightly lighter dark grey for cards/sidebar */
-    --accent-color: #4A90E2; /* Keep vibrant blue accent */
-    --accent-hover: #67a9f8; /* Lighter blue on hover for dark mode */
-    --text-primary-dark: #e0e0e0; /* Light grey for main text */
-    --text-secondary-dark: #b0b0b0; /* Muted light grey for secondary text */
-    --border-color-dark: #3a3a3a; /* Darker border */
-    --input-bg-dark: #2a2a2a;
-    --input-border-dark: #4a4a4a;
+    /* Base Colors - Dark Mode */
+    --color-bg-primary-dark: #1a1a2e; /* Deep indigo-like background */
+    --color-bg-secondary-dark: #2c2c4d; /* Slightly lighter for cards */
+    --color-text-primary-dark: #ecf0f1; /* Off-white */
+    --color-text-secondary-dark: #bdc3c7; /* Muted light grey */
+    --color-border-dark: #3e4a63; /* Darker border */
 
-    /* Shadows - More subtle in dark mode */
-    --shadow-sm-dark: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
-    --shadow-md-dark: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
-    --shadow-lg-dark: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.25);
-    --shadow-xl-dark: 0 20px 25px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.3);
+    /* Accent remains the same for vibrancy */
 
-    /* Alert Colors (Dark Mode) */
-    --info-bg-dark: #0d47a1; --info-text-dark: #bbdefb; --info-border-dark: #42a5f5;
-    --success-bg-dark: #1b5e20; --success-text-dark: #c8e6c9; --success-border-dark: #81c784;
-    --warning-bg-dark: #f57f17; --warning-text-dark: #fff9c4; --warning-border-dark: #ffee58;
-    --error-bg-dark: #b71c1c; --error-text-dark: #ffcdd2; --error-border-dark: #e57373;
+    /* Shadows - More subtle in dark mode, but still present */
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-2: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.25);
+    --shadow-3: 0 10px 20px rgba(0,0,0,0.5), 0 5px 10px rgba(0,0,0,0.3);
+    --shadow-inset: inset 0 1px 3px rgba(0,0,0,0.2);
+
+    /* Glassmorphism Effect - Darker */
+    --glass-bg-dark: rgba(44, 44, 77, 0.7);
+    --glass-border-dark: rgba(62, 74, 99, 0.4);
 }
 
 /* --- Global Base Styles --- */
 html, body, .stApp {
-    font-family: 'Poppins', sans-serif; /* Modern, clean sans-serif for body */
-    background: var(--primary-bg-light); /* Default to light mode */
-    color: var(--text-primary-light);
-    margin: 0;
-    padding: 0;
-    transition: background-color var(--transition-speed) var(--transition-ease),
-                color var(--transition-speed) var(--transition-ease);
+    font-family: 'Roboto', sans-serif; /* Clean, modern sans-serif for body */
+    background: var(--color-bg-primary-light);
+    color: var(--color-text-primary-light);
+    transition: background var(--transition-duration) var(--transition-ease),
+                color var(--transition-duration) var(--transition-ease);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden; /* Prevent horizontal scroll from animations */
 }
 
-body.dark-mode {
-    background: var(--primary-bg-dark);
-    color: var(--text-primary-dark);
+/* Dynamic Background Gradient (Subtle Animation) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top left, var(--color-accent-fade) 0%, transparent 40%),
+                radial-gradient(circle at bottom right, var(--color-accent-fade) 0%, transparent 40%);
+    z-index: -2; /* Behind everything */
+    opacity: 0.5;
+    animation: backgroundMove 20s infinite alternate ease-in-out;
 }
+
+@keyframes backgroundMove {
+    0% { background-position: 0% 0%, 100% 100%; }
+    100% { background-position: 100% 100%, 0% 0%; }
+}
+
+
+body.dark-mode {
+    background: var(--color-bg-primary-dark);
+    color: var(--color-text-primary-dark);
+}
+body.dark-mode::before {
+    background: radial-gradient(circle at top left, rgba(66, 133, 244, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at bottom right, rgba(66, 133, 244, 0.05) 0%, transparent 40%);
+}
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px; /* For horizontal scrollbars */
+    width: 12px;
+    height: 12px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05); /* Lighter track */
-    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 5px;
-    border: 2px solid transparent; /* Creates a small gap */
-    background-clip: content-box; /* Ensures border doesn't fill thumb */
+    background: var(--color-accent-main);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    transition: background var(--transition-duration) var(--transition-ease);
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-hover);
+    background: var(--color-accent-dark);
 }
 body.dark-mode ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05); /* Darker track */
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* Selection Color */
 ::selection {
-    background: var(--accent-color);
+    background: var(--color-accent-main);
     color: white;
 }
 
 /* --- Typography --- */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif; /* Stronger, more elegant serif for headings */
-    color: var(--accent-color); /* Headings use accent color */
-    margin-top: 1.8em;
-    margin-bottom: 0.8em;
+    font-family: 'Montserrat', sans-serif; /* Stronger, more elegant sans-serif for headings */
+    color: var(--color-accent-main);
+    margin-top: 2em;
+    margin-bottom: 1em;
     font-weight: 700;
+    text-shadow: var(--shadow-1);
+    transition: color var(--transition-duration) var(--transition-ease);
 }
 
-h1 { font-size: 2.8em; line-height: 1.2; text-shadow: var(--shadow-sm-light); }
-h2 { font-size: 2.2em; font-weight: 600; }
-h3 { font-size: 1.8em; font-weight: 600; }
-p { line-height: 1.7; color: var(--text-secondary-light); }
-body.dark-mode p { color: var(--text-secondary-dark); }
-a { color: var(--accent-color); text-decoration: none; transition: color var(--transition-speed) var(--transition-ease); }
-a:hover { color: var(--accent-hover); text-decoration: underline; }
+h1 { font-size: 3em; line-height: 1.2; }
+h2 { font-size: 2.4em; font-weight: 600; }
+h3 { font-size: 1.9em; font-weight: 600; }
+p { line-height: 1.8; color: var(--color-text-secondary-light); }
+body.dark-mode p { color: var(--color-text-secondary-dark); }
+a { color: var(--color-accent-main); text-decoration: none; transition: all var(--transition-duration) var(--transition-ease); }
+a:hover { color: var(--color-accent-dark); text-decoration: underline; transform: translateY(-1px); }
 
-/* --- Sidebar Styling --- */
+/* --- Sidebar Styling (Glassmorphism) --- */
 .stSidebar {
-    background: var(--secondary-bg-light); /* White background in light mode */
-    color: var(--text-primary-light);
-    padding-top: 2.5rem;
-    box-shadow: var(--shadow-lg-light); /* More pronounced shadow */
-    transition: background var(--transition-speed) var(--transition-ease),
-                color var(--transition-speed) var(--transition-ease),
-                box-shadow var(--transition-speed) var(--transition-ease);
-    border-right: 1px solid var(--border-color-light); /* Subtle right border */
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur)); /* For Safari */
+    border-right: 1px solid var(--glass-border-light);
+    box-shadow: var(--shadow-3);
+    padding-top: 3rem;
+    color: var(--color-text-primary-light);
+    transition: all var(--transition-duration) var(--transition-ease);
 }
 
 body.dark-mode .stSidebar {
-    background: var(--secondary-bg-dark); /* Dark background in dark mode */
-    color: var(--text-primary-dark);
-    box-shadow: var(--shadow-lg-dark);
-    border-right: 1px solid var(--border-color-dark);
+    background: var(--glass-bg-dark);
+    border-right: 1px solid var(--glass-border-dark);
+    box-shadow: var(--shadow-3); /* Still prominent */
+    color: var(--color-text-primary-dark);
 }
 
 .stSidebar .stButton > button {
-    width: calc(100% - 2rem); /* Account for horizontal padding */
-    margin: 0.5rem 1rem; /* Consistent margins */
+    width: calc(100% - 2.5rem); /* Adjust for padding */
+    margin: 0.75rem 1.25rem;
     background: transparent;
-    color: var(--text-primary-light);
-    border: none; /* No border for sidebar buttons */
+    color: var(--color-text-primary-light);
+    border: none;
     box-shadow: none;
-    transition: all var(--transition-speed) var(--transition-ease);
+    transition: all var(--transition-duration) var(--transition-ease);
     font-weight: 500;
-    padding: 0.9rem 1.2rem;
-    border-radius: 0.75rem; /* More rounded corners */
-    text-align: left; /* Align text left */
+    padding: 1rem 1.5rem;
+    border-radius: 1rem; /* More rounded */
+    text-align: left;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 body.dark-mode .stSidebar .stButton > button {
-    color: var(--text-primary-dark);
+    color: var(--color-text-primary-dark);
+}
+
+.stSidebar .stButton > button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-accent-fade);
+    transform: translateX(-100%);
+    transition: transform var(--transition-duration) var(--transition-ease);
+    z-index: -1;
+}
+
+.stSidebar .stButton > button:hover::before {
+    transform: translateX(0);
 }
 
 .stSidebar .stButton > button:hover {
-    background: rgba(74, 144, 226, 0.1); /* Subtle accent background */
-    color: var(--accent-color);
-    transform: translateY(-2px); /* Lift effect */
-    box-shadow: var(--shadow-sm-light); /* Light shadow on hover */
+    color: var(--color-accent-main);
+    transform: translateY(-3px); /* Subtle lift */
+    box-shadow: var(--shadow-1);
+    background: var(--color-accent-fade); /* Set background on hover for glass effect */
 }
 
 body.dark-mode .stSidebar .stButton > button:hover {
-    background: rgba(74, 144, 226, 0.15); /* Slightly stronger for dark mode */
-    color: var(--accent-hover);
-    box-shadow: var(--shadow-sm-dark);
+    color: var(--color-accent-light);
+    box-shadow: var(--shadow-1);
+    background: var(--color-accent-fade);
 }
-
 
 /* Custom HR Portal Button in sidebar */
 .stSidebar a > button {
     background: linear-gradient(45deg, #28a745, #218838) !important; /* Green gradient */
     color: white !important;
     border: none !important;
-    border-radius: 0.75rem !important; /* Consistent with other buttons */
-    padding: 0.9rem 1.5rem !important;
-    font-weight: 600 !important;
-    width: calc(100% - 2rem) !important;
-    margin: 1rem 1rem !important;
+    border-radius: 1rem !important; /* Consistent with other buttons */
+    padding: 1rem 1.8rem !important;
+    font-weight: 700 !important;
+    width: calc(100% - 2.5rem) !important;
+    margin: 1.5rem 1.25rem !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px !important;
-    box-shadow: var(--shadow-md-light) !important;
-    transition: all var(--transition-speed) var(--transition-ease) !important;
-    overflow: hidden; /* For hover effect */
+    gap: 12px !important;
+    box-shadow: var(--shadow-2) !important;
+    transition: all var(--transition-duration) var(--transition-ease) !important;
+    overflow: hidden;
     position: relative;
     z-index: 1;
 }
@@ -204,41 +247,40 @@ body.dark-mode .stSidebar .stButton > button:hover {
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    transition: width 0.4s ease, height 0.4s ease, top 0.4s ease, left 0.4s ease;
+    transition: width 0.5s ease-out, height 0.5s ease-out, top 0.5s ease-out, left 0.5s ease-out;
     transform: translate(-50%, -50%);
     z-index: -1;
 }
 
 .stSidebar a > button:hover::before {
-    width: 250%;
-    height: 250%;
+    width: 300%;
+    height: 300%;
 }
 
 .stSidebar a > button:hover {
     background: linear-gradient(45deg, #218838, #1e7e34) !important;
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: var(--shadow-lg-light) !important;
+    transform: translateY(-5px) scale(1.03) !important; /* More lift, slight scale */
+    box-shadow: var(--shadow-3) !important;
 }
 
 body.dark-mode .stSidebar a > button {
-    box-shadow: var(--shadow-md-dark) !important;
+    box-shadow: var(--shadow-2) !important;
 }
 body.dark-mode .stSidebar a > button:hover {
-    box-shadow: var(--shadow-lg-dark) !important;
+    box-shadow: var(--shadow-3) !important;
 }
-
 
 /* --- Main Content Styling --- */
 .main .block-container {
-    padding-top: 1.5rem; /* Adjusted for hidden header */
-    padding-bottom: 2.5rem;
-    padding-left: 4rem; /* More generous side padding */
-    padding-right: 4rem; /* More generous side padding */
-    opacity: 0; /* Start hidden for fade-in */
-    transform: translateY(30px); /* Start further below for slide-up */
-    animation: fadeInSlideUp var(--transition-speed) var(--transition-ease) forwards;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    padding-left: 5rem; /* Generous side padding */
+    padding-right: 5rem;
+    opacity: 0;
+    transform: translateY(40px); /* Deeper slide-up for entrance */
+    animation: fadeInSlideUp var(--transition-duration) 0.2s var(--transition-ease) forwards; /* Slight delay */
 }
 
 /* Keyframe for page fade-in and slide-up */
@@ -249,19 +291,19 @@ body.dark-mode .stSidebar a > button:hover {
     }
 }
 
-/* Inputs (text_input, text_area, selectbox, multiselect) */
+/* Inputs (text_input, text_area, selectbox, multiselect, slider) */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
 .stSelectbox > div > div > div > div > span,
 .stMultiSelect > div > div > div > div > span,
 .stSlider > div > div > div > div > div {
-    background-color: var(--input-bg-light) !important;
-    color: var(--text-primary-light) !important;
-    border: 1px solid var(--input-border-light) !important;
-    border-radius: 0.75rem; /* More rounded */
-    padding: 0.8rem 1.2rem;
-    box-shadow: inset var(--shadow-sm-light); /* Inner shadow for depth */
-    transition: all var(--transition-speed) var(--transition-ease);
+    background-color: var(--color-bg-secondary-light) !important;
+    color: var(--color-text-primary-light) !important;
+    border: 1px solid var(--color-border-light) !important;
+    border-radius: 0.75rem;
+    padding: 0.9rem 1.4rem;
+    box-shadow: var(--shadow-inset);
+    transition: all var(--transition-duration) var(--transition-ease);
 }
 
 body.dark-mode .stTextInput > div > div > input,
@@ -269,18 +311,20 @@ body.dark-mode .stTextArea > div > div > textarea,
 body.dark-mode .stSelectbox > div > div > div > div > span,
 body.dark-mode .stMultiSelect > div > div > div > div > span,
 body.dark-mode .stSlider > div > div > div > div > div {
-    background-color: var(--input-bg-dark) !important;
-    color: var(--text-primary-dark) !important;
-    border: 1px solid var(--input-border-dark) !important;
-    box-shadow: inset var(--shadow-sm-dark);
+    background-color: var(--color-bg-secondary-dark) !important;
+    color: var(--color-text-primary-dark) !important;
+    border: 1px solid var(--color-border-dark) !important;
+    box-shadow: var(--shadow-inset);
 }
 
 .stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
-    border-color: var(--accent-color) !important;
-    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.25) !important; /* Stronger glow effect */
+.stTextArea > div > div > textarea:focus,
+.stSelectbox > div > div > div:focus-within, /* For the selectbox container */
+.stMultiSelect > div > div > div:focus-within {
+    border-color: var(--color-accent-main) !important;
+    box-shadow: 0 0 0 5px rgba(66, 133, 244, 0.2); /* Broader, softer glow */
     outline: none !important;
-    transform: scale(1.005); /* Very slight zoom on focus */
+    transform: scale(1.005);
 }
 
 /* Labels for inputs */
@@ -291,11 +335,11 @@ body.dark-mode .stSlider > div > div > div > div > div {
 .stSlider label,
 .stRadio label,
 .stCheckbox label {
-    color: var(--text-primary-light) !important;
-    font-weight: 600; /* Bolder labels */
-    margin-bottom: 0.6rem;
+    color: var(--color-text-primary-light) !important;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
     display: block;
-    font-size: 1.05em;
+    font-size: 1.1em;
 }
 
 body.dark-mode .stTextInput label,
@@ -305,29 +349,29 @@ body.dark-mode .stMultiSelect label,
 body.dark-mode .stSlider label,
 body.dark-mode .stRadio label,
 body.dark-mode .stCheckbox label {
-    color: var(--text-primary-dark) !important;
+    color: var(--color-text-primary-dark) !important;
 }
-
 
 /* Main Content Buttons */
 .stButton > button {
-    background: linear-gradient(45deg, var(--accent-color), #5DADE2); /* Gradient background */
+    background: linear-gradient(45deg, var(--color-accent-main), var(--color-accent-light));
     color: white;
     border: none;
-    border-radius: 0.75rem;
-    padding: 0.9rem 1.8rem;
+    border-radius: 1rem;
+    padding: 1rem 2rem;
     font-weight: 700;
-    transition: all var(--transition-speed) var(--transition-ease);
-    box-shadow: var(--shadow-md-light);
+    transition: all var(--transition-duration) var(--transition-ease);
+    box-shadow: var(--shadow-2);
     cursor: pointer;
-    overflow: hidden; /* For ripple effect or similar */
+    overflow: hidden;
     position: relative;
     z-index: 1;
+    transform: translateZ(0); /* Force hardware acceleration */
 }
 
 .stButton > button:active {
-    transform: translateY(1px); /* Slight press effect */
-    box-shadow: var(--shadow-sm-light);
+    transform: translateY(2px) scale(0.98); /* More pronounced press effect */
+    box-shadow: var(--shadow-1);
 }
 
 .stButton > button::before {
@@ -337,136 +381,147 @@ body.dark-mode .stCheckbox label {
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: 50%;
-    transition: width 0.4s ease, height 0.4s ease, top 0.4s ease, left 0.4s ease;
     transform: translate(-50%, -50%);
+    transition: width 0.5s ease-out, height 0.5s ease-out;
     z-index: -1;
 }
 
 .stButton > button:hover::before {
-    width: 250%;
-    height: 250%;
+    width: 300%;
+    height: 300%;
 }
 
 .stButton > button:hover {
-    background: linear-gradient(45deg, var(--accent-hover), #4A90E2);
-    transform: translateY(-4px) scale(1.02); /* More pronounced lift and slight scale */
-    box-shadow: var(--shadow-xl-light); /* Deeper shadow on hover */
+    background: linear-gradient(45deg, var(--color-accent-dark), var(--color-accent-main));
+    transform: translateY(-8px) scale(1.05); /* Aggressive lift and scale */
+    box-shadow: var(--shadow-3); /* Strongest shadow on hover */
 }
 
 body.dark-mode .stButton > button {
-    background: linear-gradient(45deg, var(--accent-color), #67a9f8);
-    box-shadow: var(--shadow-md-dark);
+    background: linear-gradient(45deg, var(--color-accent-main), var(--color-accent-light));
+    box-shadow: var(--shadow-2);
 }
 body.dark-mode .stButton > button:hover {
-    background: linear-gradient(45deg, var(--accent-hover), #4A90E2);
-    box-shadow: var(--shadow-xl-dark);
+    background: linear-gradient(45deg, var(--color-accent-light), var(--color-accent-main));
+    box-shadow: var(--shadow-3);
 }
 
 
-/* Expander background */
+/* Expander (Accordion) Styling (Glassmorphism) */
 .streamlit-expanderHeader {
-    background-color: var(--secondary-bg-light);
-    color: var(--text-primary-light);
-    border-radius: 0.75rem;
-    padding: 0.9rem 1.2rem;
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(calc(var(--glass-blur) / 2)); /* Less blur for header */
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) / 2));
+    color: var(--color-text-primary-light);
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
     font-weight: 600;
-    border: 1px solid var(--border-color-light);
-    box-shadow: var(--shadow-md-light);
-    transition: all var(--transition-speed) var(--transition-ease);
+    border: 1px solid var(--glass-border-light);
+    box-shadow: var(--shadow-2);
+    transition: all var(--transition-duration) var(--transition-ease);
     cursor: pointer;
+    margin-bottom: 0.5rem; /* Space between header and content when closed */
 }
 
 body.dark-mode .streamlit-expanderHeader {
-    background-color: var(--secondary-bg-dark);
-    color: var(--text-primary-dark);
-    border: 1px solid var(--border-color-dark);
-    box-shadow: var(--shadow-md-dark);
+    background: var(--glass-bg-dark);
+    border: 1px solid var(--glass-border-dark);
+    box-shadow: var(--shadow-2);
+    color: var(--color-text-primary-dark);
 }
 
 .streamlit-expanderHeader:hover {
-    background-color: var(--primary-bg-light); /* Slightly change background on hover */
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg-light);
+    background: var(--color-accent-fade); /* Hint of accent color */
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-3);
+    border-color: var(--color-accent-main); /* Accent border on hover */
 }
 
 body.dark-mode .streamlit-expanderHeader:hover {
-    background-color: var(--primary-bg-dark);
-    box-shadow: var(--shadow-lg-dark);
+    background: var(--color-accent-fade);
+    border-color: var(--color-accent-light);
 }
 
 .streamlit-expanderContent {
-    background-color: var(--secondary-bg-light); /* Match card background for cohesive look */
-    color: var(--text-primary-light);
-    border: 1px solid var(--border-color-light);
-    border-top: none;
-    border-bottom-left-radius: 0.75rem;
-    border-bottom-right-radius: 0.75rem;
-    padding: 1.5rem;
-    margin-top: -0.5rem;
-    box-shadow: var(--shadow-sm-light); /* Subtle shadow for content */
-    border-top: 2px solid var(--accent-color); /* Accent line for content */
+    background-color: var(--color-bg-secondary-light); /* Solid background for content */
+    color: var(--color-text-primary-light);
+    border: 1px solid var(--color-border-light);
+    border-top: none; /* Connects visually to header */
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    padding: 2rem;
+    margin-top: -0.5rem; /* Overlap with header */
+    box-shadow: var(--shadow-1); /* Subtle shadow for content */
+    animation: fadeIn 0.6s var(--transition-ease) forwards; /* Fade in content */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 body.dark-mode .streamlit-expanderContent {
-    background-color: var(--secondary-bg-dark);
-    color: var(--text-primary-dark);
-    border: 1px solid var(--border-color-dark);
-    box-shadow: var(--shadow-sm-dark);
+    background-color: var(--color-bg-secondary-dark);
+    color: var(--color-text-primary-dark);
+    border: 1px solid var(--color-border-dark);
+    box-shadow: var(--shadow-1);
 }
-
 
 /* Info/Success/Warning/Error boxes (Alerts) */
 .stAlert {
-    border-radius: 0.75rem;
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 1.5rem;
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
     font-weight: 500;
-    box-shadow: var(--shadow-md-light);
-    transition: all var(--transition-speed) var(--transition-ease);
-    border-left: 6px solid; /* Stronger accent border */
+    box-shadow: var(--shadow-2);
+    transition: all var(--transition-duration) var(--transition-ease);
+    border-left: 8px solid; /* Stronger accent border */
+    position: relative;
+    overflow: hidden;
 }
+
+.stAlert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease-out;
+}
+
+.stAlert:hover::before {
+    transform: translateX(0);
+}
+
 .stAlert.stInfo {
-    background-color: var(--info-bg-light);
-    color: var(--info-text-light);
-    border-color: var(--info-border-light);
+    background-color: #e3f2fd; color: #1565c0; border-color: #64b5f6;
 }
 .stAlert.stSuccess {
-    background-color: var(--success-bg-light);
-    color: var(--success-text-light);
-    border-color: var(--success-border-light);
+    background-color: #e8f5e9; color: #2e7d32; border-color: #81c784;
 }
 .stAlert.stWarning {
-    background-color: var(--warning-bg-light);
-    color: var(--warning-text-light);
-    border-color: var(--warning-border-light);
+    background-color: #fffde7; color: #ef6c00; border-color: #ffb300;
 }
 .stAlert.stError {
-    background-color: var(--error-bg-light);
-    color: var(--error-text-light);
-    border-color: var(--error-border-light);
+    background-color: #ffebee; color: #c62828; border-color: #ef9a9a;
 }
 
 body.dark-mode .stAlert.stInfo {
-    background-color: var(--info-bg-dark);
-    color: var(--info-text-dark);
-    border-color: var(--info-border-dark);
+    background-color: #0d47a1; color: #90caf9; border-color: #42a5f5;
 }
 body.dark-mode .stAlert.stSuccess {
-    background-color: var(--success-bg-dark);
-    color: var(--success-text-dark);
-    border-color: var(--success-border-dark);
+    background-color: #1b5e20; color: #a5d6a7; border-color: #81c784;
 }
 body.dark-mode .stAlert.stWarning {
-    background-color: var(--warning-bg-dark);
-    color: var(--warning-text-dark);
-    border-color: var(--warning-border-dark);
+    background-color: #ff6f00; color: #ffeb3b; border-color: #ffa726;
 }
 body.dark-mode .stAlert.stError {
-    background-color: var(--error-bg-dark);
-    color: var(--error-text-dark);
-    border-color: var(--error-border-dark);
+    background-color: #b71c1c; color: #ef9a9a; border-color: #e57373;
 }
 
 .stAlert > div > div > div > div {
@@ -475,47 +530,49 @@ body.dark-mode .stAlert.stError {
 
 /* Dataframe styling */
 .stDataFrame {
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     overflow: hidden;
-    box-shadow: var(--shadow-md-light);
-    border: 1px solid var(--border-color-light);
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    transition: all var(--transition-speed) var(--transition-ease);
+    box-shadow: var(--shadow-2);
+    border: 1px solid var(--color-border-light);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    transition: all var(--transition-duration) var(--transition-ease);
 }
 body.dark-mode .stDataFrame {
-    box-shadow: var(--shadow-md-dark);
-    border: 1px solid var(--border-color-dark);
+    box-shadow: var(--shadow-2);
+    border: 1px solid var(--color-border-dark);
 }
 
-/* Metric boxes */
+/* Metric boxes (Glassmorphism) */
 .stMetric {
-    background-color: var(--secondary-bg-light);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    border: 1px solid var(--border-color-light);
-    box-shadow: var(--shadow-md-light);
-    transition: all var(--transition-speed) var(--transition-ease);
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 1rem;
+    padding: 1.8rem;
+    border: 1px solid var(--glass-border-light);
+    box-shadow: var(--shadow-2);
+    transition: all var(--transition-duration) var(--transition-ease);
     overflow: hidden;
     position: relative;
     z-index: 1;
 }
 
 body.dark-mode .stMetric {
-    background-color: var(--secondary-bg-dark);
-    border: 1px solid var(--border-color-dark);
-    box-shadow: var(--shadow-md-dark);
+    background: var(--glass-bg-dark);
+    border: 1px solid var(--glass-border-dark);
+    box-shadow: var(--shadow-2);
 }
 
 .stMetric:hover {
-    transform: translateY(-5px); /* Stronger lift */
-    box-shadow: var(--shadow-xl-light); /* Deeper shadow */
-    border-color: var(--accent-color); /* Accent border on hover */
+    transform: translateY(-8px); /* More significant lift */
+    box-shadow: var(--shadow-3); /* Deeper shadow */
+    border-color: var(--color-accent-main); /* Accent border on hover */
 }
 
 body.dark-mode .stMetric:hover {
-    box-shadow: var(--shadow-xl-dark);
-    border-color: var(--accent-hover);
+    box-shadow: var(--shadow-3);
+    border-color: var(--color-accent-light);
 }
 
 .stMetric::before {
@@ -525,58 +582,58 @@ body.dark-mode .stMetric:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.05), rgba(74, 144, 226, 0));
-    transition: all var(--transition-speed) var(--transition-ease);
+    background: linear-gradient(135deg, rgba(66, 133, 244, 0.08), rgba(66, 133, 244, 0));
+    transition: all var(--transition-duration) var(--transition-ease);
     z-index: -1;
     opacity: 0;
 }
 
 .stMetric:hover::before {
     opacity: 1;
+    transform: scale(1.1);
 }
-
 
 /* Radio buttons and checkboxes */
 .stRadio div[role="radiogroup"] label, .stCheckbox label {
-    padding: 0.6rem 0;
-    color: var(--text-primary-light);
+    padding: 0.8rem 0;
+    color: var(--color-text-primary-light);
     font-weight: 500;
+    transition: color var(--transition-duration) var(--transition-ease);
 }
 body.dark-mode .stRadio div[role="radiogroup"] label, body.dark-mode .stCheckbox label {
-    color: var(--text-primary-dark);
+    color: var(--color-text-primary-dark);
 }
 
-/* --- Utility Classes / Custom Components --- */
-
-/* Horizontal Divider with subtle gradient */
-.stHorizontalDivider {
-    border: none;
-    border-top: 1px dashed var(--border-color-light);
-    margin: 2rem 0;
-    background: linear-gradient(to right, transparent, var(--border-color-light), transparent);
-    height: 1px;
-}
-body.dark-mode .stHorizontalDivider {
-    border-top: 1px dashed var(--border-color-dark);
-    background: linear-gradient(to right, transparent, var(--border-color-dark), transparent);
+/* Custom progress bar */
+.stProgress > div > div {
+    background-color: var(--color-border-light) !important;
+    height: 10px !important;
+    border-radius: 5px !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-inset);
 }
 
-/* Custom Loader/Spinner (can be used with st.spinner) */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--color-accent-light), var(--color-accent-main), var(--color-accent-dark)) !important;
+    animation: progressFill 2s infinite linear;
+    border-radius: 5px !important;
+}
+
+@keyframes progressFill {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Custom Loader/Spinner */
 .stSpinner > div > div {
-    border-top-color: var(--accent-color) !important;
-    border-left-color: var(--accent-color) !important;
+    border-top-color: var(--color-accent-main) !important;
+    border-left-color: var(--color-accent-main) !important;
     animation: spin 1s linear infinite, pulse 1.5s ease-in-out infinite alternate;
+    width: 60px !important; /* Larger spinner */
+    height: 60px !important;
+    border-width: 6px !important; /* Thicker spinner */
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.8); opacity: 0.7; }
-    100% { transform: scale(1.0); opacity: 1; }
-}
 
 /* --- Rules to Hide Streamlit Elements (No Change, just included for completeness) --- */
 
@@ -591,7 +648,7 @@ header {
     padding: 0px;
 }
 
-.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir {
+.css-1jc7ptx, .e1ewe7hr3, .e1ewe7hr1, .css-1dp5vir { /* Common hamburger classes */
     visibility: hidden;
     display: none;
 }
@@ -609,5 +666,5 @@ footer {
 
 /* Adjust main content padding to remove any leftover space if needed */
 .main .block-container {
-    padding-top: 1.5rem;
+    padding-top: 2rem;
 }
