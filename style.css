@@ -417,6 +417,7 @@ html[data-theme="dark"] h6 {
   margin-top: 8px;
   width: 100%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 187, 255, 0.2); /* Light blue shadow */
   transition: all 0.3s ease;
 }
 
