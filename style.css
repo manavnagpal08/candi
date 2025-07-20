@@ -408,52 +408,44 @@ html[data-theme="dark"] h6 {
 
 /* Form Elements Styling */
 
-/* Selectbox styling */
-.stSelectbox > div > div {
-    border-radius: 18px;
-    border: 1px solid var(--input-border);
-    transition: all 0.4s ease;
-    cursor: pointer;
-    padding: 0.8rem 1.2rem;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
-    /* Changed background to light blue */
-    background: rgba(0, 206, 201, 0.1) !important;
-    /* Ensure text color is dark for direct children */
-    color: #333333 !important;
-    position: relative; /* Added for z-index context */
-    z-index: 1; /* Added to ensure it's above other potential elements */
+/* Dropdown container styling */
+.dropdown-container {
+  background: #e6fafa; /* Light blue background */
+  border: 1px solid #c8e6e6; /* Soft border */
+  border-radius: 25px;
+  padding: 10px 20px;
+  margin-top: 8px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-.stSelectbox > div > div:hover {
-    border-color: #00cec9;
-    box-shadow: 0 0 0 4px rgba(0, 206, 201, 0.4);
+/* Select box styling */
+select {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+  color: #1a1a1a;
+  appearance: none; /* Removes default arrow on some browsers */
 }
 
-/* Removed dark mode specific selectbox hover styles */
-/* html[data-theme="dark"] .stSelectbox > div > div:hover {
-    border-color: #00e0db;
-    box-shadow: 0 0 0 4px rgba(0, 224, 219, 0.5);
-} */
-
-.stSelectbox > div > div:focus-within {
-    border-color: #00cec9;
-    box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
-    outline: none;
+/* Dropdown arrow */
+select::-ms-expand {
+  display: none;
 }
 
-/* Removed dark mode specific selectbox focus styles */
-/* html[data-theme="dark"] .stSelectbox > div > div:focus-within {
-    border-color: #00e0db;
-    box-shadow: 0 0 0 5px rgba(0, 224, 219, 0.7);
-} */
-
-.stSelectbox > label {
-    font-weight: 600;
-    margin-bottom: 0.7rem;
-    display: block;
-    font-size: 1.1rem;
-    color: var(--text-color); /* Ensure label color changes with theme */
+.dropdown-container:focus-within {
+  box-shadow: 0 0 0 2px #b3ebeb;
 }
+
+/* Label text */
+.label-text {
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
 
 /* FIX: Explicit text color for the selected value in the selectbox input */
 /* This targets the span that holds the selected value in the display box */
