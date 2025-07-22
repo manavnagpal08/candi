@@ -1853,45 +1853,77 @@ def extract_text_from_file(file_bytes, file_name, file_type):
     return full_text
 
 
-def extract_years_of_experience(text):
-    text = text.lower()
-    total_months = 0
-    
-    for pattern in EXP_DATE_PATTERNS: # Use pre-compiled patterns
-        job_date_ranges = pattern.findall(text)
-        for start_str, end_str in job_date_ranges:
-            start_date = None
-            end_date = None
+def extract_years_of_experience(resume_text):
+    def remove_education_section(text):
+        lines = text.lower().splitlines()
+        filtered = []
+        inside_education = False
+        for line in lines:
+            if any(keyword in line for keyword in [
+                "education", "b.tech", "btech", "class x", "class xii", "school",
+                "higher secondary", "cgpa", "percentage"
+            ]):
+                inside_education = True
+            elif inside_education and line.strip() == "":
+                inside_education = False
+            if not inside_education:
+                filtered.append(line)
+        return "\n".join(filtered)
 
+    def normalize_date_str(date_str):
+        return re.sub(r'[,\.\s]+', ' ', date_str.strip().lower()).title()
+
+    text = remove_education_section(resume_text)
+    text = re.sub(r'[\:\,\–—]+', ' - ', text)  # Normalize all symbols to hyphen
+
+    total_months = 0
+    now = datetime.now()
+
+    date_patterns = [
+        r'(\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4})\s*[-to]+\s*(present|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4})',
+        r'(\b\d{4})\s*[-to]+\s*(present|\b\d{4})'
+    ]
+
+    for pattern in date_patterns:
+        job_date_ranges = re.findall(pattern, text)
+        for start_str, end_str in job_date_ranges:
+            start_str = normalize_date_str(start_str)
+            end_str = normalize_date_str(end_str)
+
+            # Parse start date
             try:
-                start_date = datetime.strptime(start_str.strip(), '%B %Y')
-            except ValueError:
+                start_date = datetime.strptime(start_str, '%B %Y')
+            except:
                 try:
-                    start_date = datetime.strptime(start_str.strip(), '%b %Y')
-                except ValueError:
+                    start_date = datetime.strptime(start_str, '%b %Y')
+                except:
                     try:
                         start_date = datetime(int(start_str.strip()), 1, 1)
-                    except ValueError:
-                        pass
+                    except:
+                        continue
 
-            if start_date is None:
+            if not start_date or start_date > now:
                 continue
 
-            if end_str.strip() == 'present':
-                end_date = datetime.now()
+            # Parse end date
+            if 'present' in end_str.lower():
+                end_date = now
             else:
                 try:
-                    end_date = datetime.strptime(end_str.strip(), '%B %Y')
-                except ValueError:
+                    end_date = datetime.strptime(end_str, '%B %Y')
+                except:
                     try:
-                        end_date = datetime.strptime(end_str.strip(), '%b %Y')
-                    except ValueError:
+                        end_date = datetime.strptime(end_str, '%b %Y')
+                    except:
                         try:
                             end_date = datetime(int(end_str.strip()), 12, 31)
-                        except ValueError:
-                            pass
-            
-            if end_date is None:
+                        except:
+                            continue
+
+                if end_date > now:
+                    end_date = now
+
+            if not end_date:
                 continue
 
             delta_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
@@ -1899,12 +1931,13 @@ def extract_years_of_experience(text):
 
     if total_months > 0:
         return round(total_months / 12, 1)
-    else:
-        match = EXP_YEARS_PATTERN.search(text) # Use pre-compiled pattern
-        if not match:
-            match = EXP_FALLBACK_PATTERN.search(text) # Use pre-compiled pattern
-        if match:
-            return float(match.group(1))
+
+    # Fallback: textual pattern like "3 years of experience"
+    match = re.search(r'(\d+(?:\.\d+)?)\s*(\+)?\s*(year|yrs|years)\b', text)
+    if not match:
+        match = re.search(r'experience[^\d]{0,10}(\d+(?:\.\d+)?)', text)
+    if match:
+        return float(match.group(1))
 
     return 0.0
 
@@ -1931,29 +1964,55 @@ def extract_location(text):
         return ", ".join(sorted(list(found_locations)))
     return "Not Found"
 
+
+
 def extract_name(text):
-    lines = text.strip().split('\n')
+    lines = text.strip().splitlines()
     if not lines:
         return None
 
-    potential_name_lines = []
-    for line in lines[:5]:
-        line = line.strip()
-        line_lower = line.lower()
+    # 🚫 Terms that should NOT be considered part of a name line
+    EXCLUDE_TERMS = {
+        "email", "e-mail", "phone", "mobile", "contact", "linkedin", "github",
+        "portfolio", "website", "profile", "summary", "objective", "education",
+        "skills", "projects", "certifications", "achievements", "experience",
+        "dob", "date of birth", "address", "resume", "cv", "career", "gender",
+        "marital", "nationality", "languages", "language"
+    }
 
-        if not re.search(r'[@\d\.\-]', line) and \
-           len(line.split()) <= 4 and \
-           not any(term in line_lower for term in NAME_EXCLUDE_TERMS): # Use pre-defined set
-            if line.isupper() or (line and line[0].isupper() and all(word[0].isupper() or not word.isalpha() for word in line.split())):
-                potential_name_lines.append(line)
+    # 🔠 Common prefixes before names to remove
+    PREFIX_CLEANER = re.compile(r"^(name[\s:\-]*|mr\.?|ms\.?|mrs\.?)", re.IGNORECASE)
 
-    if potential_name_lines:
-        name = max(potential_name_lines, key=len)
-        name = re.sub(r'summary|education|experience|skills|projects|certifications|profile|contact', '', name, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^[^\w\s]+|[^\w\s]+$', '', name).strip()
-        if name:
-            return name.title()
+    potential_names = []
+
+    for line in lines[:10]:  # 🔍 Only scan top 10 lines
+        original_line = line.strip()
+        if not original_line:
+            continue
+
+        # Remove known prefixes (e.g., "Name: John Doe")
+        cleaned_line = PREFIX_CLEANER.sub('', original_line).strip()
+
+        # Remove special characters, digits, commas, etc.
+        cleaned_line = re.sub(r'[^A-Za-z\s]', '', cleaned_line)
+
+        # Skip if contains any noise terms
+        if any(term in cleaned_line.lower() for term in EXCLUDE_TERMS):
+            continue
+
+        words = cleaned_line.split()
+
+        # Must be 2–4 words, all alphabetic, and properly cased
+        if 1 < len(words) <= 4 and all(w.isalpha() for w in words):
+            if all(w.istitle() or w.isupper() for w in words):
+                potential_names.append(cleaned_line)
+
+    # Return longest valid name found
+    if potential_names:
+        return max(potential_names, key=len).title()
+
     return None
+
 
 def extract_cgpa(text):
     text = text.lower()
