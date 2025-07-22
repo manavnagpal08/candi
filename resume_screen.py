@@ -2039,13 +2039,25 @@ def extract_cgpa(text):
         
     return None
 
+import re
+
+# Patterns to match degrees and institutions
+EDU_MATCH_PATTERN = re.compile(
+    r"(b\.?tech|bachelor|be|b\.e\.|m\.?tech|master|mca|mba)[^\n]{0,100}?(university|college|institute)[^\n]{0,100}?(20\d{2})(?!\d)",
+    re.IGNORECASE
+)
+
+# Fallback pattern: year + degree without university
+EDU_FALLBACK_PATTERN = re.compile(
+    r"(b\.?tech|bachelor|be|b\.e\.|m\.?tech|master|mca|mba)[^\n]{0,100}?(20\d{2})(?!\d)",
+    re.IGNORECASE
+)
+
 def extract_education_text(text):
     """
-    Extracts a single-line education entry from resume text.
-    Returns a clean string like: "B.Tech in CSE, Alliance University, Bangalore – 2028"
-    Works with or without 'Expected' in the year.
+    Extract a clean single-line education summary from resume.
+    E.g., "B.Tech in CSE, Alliance University, Bangalore – 2028"
     """
-
     text = text.replace('\r', '').replace('\t', ' ')
     lines = text.split('\n')
     lines = [line.strip() for line in lines if line.strip()]
@@ -2065,17 +2077,20 @@ def extract_education_text(text):
 
     education_section = education_section.strip()
 
-    edu_match = EDU_MATCH_PATTERN.search(education_section) # Use pre-compiled pattern
-
+    # Try matching full pattern: degree + college + year
+    edu_match = EDU_MATCH_PATTERN.search(education_section)
     if edu_match:
-        return edu_match.group(1).strip()
+        return ' '.join(edu_match.groups()).strip()
 
-    fallback_match = EDU_FALLBACK_PATTERN.search(education_section) # Use pre-compiled pattern
+    # Try fallback: degree + year
+    fallback_match = EDU_FALLBACK_PATTERN.search(education_section)
     if fallback_match:
-        return fallback_match.group(1).strip()
+        return ' '.join(fallback_match.groups()).strip()
 
+    # Fallback to first line in section
     fallback_line = education_section.split('.')[0].strip()
     return fallback_line if fallback_line else None
+
 
 def extract_work_history(text):
     work_history_section_matches = WORK_HISTORY_SECTION_PATTERN.finditer(text) # Use pre-compiled pattern
