@@ -712,6 +712,7 @@ def main():
 
     # --- Permanent Sidebar Content (Always Visible) ---
     with st.sidebar:
+        st.info("💡 You can collapse or expand the sidebar by clicking the arrow icon in the top-left corner of the page.")
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
         logo_path = "logo.png"  # Assuming logo is in the same directory
 
