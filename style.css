@@ -1,994 +1,776 @@
-/* Base Imports & Global Resets */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+import streamlit as st
+import json
+import os
+import re # Import regex for email validation
+import pandas as pd # Ensure pandas is imported for DataFrame display
+import requests # Import requests for HTTP calls to Firebase REST API
+import base64
+import random # Import random for quotes
 
-/* Hide GitHub fork button, Streamlit menu and footer */
-#MainMenu {
-    visibility: hidden;
-}
+# Import your page functions from separate files (assuming these are separate Python files)
+# Make sure these files (e.g., certificate_verify.py, resume_screen.py) are also in your GitHub repo
+from pages.certificate_verify import certificate_verifier_page
+from resume_screen import resume_screener_page
+from top_leaderboard import leaderboard_page
+from about_us import about_us_page
+from feedback_form import feedback_and_help_page
+from total_screened_page import total_screened_page
+from generate_fake_data import generate_fake_data_page
 
-footer {
-    visibility: hidden;
-}
+# --- Firebase Configuration (for deployment via GitHub/Streamlit Cloud) ---
+# These values should be stored directly at the top level of your .streamlit/secrets.toml file
+# Example .streamlit/secrets.toml:
+# FIREBASE_API_KEY = "YOUR_FIREBASE_API_KEY"
+# FIREBASE_PROJECT_ID = "YOUR_FIREBASE_PROJECT_ID"
+# FIREBASE_APP_ID = "YOUR_APP_ID_FOR_FIRESTORE_PATH" # Use a consistent ID for your app's data in Firestore
 
-/* Global body and HTML styling */
-html,
-body,
-[class*="css"] {
-    font-family: 'Inter', sans-serif;
-    /* Background and color will be set dynamically by Streamlit based on dark_mode toggle */
-    transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-}
+# Get Firebase API Key and Project ID directly from Streamlit Secrets
+FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
+FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
+APP_ID = st.secrets.get('FIREBASE_APP_ID', 'your-default-app-id') # Use a default if not provided
 
-/* Light mode default colors (now the only active theme) */
-html {
-    --background-color: #f0f2f6;
-    --text-color: #333333;
-    --card-background: rgba(255,255,255,0.98);
-    --border-color-light: rgba(0, 0, 0, 0.08);
-    --shadow-light: 0 30px 70px rgba(0, 0, 0, 0.15);
-    --input-background: rgba(255,255,255,0.9);
-    --input-border: rgba(0, 0, 0, 0.15);
-}
+# Validate that API Key and Project ID are available
+if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
+    st.error("Firebase API Key or Project ID not found. Please ensure they are configured directly at the top level of your .streamlit/secrets.toml file with correct capitalization (FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIREBASE_APP_ID).")
+    st.stop() # Stop the app if essential keys are missing
 
-/* Apply global theme variables */
-html, body, [class*="css"] {
-    background-color: var(--background-color);
-    color: var(--text-color);
-}
+# Firebase Authentication REST API Endpoints
+AUTH_SIGNUP_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
+AUTH_SIGNIN_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
 
+# Firestore REST API Base URL for documents
+# This path uses the APP_ID from secrets to maintain the structure
+FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
-/* Custom scrollbar for a cleaner look */
-::-webkit-scrollbar {
-    width: 12px;
-}
+# --- CSS Loading and Body Class Functions ---
+def load_css(file_name="style.css"):
+    """
+    Loads a CSS file from the same directory as the app.py.
+    Also ensures Font Awesome is loaded for icons.
+    """
+    try:
+        current_dir = os.path.dirname(__file__)
+        css_file_path = os.path.join(current_dir, file_name)
+        with open(css_file_path) as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.error(f"Error: '{file_name}' not found. Please ensure it's in the same directory as app.py.")
 
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.15); /* Darker track for better contrast */
-    border-radius: 10px;
-}
+    # Ensure Font Awesome is loaded for icons if you use them (e.g., in buttons)
+    st.markdown(
+        '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">',
+        unsafe_allow_html=True
+    )
 
-::-webkit-scrollbar-thumb {
-    background: #00cec9; /* Teal thumb */
-    border-radius: 10px;
-    border: 3px solid transparent; /* Creates more padding effect */
-    background-clip: padding-box;
-    transition: background 0.4s ease;
-}
+def set_body_class():
+    """
+    Sets a class on the body element to force light mode styling.
+    """
+    # Force light mode regardless of Streamlit's theme option
+    body_class = "light-mode"
+    js_code = f"""
+    <script>
+        var body = window.parent.document.querySelector('body');
+        if (body) {{
+            body.className = ''; // Clear existing classes
+            body.classList.add('{body_class}'); // Add the light mode class
+            // Always set data-theme to 'light'
+            body.setAttribute('data-theme', 'light');
+        }}
+    </script>
+    """
+    st.markdown(js_code, unsafe_allow_html=True)
 
-::-webkit-scrollbar-thumb:hover {
-    background: #00b0a8; /* Darker teal on hover */
-}
+# --- Firebase REST API Helper Functions ---
 
-/* Main content block container */
-.main .block-container {
-    padding: 4rem;
-    border-radius: 35px;
-    background: var(--card-background);
-    box-shadow: var(--shadow-light);
-    animation: fadeInScaleBounce 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    transition: background 0.7s ease-in-out, box-shadow 0.7s ease-in-out, border 0.7s ease-in-out;
-    border: 1px solid var(--border-color-light);
-    margin-bottom: 3.5rem;
-    overflow: hidden;
-}
+def get_firestore_doc_url(uid):
+    """Constructs the Firestore document URL for a given UID."""
+    return f"{FIRESTORE_BASE_URL}/{uid}"
 
-/* Header (h1-h6) styling */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: #00cec9;
-    font-weight: 800;
-    letter-spacing: -0.05em;
-    line-height: 1.1;
-    margin-bottom: 1em;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
+def get_user_profile_from_firestore(uid, id_token):
+    """Fetches user profile data from Firestore using UID and ID Token."""
+    url = get_firestore_doc_url(uid)
+    headers = {"Authorization": f"Bearer {id_token}"}
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+        if 'fields' in data:
+            # Firestore returns fields as {"fieldName": {"valueType": "value"}}
+            profile = {}
+            for key, value_obj in data['fields'].items():
+                if 'stringValue' in value_obj:
+                    profile[key] = value_obj['stringValue']
+                elif 'booleanValue' in value_obj:
+                    profile[key] = value_obj['booleanValue']
+                # Add other types as needed (e.g., integerValue, arrayValue)
+            return profile
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching user profile from Firestore: {e}")
+        print(f"Firestore Fetch Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
+        return None
 
-/* Dashboard specific header */
-.dashboard-header {
-    font-size: 4rem;
-    font-weight: 900;
-    padding-bottom: 1.5rem;
-    border-bottom: 8px solid #00cec9;
-    display: inline-block;
-    margin-bottom: 4rem;
-    animation: slideInLeftFadeBounce 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    position: relative;
-    overflow: hidden;
-}
-
-@keyframes slideInLeftFadeBounce {
-    0% {
-        transform: translateX(-100px);
-        opacity: 0;
+def set_user_profile_in_firestore(uid, id_token, profile_data):
+    """Sets/updates user profile data in Firestore."""
+    url = get_firestore_doc_url(uid)
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {id_token}"
     }
-    60% {
-        transform: translateX(10px); /* Overshoot for bounce effect */
-        opacity: 1;
+    # Convert Python dict to Firestore's expected JSON structure
+    fields = {}
+    for key, value in profile_data.items():
+        if isinstance(value, str):
+            fields[key] = {"stringValue": value}
+        elif isinstance(value, bool):
+            fields[key] = {"booleanValue": value}
+        # Add other types as needed
+    payload = {"fields": fields}
+
+    try:
+        response = requests.patch(url, headers=headers, json=payload) # Use PATCH for update, PUT for replace
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error setting user profile in Firestore: {e}")
+        print(f"Firestore Set Error Response: {response.text if 'response' in locals() else 'No response object'}") # Added for debugging
+        return False
+
+# --- Authentication and User Management Functions ---
+
+def is_valid_email(email):
+    """Basic validation for email format."""
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+def register_user_firebase(email, password, company_name):
+    """Registers a new user with Firebase Auth and stores profile in Firestore."""
+    payload = json.dumps({
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    })
+    try:
+        response = requests.post(AUTH_SIGNUP_URL, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        id_token = data['idToken']
+        uid = data['localId']
+
+        # Store additional profile data in Firestore
+        profile_data = {
+            "email": email,
+            "company": company_name,
+            "status": "active"
+        }
+        if set_user_profile_in_firestore(uid, id_token, profile_data):
+            return {"success": True, "idToken": id_token, "uid": uid, "email": email, "company": company_name, "status": "active"}
+        else:
+            return {"success": False, "message": "Failed to save user profile to Firestore."}
+    except requests.exceptions.RequestException as e:
+        error_message = "Registration failed."
+        if 'response' in locals(): # Check if response object exists
+            error_data = response.json()
+            print(f"Firebase Auth Registration Error Response: {error_data}") # Added for debugging
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Registration failed: {error_data['error']['message']}"
+        st.error(error_message)
+        return {"success": False, "message": error_message}
+
+def sign_in_user_firebase(email, password):
+    """Signs in a user with Firebase Auth and fetches profile from Firestore."""
+    payload = json.dumps({
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    })
+    try:
+        response = requests.post(AUTH_SIGNIN_URL, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        id_token = data['idToken']
+        uid = data['localId']
+
+        user_profile = get_user_profile_from_firestore(uid, id_token)
+        if user_profile:
+            if user_profile.get("status") == "disabled":
+                st.error("❌ Your account has been disabled. Please contact an administrator.")
+                return {"success": False, "message": "Account disabled."}
+            return {"success": True, "idToken": id_token, "uid": uid, "email": email, "company": user_profile.get("company", "N/A"), "status": user_profile.get("status", "active")}
+        else:
+            st.warning("User profile not found in Firestore. Please contact support.")
+            return {"success": False, "message": "User profile not found."}
+    except requests.exceptions.RequestException as e:
+        error_message = "Login failed."
+        if 'response' in locals(): # Check if response object exists
+            error_data = response.json()
+            print(f"Firebase Auth Sign-in Error Response: {error_data}") # Added for debugging
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Login failed: {error_data['error']['message']}"
+        st.error(error_message)
+        return {"success": False, "message": error_message}
+
+def send_password_reset_email_firebase(email):
+    """Sends a password reset email via Firebase Auth REST API."""
+    payload = json.dumps({
+        "requestType": "PASSWORD_RESET",
+        "email": email
+    })
+    try:
+        response = requests.post(AUTH_RESET_PASSWORD_URL, data=payload)
+        response.raise_for_status()
+        st.success(f"✅ Password reset email sent to {email}. Please check your inbox.")
+        return True
+    except requests.exceptions.RequestException as e:
+        error_message = "Failed to send password reset email."
+        if 'response' in locals(): # Check if response object exists
+            error_data = response.json()
+            print(f"Firebase Auth Reset Password Error Response: {error_data}") # Added for debugging
+            if "error" in error_data and "message" in error_data["error"]:
+                error_message = f"Failed to send password reset email: {error_data['error']['message']}"
+        st.error(error_message)
+        return False
+
+def register_section():
+    """Public self-registration form."""
+    st.subheader("📝 Create New Account")
+    with st.form("registration_form", clear_on_submit=True):
+        new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
+        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public") # New field
+        new_password = st.text_input("Choose Password", type="password", key="new_password_reg_public")
+        confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password_reg_public")
+        register_button = st.form_submit_button("Register New Account")
+
+        if register_button:
+            if not new_username or not new_password or not confirm_password or not new_company_name:
+                st.error("Please fill in all fields.")
+            elif not is_valid_email(new_username): # Email format validation
+                st.error("Please enter a valid email address for the username.")
+            elif new_password != confirm_password:
+                st.error("Passwords do not match.")
+            else:
+                # Attempt to register with Firebase Auth
+                result = register_user_firebase(new_username, new_password, new_company_name)
+                if result["success"]:
+                    st.success("✅ Registration successful! You are now logged in.")
+                    # Automatically log in the user
+                    st.session_state.authenticated = True
+                    st.session_state.username = result["email"]
+                    st.session_state.user_company = result["company"]
+                    st.session_state.user_uid = result["uid"] # Store UID
+                    st.session_state.id_token = result["idToken"] # Store ID Token
+                    st.session_state.current_page = "welcome_dashboard" # Redirect
+                    st.rerun()
+                # Error message is handled within register_user_firebase
+
+
+def login_section():
+    """Handles user login and public registration."""
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if "username" not in st.session_state:
+        st.session_state.username = None
+    if "user_company" not in st.session_state:
+        st.session_state.user_company = None
+    if "user_uid" not in st.session_state: # Store Firebase UID
+        st.session_state.user_uid = None
+    if "id_token" not in st.session_state: # Store Firebase ID Token
+        st.session_state.id_token = None
+
+    # Initialize active_login_tab_selection if not present
+    if "active_login_tab_selection" not in st.session_state:
+        st.session_state.active_login_tab_selection = "Login" # Default to Login
+
+    if st.session_state.authenticated:
+        return True
+
+    tab_selection = st.radio(
+        "Select an option:",
+        ("Login", "Register"),
+        key="login_register_radio",
+        index=0 if st.session_state.active_login_tab_selection == "Login" else 1
+    )
+
+    if tab_selection == "Login":
+        st.subheader("🔐 HR Login")
+        st.info("If you don't have an account, please go to the 'Register' option first.")
+        with st.form("login_form", clear_on_submit=False):
+            username = st.text_input("Username (Email)", key="username_login")
+            password = st.text_input("Password", type="password", key="password_login")
+            submitted = st.form_submit_button("Login")
+
+            if submitted:
+                if not username or not password:
+                    st.error("Please enter both username and password.")
+                else:
+                    result = sign_in_user_firebase(username, password)
+                    if result["success"]:
+                        st.success("✅ Login successful!")
+                        st.session_state.authenticated = True
+                        st.session_state.username = result["email"]
+                        st.session_state.user_company = result["company"]
+                        st.session_state.user_uid = result["uid"]
+                        st.session_state.id_token = result["idToken"]
+                        st.session_state.current_page = "welcome_dashboard"
+                        st.rerun()
+                    # Error message is handled within sign_in_user_firebase
+    elif tab_selection == "Register":
+        register_section()
+
+    return st.session_state.authenticated
+
+def logout_page():
+    st.title("👋 Logging Out...")
+    st.write("You are about to be logged out. Thank you for using ScreenerPro!")
+    if st.button("Confirm Logout"):
+        st.session_state.authenticated = False
+        st.session_state.pop('username', None)
+        st.session_state.pop('user_company', None)
+        st.session_state.pop('user_uid', None)
+        st.session_state.pop('id_token', None)
+        st.session_state.pop('current_quote', None) # Clear the quote on logout
+        st.session_state.active_login_tab_selection = "Login" # Reset to login tab
+        st.rerun()
+    st.info("You will be redirected to the login page shortly if you don't confirm.")
+
+# List of quotes for the welcome message
+QUOTES = [
+    "The only way to do great work is to love what you do. – Steve Jobs",
+    "Believe you can and you're halfway there. – Theodore Roosevelt",
+    "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts. – Winston Churchill",
+    "The best way to predict the future is to create it. – Peter Drucker",
+    "Innovation distinguishes between a leader and a follower. – Steve Jobs",
+    "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. – Steve Jobs",
+    "The mind is everything. What you think you become. – Buddha",
+    "Strive not to be a success, but rather to be of value. – Albert Einstein",
+    "The journey of a thousand miles begins with a single step. – Lao Tzu"
+]
+
+def display_welcome_dashboard():
+    """Displays the welcome message and a random quote."""
+    # Select a new quote if not already in session state
+    if "current_quote" not in st.session_state:
+        st.session_state.current_quote = random.choice(QUOTES)
+
+    st.markdown(
+        f"""
+        <style>
+            @keyframes fadeInScale {{
+                from {{ opacity: 0; transform: scale(0.9); }}
+                to {{ opacity: 1; transform; scale(1); }}
+            }}
+
+            .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%); /* Soft gradient background */
+                border-radius: 12px; /* More rounded corners */
+                padding: 30px;
+                margin-bottom: 25px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Deeper, softer shadow */
+                text-align: center;
+                animation: fadeInScale 0.7s ease-out forwards; /* Apply animation */
+                position: relative; /* For the sparkle effect */
+                overflow: hidden; /* To contain the sparkle */
+            }}
+
+            .beautiful-greeting-card::before {{
+                content: '✨'; /* Add a subtle sparkle effect */
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+            .beautiful-greeting-card::after {{
+                content: '🌟'; /* Another sparkle */
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                font-size: 2em;
+                opacity: 0.2;
+                pointer-events: none;
+            }}
+
+            .beautiful-greeting-title {{
+                font-size: 2.2em; /* Larger title */
+                font-weight: 700; /* Bolder */
+                color: #2c3e50; /* Darker, more prominent color */
+                margin-bottom: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
+            }}
+
+            .beautiful-username {{
+                color: #3498db; /* Vibrant blue for username */
+                font-weight: 800; /* Extra bold */
+            }}
+
+            .beautiful-welcome-text {{
+                font-size: 1.15em; /* Slightly larger body text */
+                color: #555555; /* Softer text color */
+                line-height: 1.6;
+                margin-top: 15px;
+            }}
+            .beautiful-quote {{
+                font-style: italic;
+                color: #666;
+                margin-top: 20px;
+                font-size: 1.05em;
+            }}
+
+            .beautiful-emoji {{
+                font-size: 1.6em; /* Larger, more impactful emojis */
+                vertical-align: middle;
+                margin: 0 5px;
+            }}
+            /* Dark mode adjustments for the greeting card */
+            html[data-theme="dark"] .beautiful-greeting-card {{
+                background: linear-gradient(135deg, #2c2c44 0%, #3a3a50 100%);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            }}
+            html[data-theme="dark"] .beautiful-greeting-title {{
+                color: #e0e0e0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }}
+            html[data-theme="dark"] .beautiful-username {{
+                color: #6fa8f7; /* Lighter blue for dark mode */
+            }}
+            html[data-theme="dark"] .beautiful-welcome-text {{
+                color: #a0a0a0;
+            }}
+            html[data-theme="dark"] .beautiful-quote {{
+                color: #b0b0b0;
+            }}
+        </style>
+
+        <div class="beautiful-greeting-card">
+            <h1 class="beautiful-greeting-title">
+                Welcome, <span class="beautiful-username">{st.session_state.username}</span>!
+            </h1>
+            <p class="beautiful-welcome-text">
+                <span class="beautiful-emoji">👋</span> We're absolutely thrilled to have you here!
+                Your journey with us officially begins now. <span class="beautiful-emoji">🚀</span>
+                Get ready to explore! <span class="beautiful-emoji">🎉</span>
+            </p>
+            <p class="beautiful-quote">
+                "{st.session_state.current_quote}"
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# --- Main Application Logic ---
+
+def main():
+    # Set initial page config. We will override theme later.
+    st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
+
+    # Force theme to light mode
+    st.session_state.theme = "light"
+    # Streamlit's internal theme option should also be set to light
+    st._config.set_option("theme.base", "light")
+
+
+    # Load the external CSS file
+    load_css("style.css")
+
+    # Set the body class based on the current theme (which is now forced to light)
+    set_body_class()
+
+    # CSS for hiding specific Streamlit elements globally and ensuring sidebar responsiveness
+    st.markdown("""
+    <style>
+    /* Ensure body and html have no default margins/paddings */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
 
-/* Greeting message animation (ENHANCED) */
-@keyframes slideInDownFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.greeting-message {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #00cec9;
-    margin-bottom: 2.5rem;
-    animation: slideInDownFadeIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    letter-spacing: -0.03em;
-}
-
-/* Metric boxes styling */
-.stMetric {
-    border-radius: 25px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(240,242,246,0.9));
-}
-
-.stMetric:hover {
-    transform: translateY(-15px) rotateX(3deg);
-    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
-    animation: metricHoverGlow 0.8s forwards;
-}
-
-@keyframes metricHoverGlow {
-    0% {
-        box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow: 0 25px 65px rgba(0, 206, 201, 0.4), 0 25px 55px rgba(0, 0, 0, 0.3);
-    }
-    100% {
-        box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
-    }
-}
-
-.stMetric > div[data-testid="stMetricValue"] {
-    font-size: 4rem;
-    font-weight: 900;
-    color: #00cec9;
-    animation: pulseValue 3s infinite alternate ease-in-out;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-@keyframes pulseValue {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1.05);
-        opacity: 0.9;
-    }
-}
-
-.stMetric > div[data-testid="stMetricLabel"] {
-    font-size: 1.4rem;
-    opacity: 0.8;
-    font-weight: 600;
-}
-
-/* Button styling - Default (inactive) */
-.stButton > button {
-    background-color: #ffffff; /* Explicit white background */
-    color: #333333; /* Explicit dark text */
-    border-radius: 9999px; /* Fully rounded pill shape */
-    padding: 0.7rem 1.2rem;
-    font-weight: 500;
-    border: 1px solid #e0e0e0; /* Very light grey border */
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    text-transform: none;
-    background-image: none; /* Ensure no radial gradient */
-    gap: 0.8rem;
-    width: 100%;
-    text-align: left;
-}
-
-.stButton > button:hover {
-    background-color: rgba(0, 206, 201, 0.1); /* Light teal hover */
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    outline: none;
-    border-color: #00cec9; /* Teal border on hover */
-}
-
-.stButton > button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 206, 201, 0.2);
-}
-
-/* Ripple effect for buttons - REMOVED */
-.stButton > button:after {
-    content: none;
-}
-.stButton > button:active:after {
-    content: none;
-}
-
-/* Expander styling */
-.stExpander {
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(255,255,255,0.95);
-}
-
-.stExpander:hover {
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-    transform: translateY(-8px);
-}
-
-.stExpander > div > div > div > p {
-    line-height: 1.9;
-    font-size: 1.05rem;
-    color: var(--text-color); /* Ensure text color changes with theme */
-}
-
-.stExpander > div[data-testid="stExpanderToggle"] {
-    color: #00cec9;
-    font-weight: 700;
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding-bottom: 0.8rem;
-}
-
-.stExpander > div[data-testid="stExpanderToggle"] svg {
-    fill: #00cec9;
-    transition: transform 0.4s ease;
-}
-
-.stExpander > div[data-testid="stExpanderToggle"][aria-expanded="true"] svg {
-    transform: rotate(90deg);
-}
-
-/* Form Elements Styling */
-
-/* Dropdown container styling */
-.dropdown-container {
-  background: #e6fafa; /* Light blue background */
-  border: 1px solid #c8e6e6; /* Soft border */
-  border-radius: 25px;
-  padding: 10px 20px;
-  margin-top: 8px;
-  width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 12px rgba(0, 187, 255, 0.2); /* Light blue shadow */
-  transition: all 0.3s ease;
-}
-
-/* Select box styling */
-select {
-  background: transparent;
-  border: none;
-  font-size: 16px;
-  width: 100%;
-  outline: none;
-  color: #1a1a1a;
-  appearance: none; /* Removes default arrow on some browsers */
-}
-
-/* Dropdown arrow */
-select::-ms-expand {
-  display: none;
-}
-
-.dropdown-container:focus-within {
-  box-shadow: 0 0 0 2px #b3ebeb;
-}
-
-/* Label text */
-.label-text {
-  font-weight: 600;
-  color: #2a2a2a;
-}
-
-
-/* FIX: Explicit text color for the selected value in the selectbox input */
-/* This targets the span that holds the selected value in the display box */
-.stSelectbox > div > div > div[data-baseweb="select"] > div > span,
-.stSelectbox > div > div > div[data-baseweb="select"] > div > div > span {
-    color: #333333 !important; /* Explicitly set to dark for visibility on light blue background */
-}
-
-/* NEW: Styling for the dropdown options of selectbox */
-/* Target the actual text within the option items (p tag) */
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] p {
-    color: #333333 !important; /* Explicitly set to a dark color for visibility */
-}
-
-/* Target the actual text within the option items (span tag, as a fallback/additional specificity) */
-div[data-baseweb="popover"] div[role="listbox"] div[role="option"] span {
-    color: #333333 !important; /* Explicitly set to a dark color for visibility */
-}
-
-/* NEW: Force text color for the input field itself within the selectbox */
-.stSelectbox input[type="text"] {
-    color: #333333 !important; /* Force dark text color for visibility on light blue background */
-    -webkit-text-fill-color: #333333 !important; /* For Safari/Chrome autocomplete */
-    background-color: transparent !important; /* Ensure no conflicting background on the input itself */
-    opacity: 1 !important; /* Ensure full visibility */
-    position: relative; /* Added for z-index context */
-    z-index: 2; /* Ensures the input text is on top */
-}
-
-/* Text input and Text area styling */
-.stTextInput > div > div > input, /* For st.text_input */
-.stTextArea > div > div { /* For st.text_area's main container */
-    border-radius: 18px;
-    border: 1px solid var(--input-border);
-    padding: 1.1rem 1.4rem;
-    transition: all 0.4s ease;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
-    background: var(--input-background);
-    /* Removed color from here as we'll target the inner textarea directly */
-    position: relative; /* Added for z-index context */
-    z-index: 1; /* Ensure the container is in a proper z-index layer */
-}
-
-.stTextInput > div > div > input, /* For st.text_input's actual input element */
-.stTextArea textarea { /* Targeting the actual textarea element within st.text_area */
-    color: #333333 !important; /* Force dark text color for visibility */
-    -webkit-text-fill-color: #333333 !important; /* For Safari/Chrome autocomplete */
-    background-color: transparent !important; /* Ensure no conflicting background */
-    opacity: 1 !important; /* Ensure full visibility */
-    position: relative; /* Added for z-index context */
-    z-index: 2; /* Ensures the text is on top of its container */
-}
-
-
-.stTextInput > div > div > input::placeholder,
-.stTextArea textarea::placeholder { /* Added for placeholder text color */
-    color: var(--text-color) !important; /* Added !important for placeholder text color */
-    opacity: 0.7; /* Make placeholder slightly transparent */
-}
-
-
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div:focus-within {
-    border-color: #00cec9;
-    box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
-    outline: none;
-}
-
-.stTextInput > div > div > input:hover,
-.stTextArea > div > div:hover {
-    border-color: #00b0a8;
-}
-
-.stTextInput > label,
-.stTextArea > label {
-    font-weight: 600;
-    margin-bottom: 0.7rem;
-    display: block;
-    font-size: 1.1rem;
-    color: var(--text-color); /* Ensure label color changes with theme */
-}
-
-/* Radio button styling */
-/* Custom styling for st.sidebar.radio to make it look like buttons */
-.stSidebar .stRadio div[role="radiogroup"] {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.stSidebar .stRadio div[role="radiogroup"] label {
-    border-radius: 20px;
-    padding: 1.2rem 1.8rem;
-    font-weight: 600;
-    border: none;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    background: var(--card-background);
-}
-
-.stSidebar .stRadio div[role="radiogroup"] label span:first-child {
-    display: none;
-}
-
-.stSidebar .stRadio div[role="radiogroup"] label:hover {
-    background-color: rgba(0, 206, 201, 0.2);
-    transform: translateX(12px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* Style for the selected radio button (using input:checked + div) */
-.stSidebar .stRadio div[role="radiogroup"] input:checked + div {
-    background-color: #00cec9;
-    color: white;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    transform: translateX(0);
-    border: 1px solid #00a09a;
-    animation: sidebarSelectedPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes sidebarSelectedPop {
-    0% {
-        transform: scale(0.9);
-    }
-    70% {
-        transform: scale(1.03); /* More overshoot */
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* FIX: Explicit text color for unselected radio button labels in the sidebar */
-.stSidebar .stRadio div[role="radiogroup"] label p {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: var(--text-color) !important;
-}
-
-.stSidebar .stRadio div[role="radiogroup"] input:checked + div p {
-    color: white !important;
-}
-
-/* Custom styling for the dataframes */
-.stDataFrame {
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-    transition: box-shadow 0.5s ease;
-    border: 1px solid var(--border-color-light);
-    background: var(--card-background);
-}
-
-.stDataFrame:hover {
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-}
-
-.stDataFrame table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-}
-
-.stDataFrame th {
-    font-weight: 700;
-    padding: 1.2rem 1.5rem;
-    text-align: left;
-    border-bottom: 5px solid #00cec9;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    transition: background-color 0.5s ease, color 0.5s ease;
-    background-color: #f0f2f6; /* Light mode header background */
-    color: #333333; /* Light mode header text */
-}
-
-.stDataFrame tbody tr:nth-child(odd) {
-    background-color: var(--card-background);
-}
-
-.stDataFrame tbody tr:nth-child(even) {
-    background-color: rgba(0,0,0,0.03); /* Slightly darker for even rows in light mode */
-}
-
-.stDataFrame td {
-    padding: 1.1rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    transition: background-color 0.4s ease, color 0.4s ease;
-    color: var(--text-color); /* Ensure text color changes with theme */
-}
-
-.stDataFrame tbody tr:hover {
-    background-color: rgba(0, 206, 201, 0.12) !important;
-}
-
-/* Info/Warning/Error/Success boxes */
-.stAlert {
-    border-radius: 18px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    animation: fadeInSlideUp 0.8s ease-out;
-    transition: all 0.5s ease;
-    border: 1px solid var(--border-color-light);
-    position: relative;
-    overflow: hidden;
-}
-
-.stAlert:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-}
-
-/* Specific alert types (Streamlit's internal classes are targeted) */
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 {
-    /* Info */
-    background-color: #E0F7FA;
-    color: #006064;
-    border-left: 8px solid #00BCD4;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn0 svg {
-    fill: #00BCD4;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 {
-    /* Success */
-    background-color: #E8F5E9;
-    color: #2E7D32;
-    border-left: 8px solid #4CAF50;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn1 svg {
-    fill: #4CAF50;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 {
-    /* Warning */
-    background-color: #FFFDE7;
-    color: #FF8F00;
-    border-left: 8px solid #FFC107;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn2 svg {
-    fill: #FFC107;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 {
-    /* Error */
-    background-color: #FFEBEE;
-    color: #D32F2F;
-    border-left: 8px solid #F44336;
-}
-
-.stAlert.st-emotion-cache-1f0o48a.e1f1d6gn3 svg {
-    fill: #F44336;
-}
-
-/* Top Header Styles */
-.top-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem 4rem;
-    background: linear-gradient(145deg, rgba(255,255,255,0.99), rgba(245,247,250,0.9));
-    margin-bottom: 4rem;
-    border-radius: 30px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
-    transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-    border: 1px solid var(--border-color-light);
-    animation: slideInDownFadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.top-header h1 {
-    margin: 0;
-    color: #00cec9;
-    font-size: 2.8rem;
-    font-weight: 900;
-    letter-spacing: -0.06em;
-    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-.top-header .profile {
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-weight: 600;
-    color: var(--text-color); /* Ensure profile text color changes with theme */
-}
-
-.top-header .profile a {
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-    color: #00cec9; /* Link color */
-}
-
-.top-header .profile a:hover {
-    color: #00b0a8;
-    text-decoration: underline;
-}
-
-/* Additional User-Friendly Enhancements & Animations */
-
-/* Card-like containers for general elements */
-.stCard {
-    border-radius: 25px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
-    border: 1px solid var(--border-color-light);
-    position: relative;
-    background: var(--card-background);
-}
-
-.stCard:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-}
-
-/* Progress Bar Styling */
-.stProgress > div > div {
-    border-radius: 15px;
-    height: 16px;
-    background-color: rgba(0, 206, 201, 0.3);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-.stProgress > div > div > div {
-    background-color: #00cec9;
-    border-radius: 15px;
-    transition: width 0.8s ease-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.stProgress > div > div > div::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-image: linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
-    background-size: 1.2rem 1.2rem;
-    animation: progressStripe 1s linear infinite;
-    border-radius: 15px;
-}
-
-@keyframes progressStripe {
-    from {
-        background-position: 1.2rem 0;
-    }
-    to {
-        background-position: 0 0;
-    }
-}
-
-/* Checkbox and Radio Button Circles (visual enhancement) */
-.stCheckbox > label > div > span:first-child,
-.stRadio > label > div > span:first-child {
-    border-radius: 50%;
-    border: 3px solid #00cec9;
-    width: 1.4em;
-    height: 1.4em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.4s ease;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-.stCheckbox > label > div > span:first-child svg,
-.stRadio > label > div > span:first-child svg {
-    fill: #00cec9;
-    transform: scale(0);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.stCheckbox > label > div > input:checked + span:first-child,
-.stRadio > label > div > input:checked + span:first-child {
-    background-color: #00cec9;
-    border-color: #00cec9;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15), 0 0 0 5px rgba(0, 206, 201, 0.4);
-}
-
-/* Tooltip styling (for custom tooltips if added) */
-.stTooltip {
-    background-color: rgba(0, 0, 0, 0.95);
-    color: white;
-    border-radius: 12px;
-    padding: 0.7rem 1.4rem;
-    font-size: 1rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    transform: translateY(20px);
-    backdrop-filter: blur(8px);
-}
-
-.stTooltip.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Global text styling for readability */
-p {
-    line-height: 1.9;
-    margin-bottom: 1.5em;
-    font-size: 1.1rem;
-    color: var(--text-color); /* Ensure paragraph text color changes with theme */
-}
-
-/* Link styling */
-a {
-    color: #00cec9;
-    text-decoration: none;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-    font-weight: 600;
-}
-
-a:hover {
-    color: #00b0a8;
-    text-decoration: underline;
-}
-
-/* Utility Classes (can be added via st.markdown('<div class="my-class">...</div>', unsafe_allow_html=True)) */
-.text-center {
-    text-align: center;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.fade-in {
-    animation: fadeIn 0.8s ease-in-out forwards;
-}
-
-.slide-up {
-    animation: fadeInSlideUp 0.9s ease-out forwards;
-}
-
-/* Responsive Design (Enhanced Breakpoints) */
-@media (max-width: 1024px) { /* Tablet landscape */
+    /* Ensure the main content starts from the top */
     .main .block-container {
-        padding: 3rem;
-        border-radius: 25px;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
     }
-    .dashboard-header {
-        font-size: 3.2rem;
-        margin-bottom: 3rem;
-    }
-    .greeting-message {
-        font-size: 1.6rem;
-    }
-    .stMetric {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    .stMetric > div[data-testid="stMetricValue"] {
-        font-size: 3rem;
-    }
-    .stMetric > div[data-testid="stMetricLabel"] {
-        font-size: 1.2rem;
-    }
-    .top-header {
-        padding: 1.5rem 3rem;
-        margin-bottom: 3rem;
-        border-radius: 25px;
-    }
-    .top-header h1 {
-        font-size: 2.2rem;
-    }
-    .top-header .profile {
-        font-size: 1.05rem;
-    }
-    .stButton > button {
-        padding: 0.8rem 1.6rem;
-        font-size: 0.95rem;
-    }
-    .stExpander {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    .stExpander > div[data-testid="stExpanderToggle"] {
-        font-size: 1.2rem;
-    }
-    .stSelectbox > div > div,
-    .stTextInput > div > div > input,
-    .stTextArea > div > div {
-        padding: 0.9rem 1.2rem;
-    }
-    .stSelectbox > label,
-    .stTextInput > label,
-    .stTextArea > label {
-        font-size: 1rem;
-    }
-    .stDataFrame th,
-    .stDataFrame td {
-        padding: 1rem 1.2rem;
-    }
-    .stAlert {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border-radius: 15px;
-        border-left-width: 7px;
-    }
-    p {
-        font-size: 1rem;
-    }
-}
 
-@media (max-width: 768px) { /* Tablet portrait & large mobile */
-    .main .block-container {
-        padding: 2.5rem;
-        border-radius: 20px;
+    /* Ensure header is visible (contains the hamburger menu) */
+    header {
+        visibility: visible !important;
+        height: auto !important;
+        display: block !important;
+        margin: initial !important;
+        padding: initial !important;
+        position: initial !important;
+        top: initial !important;
     }
-    .dashboard-header {
-        font-size: 2.8rem;
-        margin-bottom: 2.5rem;
-        border-bottom-width: 6px;
-    }
-    .greeting-message {
-        font-size: 1.4rem;
-        margin-bottom: 2rem;
-    }
-    .stMetric {
-        padding: 1.2rem;
-        margin-bottom: 1.2rem;
-    }
-    .stMetric > div[data-testid="stMetricValue"] {
-        font-size: 2.8rem;
-    }
-    .stMetric > div[data-testid="stMetricLabel"] {
-        font-size: 1.1rem;
-    }
-    .top-header {
-        padding: 1.2rem 2rem;
-        margin-bottom: 2.5rem;
-        border-radius: 20px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.8rem;
-    }
-    .top-header h1 {
-        font-size: 2rem;
-    }
-    .top-header .profile {
-        font-size: 1rem;
-    }
-    .stButton > button {
-        padding: 0.7rem 1.4rem;
-        font-size: 0.9rem;
-    }
-    .stExpander {
-        padding: 1.2rem;
-        margin-bottom: 1.2rem;
-    }
-    .stExpander > div[data-testid="stExpanderToggle"] {
-        font-size: 1.1rem;
-    }
-    .stSelectbox > div > div,
-    .stTextInput > div > div > input,
-    .stTextArea > div > div {
-        padding: 0.8rem 1.1rem;
-    }
-    .stSelectbox > label,
-    .stTextInput > label,
-    .stTextArea > label {
-        font-size: 0.98rem;
-    }
-    .stDataFrame th,
-    .stDataFrame td {
-        padding: 0.8rem 1.1rem;
-    }
-    .stAlert {
-        padding: 1.2rem;
-        margin-bottom: 1.2rem;
-        border-radius: 15px;
-        border-left-width: 6px;
-    }
-    p {
-        font-size: 0.98rem;
-    }
-}
 
-@media (max-width: 480px) { /* Small mobile */
-    .main .block-container {
-        padding: 1.5rem;
-        border-radius: 15px;
+    /* Revert sidebar specific CSS to allow Streamlit's native behavior */
+    /* Remove fixed positioning and explicit size overrides */
+    [data-testid="stSidebar"] {
+        position: relative !important; /* Allow it to be part of the normal document flow */
+        display: block !important; /* Ensure it's not hidden by other rules */
+        visibility: visible !important;
+        width: auto !important; /* Let Streamlit control width */
+        height: auto !important; /* Let Streamlit control height */
+        top: auto !important;
+        left: auto !important;
+        z-index: auto !important;
+        /* Streamlit's internal JS will handle the transform/transition for collapsing/expanding */
     }
-    .dashboard-header {
-        font-size: 2.2rem;
-        margin-bottom: 2rem;
-        border-bottom-width: 4px;
+
+    /* Hide specific Streamlit elements by ID/class */
+    .st-emotion-cache-1wbqy5l, /* Class to hide */
+    #_link_gzau3_10, /* ID to hide */
+    .st-emotion-cache-h6us5p /* Class to hide the "Manage app" button */
+    {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        width: 0px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    .greeting-message {
-        font-size: 1.2rem;
-        margin-bottom: 1.5rem;
-    }
-    .stMetric {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    .stMetric > div[data-testid="stMetricValue"] {
-        font-size: 2.2rem;
-    }
-    .stMetric > div[data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
-    }
-    .top-header {
-        padding: 0.8rem 1rem;
-        margin-bottom: 2rem;
-        border-radius: 12px;
-    }
-    .top-header h1 {
-        font-size: 1.5rem;
-    }
-    .top-header .profile {
-        font-size: 0.85rem;
-    }
-    .stButton > button {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
-    .stExpander {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    .stExpander > div[data-testid="stExpanderToggle"] {
-        font-size: 1rem;
-    }
-    .stSelectbox > div > div,
-    .stTextInput > div > div > input,
-    .stTextArea > div > div {
-        padding: 0.6rem 0.9rem;
-    }
-    .stSelectbox > label,
-    .stTextInput > label,
-    .stTextArea > label {
-        font-size: 0.9rem;
-    }
-    .stDataFrame th,
-    .stDataFrame td {
-        padding: 0.6rem 0.9rem;
-    }
-    .stAlert {
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 10px;
-        border-left-width: 4px;
-    }
-    p {
-        font-size: 0.9rem;
-    }
-}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- Permanent Sidebar Content (Always Visible) ---
+    with st.sidebar:
+        st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+        logo_path = "logo.png"  # Assuming logo is in the same directory
+
+        if os.path.exists(logo_path):
+            try:
+                with open(logo_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+
+                st.markdown(f"""
+                <a href="https://screenerpro.streamlit.app/" target="_self">
+                    <img src="data:image/png;base64,{encoded_string}" alt="Go to HR Portal" width="215">
+                </a>
+                """, unsafe_allow_html=True)
+            except FileNotFoundError:
+                st.warning(f"Logo file not found at: {logo_path}")
+            except Exception as e:
+                st.error(f"An error occurred while processing the logo: {e}")
+                st.info("Please ensure 'logo.png' is a valid PNG image.")
+        else:
+            st.warning(f"Logo file not found at: {logo_path}") # More specific message
+
+        st.sidebar.write("---")
+
+    # --- Main Content Area Logic ---
+    is_authenticated = login_section() # Call login_section first
+
+    if is_authenticated:
+        # If authenticated, display conditional sidebar content
+        with st.sidebar:
+            st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
+
+            # Navigation Buttons (using st.button and applying dynamic styling)
+            # Resume Screener Button
+            if st.button("Resume Screener", key="nav_resume_screen"):
+                st.session_state.current_page = "resume_screen"
+                st.rerun()
+            if st.session_state.current_page == "resume_screen":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_resume_screen"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important; /* Made bolder */
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important; /* More prominent shadow */
+                        border: none !important; /* No border when active */
+                    }}
+                    div[data-testid="stButton-nav_resume_screen"] > button:hover {{
+                        background-color: #00b0a8 !important; /* Darker teal on hover for active */
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important; /* More prominent shadow on hover */
+                    }}
+                    div[data-testid="stButton-nav_resume_screen"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+
+            # Top Leaderboard Button
+            if st.button("Top Leaderboard", key="nav_top_leaderboard"):
+                st.session_state.current_page = "top_leaderboard"
+                st.rerun()
+            if st.session_state.current_page == "top_leaderboard":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_top_leaderboard"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important;
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+                        border: none !important;
+                    }}
+                    div[data-testid="stButton-nav_top_leaderboard"] > button:hover {{
+                        background-color: #00b0a8 !important;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+                    }}
+                    div[data-testid="stButton-nav_top_leaderboard"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # Certificate Verify Button
+            if st.button("Verify Certificate", key="nav_certificate_verify"):
+                st.session_state.current_page = "certificate_verify"
+                st.rerun()
+            if st.session_state.current_page == "certificate_verify":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_certificate_verify"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important;
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+                        border: none !important;
+                    }}
+                    div[data-testid="stButton-nav_certificate_verify"] > button:hover {{
+                        background-color: #00b0a8 !important;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+                    }}
+                    div[data-testid="stButton-nav_certificate_verify"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # Total Resumes Screened Button
+            if st.button("Total Resumes Screened", key="nav_total_screened"):
+                st.session_state.current_page = "total_screened"
+                st.rerun()
+            if st.session_state.current_page == "total_screened":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_total_screened"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important;
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+                        border: none !important;
+                    }}
+                    div[data-testid="stButton-nav_total_screened"] > button:hover {{
+                        background-color: #00b0a8 !important;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+                    }}
+                    div[data-testid="stButton-nav_total_screened"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # About Us Button
+            if st.button("About Us", key="nav_about_us"):
+                st.session_state.current_page = "about_us"
+                st.rerun()
+            if st.session_state.current_page == "about_us":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_about_us"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important;
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+                        border: none !important;
+                    }}
+                    div[data-testid="stButton-nav_about_us"] > button:hover {{
+                        background-color: #00b0a8 !important;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+                    }}
+                    div[data-testid="stButton-nav_about_us"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # Feedback Form Button
+            if st.button("Feedback Form", key="nav_feedback_form"):
+                st.session_state.current_page = "feedback_form"
+                st.rerun()
+            if st.session_state.current_page == "feedback_form":
+                st.markdown(f"""
+                <style>
+                    div[data-testid="stButton-nav_feedback_form"] > button {{
+                        background-color: #00cec9 !important;
+                        color: white !important;
+                        font-weight: 700 !important;
+                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+                        border: none !important;
+                    }}
+                    div[data-testid="stButton-nav_feedback_form"] > button:hover {{
+                        background-color: #00b0a8 !important;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+                    }}
+                    div[data-testid="stButton-nav_feedback_form"] > button:active {{
+                        background-color: #009a93 !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
+            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+            # Logout Button
+            if st.button("Logout", key="nav_logout"):
+                st.session_state.current_page = "logout"
+                st.rerun()
+            # Logout button should always look like an inactive button, no special active styling
+            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+
+
+            # Logged in as: and Company: info
+            st.sidebar.markdown("---")
+            st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
+            if st.session_state.get('user_company'):
+                st.sidebar.info(f"Company: **{st.session_state.user_company}**")
+
+        # Content for authenticated users
+        if st.session_state.current_page == "welcome_dashboard":
+            display_welcome_dashboard()
+        elif st.session_state.current_page == "resume_screen":
+            st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
+            resume_screener_page()
+        elif st.session_state.current_page == "top_leaderboard":
+            st.markdown('<h2 class="overview-dashboard-header">Top Leaderboard</h2>', unsafe_allow_html=True)
+            leaderboard_page()
+        elif st.session_state.current_page == "certificate_verify":
+            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
+            certificate_verifier_page()
+        elif st.session_state.current_page == "total_screened":
+            st.markdown('<h2 class="overview-dashboard-header">Total Resumes Screened</h2>', unsafe_allow_html=True)
+            total_screened_page()
+        elif st.session_state.current_page == "about_us":
+            st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
+            about_us_page()
+        elif st.session_state.current_page == "feedback_form":
+            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
+            feedback_and_help_page()
+        elif st.session_state.current_page == "logout":
+            logout_page()
+        elif st.session_state.current_page == "generate_fake_data": # Keep this page accessible if it's not admin-only
+            st.markdown('<h2 class="overview-dashboard-header">Generate Fake Data</h2>', unsafe_allow_html=True)
+            generate_fake_data_page()
+
+    else:
+        # If not authenticated, only show the login/registration section
+        pass # login_section() is called before this block and handles non-authenticated display
+
+if __name__ == "__main__":
+    main()
