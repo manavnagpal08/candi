@@ -465,27 +465,15 @@ def register_section():
 
 def login_section():
     """Handles user login and public registration."""
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
-    if "username" not in st.session_state:
-        st.session_state.username = None
-    if "user_company" not in st.session_state:
-        st.session_state.user_company = None
-    if "user_uid" not in st.session_state:
-        st.session_state.user_uid = None
-    if "id_token" not in st.session_state:
-        st.session_state.id_token = None
-
+    # This section now assumes it's only called when not authenticated.
+    # The st.radio for "Login" vs "Register" is handled here.
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
-
-    if st.session_state.authenticated:
-        return True
 
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
-        key="login_register_radio",
+        key="login_register_radio", # This key is unique to this section
         index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
@@ -509,12 +497,14 @@ def login_section():
                         st.session_state.user_company = result["company"]
                         st.session_state.user_uid = result["uid"]
                         st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "welcome_dashboard"
+                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
                         st.rerun()
     elif tab_selection == "Register":
         register_section()
 
-    return st.session_state.authenticated
+    # This function no longer returns authentication status.
+    # The main loop will check st.session_state.authenticated directly.
+
 
 def logout_page():
     st.title("👋 Logging Out...")
@@ -527,6 +517,7 @@ def logout_page():
         st.session_state.pop('id_token', None)
         st.session_state.pop('current_quote', None)
         st.session_state.active_login_tab_selection = "Login"
+        st.session_state.current_page = "Login / Register" # Redirect to public login page
         st.rerun()
     st.info("You will be redirected to the login page shortly if you don't confirm.")
 
@@ -665,8 +656,21 @@ def main():
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
 
-    load_css_and_fonts()
+    # Initialize session state variables if they don't exist
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+    if "username" not in st.session_state:
+        st.session_state.username = None
+    if "user_company" not in st.session_state:
+        st.session_state.user_company = None
+    if "user_uid" not in st.session_state:
+        st.session_state.user_uid = None
+    if "id_token" not in st.session_state:
+        st.session_state.id_token = None
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "Login / Register" # Default for unauthenticated
 
+    load_css_and_fonts()
     set_body_class()
 
     # --- Permanent Sidebar Content ---
@@ -693,13 +697,49 @@ def main():
             st.warning(f"Logo file not found at: {logo_path}")
 
         st.sidebar.title("🧠 ScreenerPro")
-
         st.sidebar.write("---")
 
-    # --- Main Content Area Logic ---
-    is_authenticated = login_section()
+    # --- Main Content Area Logic based on Authentication ---
+    if not st.session_state.authenticated:
+        # If not authenticated, display public navigation and content
+        with st.sidebar:
+            st.markdown("### Navigate")
+            current_sidebar_options = [
+                "Login / Register",
+                "Verify Certificate",
+                "About Us",
+                "Feedback Form",
+            ]
+            default_sidebar_index = current_sidebar_options.index(st.session_state.current_page) if st.session_state.current_page in current_sidebar_options else 0
 
-    if is_authenticated:
+            selected_tab = st.sidebar.radio(
+                "Select Page",
+                current_sidebar_options,
+                index=default_sidebar_index,
+                key="public_nav_radio"
+            )
+            st.session_state.current_page = selected_tab
+
+        if st.session_state.current_page == "Login / Register":
+            login_section() # Call login_section only when this tab is selected
+        elif st.session_state.current_page == "Verify Certificate":
+            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
+            certificate_verifier_page()
+        elif st.session_state.current_page == "About Us":
+            st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
+            about_us_page()
+        elif st.session_state.current_page == "Feedback Form":
+            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
+            feedback_and_help_page()
+        else: # Default public home if no specific page is selected or initial load
+            st.title("Welcome to ScreenerPro - Public Access")
+            st.info("Please login or register to access the full HR dashboard features.")
+            st.write("---")
+            st.subheader("What is ScreenerPro?")
+            st.write("ScreenerPro is an AI-powered platform designed to streamline your HR processes, from resume screening to candidate management.")
+
+    else:
+        # If authenticated, display authenticated navigation and content
         with st.sidebar:
             st.markdown("### Navigate")
             current_sidebar_options = [
@@ -711,14 +751,13 @@ def main():
                 "Feedback Form",
                 "Logout"
             ]
-            default_tab_name = st.session_state.get("current_page", "Resume Screener")
-            default_sidebar_index = current_sidebar_options.index(default_tab_name) if default_tab_name in current_sidebar_options else 0
+            default_sidebar_index = current_sidebar_options.index(st.session_state.current_page) if st.session_state.current_page in current_sidebar_options else 0
 
             selected_tab = st.sidebar.radio(
                 "Select Page",
                 current_sidebar_options,
                 index=default_sidebar_index,
-                key="main_nav_radio"
+                key="main_nav_radio" # Unique key for authenticated sidebar radio
             )
             st.session_state.current_page = selected_tab
 
@@ -747,43 +786,6 @@ def main():
             feedback_and_help_page()
         elif st.session_state.current_page == "Logout":
             logout_page()
-
-    else: # Not authenticated
-        with st.sidebar:
-            st.markdown("### Navigate")
-            current_sidebar_options = [
-                "Login / Register",
-                "Verify Certificate",
-                "About Us",
-                "Feedback Form",
-            ]
-            default_sidebar_index = current_sidebar_options.index("Login / Register") if "Login / Register" in current_sidebar_options else 0
-
-            selected_tab = st.sidebar.radio(
-                "Select Page",
-                current_sidebar_options,
-                index=default_sidebar_index,
-                key="public_nav_radio"
-            )
-            st.session_state.current_page = selected_tab
-
-        if st.session_state.current_page == "Login / Register":
-            login_section()
-        elif st.session_state.current_page == "Verify Certificate":
-            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
-            certificate_verifier_page()
-        elif st.session_state.current_page == "About Us":
-            st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
-            about_us_page()
-        elif st.session_state.current_page == "Feedback Form":
-            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
-            feedback_and_help_page()
-        else:
-            st.title("Welcome to ScreenerPro - Public Access")
-            st.info("Please login or register to access the full HR dashboard features.")
-            st.write("---")
-            st.subheader("What is ScreenerPro?")
-            st.write("ScreenerPro is an AI-powered platform designed to streamline your HR processes, from resume screening to candidate management.")
 
 
 if __name__ == "__main__":
