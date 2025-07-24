@@ -35,21 +35,240 @@ FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PR
 # --- CSS Loading and Body Class Functions ---
 def load_css_and_fonts():
     """
-    Loads custom CSS from style.css and ensures Font Awesome is loaded.
+    Loads custom CSS for styling and ensures Font Awesome is loaded.
     """
-    st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
-    st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
-    
-    # Load the external style.css file
-    try:
-        current_dir = os.path.dirname(__file__)
-        css_file_path = os.path.join(current_dir, "style.css")
-        with open(css_file_path) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.error("Error: 'style.css' not found. Please ensure it's in the same directory as app.py.")
-    except Exception as e:
-        st.error(f"An error occurred while loading style.css: {e}")
+    st.markdown("""
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f5f0;
+        color: #333333;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .st-emotion-cache-vk330y {
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-right: 1px solid #e0e0e0;
+        padding: 2rem 1.5rem;
+        animation: slideInLeftSidebar 0.5s ease-out;
+    }
+
+    @keyframes slideInLeftSidebar {
+        0% { transform: translateX(-100%); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+
+    .st-emotion-cache-10qj611 {
+        color: #00cec9;
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .stRadio > label {
+        color: #333333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stRadio div[role="radiogroup"] label {
+        background-color: #f0f2f6;
+        border-radius: 8px;
+        padding: 0.8rem 1.2rem;
+        margin: 0.4rem 0;
+        color: #333333;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .stRadio div[role="radiogroup"] label:hover {
+        background-color: #e0e2e6;
+        transform: translateX(3px);
+    }
+
+    .stRadio div[role="radiogroup"] label[data-baseweb="radio"] span:first-child {
+        background-color: #00cec9 !important;
+        border-color: #00cec9 !important;
+    }
+
+    .stRadio div[role="radiogroup"] label[data-baseweb="radio"][aria-checked="true"] {
+        background-color: #00cec9;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .st-emotion-cache-1v0bb1h {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .st-emotion-cache-1v0bb1h img {
+        border-radius: 10px;
+    }
+
+    .st-emotion-cache-16txt4y,
+    .st-emotion-cache-1gh866l,
+    .st-emotion-cache-30do4w,
+    .stToolbarActionButtonLabel,
+    .st-emotion-cache-1wbqy5l,
+    #_link_gzau3_10,
+    .st-emotion-cache-h6us5p
+    {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        width: 0px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .main .block-container {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .stButton > button {
+        background-color: #ffffff;
+        color: #333333;
+        border-radius: 9999px;
+        padding: 0.7rem 1.2rem;
+        font-weight: 500;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        text-transform: none;
+        background-image: none;
+        gap: 0.8rem;
+        width: 100%;
+        text-align: left;
+    }
+
+    .stButton > button:hover {
+        background-color: rgba(0, 206, 201, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        outline: none;
+        border-color: #00cec9;
+    }
+
+    .stButton > button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 206, 201, 0.2);
+    }
+
+    .stTextInput > div > div > input,
+    .stTextArea > div > div {
+        border-radius: 18px;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 1.1rem 1.4rem;
+        transition: all 0.4s ease;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
+        background: rgba(255,255,255,0.9);
+        color: #333333 !important;
+        -webkit-text-fill-color: #333333 !important;
+    }
+
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div:focus-within {
+        border-color: #00cec9;
+        box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
+        outline: none;
+    }
+
+    .stTextInput > label,
+    .stTextArea > label {
+        font-weight: 600;
+        margin-bottom: 0.7rem;
+        display: block;
+        font-size: 1.1rem;
+        color: #333333;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #00cec9;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 1.1;
+        margin-bottom: 1em;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .main .block-container {
+        padding: 4rem;
+        border-radius: 35px;
+        background: rgba(255,255,255,0.98);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.15);
+        animation: fadeInScaleBounce 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        transition: background 0.7s ease-in-out, box-shadow 0.7s ease-in-out, border 0.7s ease-in-out;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 3.5rem;
+        overflow: hidden;
+    }
+
+    @keyframes fadeInScaleBounce {
+        0% { transform: scale(0.9); opacity: 0; }
+        60% { transform: scale(1.02); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .stMetric {
+        border-radius: 25px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(240,242,246,0.9));
+    }
+
+    .stMetric > div[data-testid="stMetricValue"] {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #00cec9;
+        animation: pulseValue 3s infinite alternate ease-in-out;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stMetric > div[data-testid="stMetricLabel"] {
+        font-size: 1.4rem;
+        opacity: 0.8;
+        font-weight: 600;
+    }
+
+    p {
+        line-height: 1.9;
+        margin-bottom: 1.5em;
+        font-size: 1.1rem;
+        color: #333333;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 def set_body_class():
     """
