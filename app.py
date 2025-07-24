@@ -677,7 +677,7 @@ def main():
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
 
-    load_css_and_fonts() # Call the updated function
+    load_css_and_fonts()
 
     set_body_class()
 
@@ -713,27 +713,17 @@ def main():
 
     if is_authenticated:
         with st.sidebar:
-            st.markdown("### Navigation")
+            st.markdown("### Navigate") # Changed to h3 for consistency with provided design
             current_sidebar_options = [
-                "🏠 Dashboard Home",
-                "🧠 Resume Screener",
-                "📁 Manage JDs",
-                "📊 Screening Analytics",
-                "📈 Advanced Tools",
-                "🤝 Collaboration Hub",
-                "🧑‍💼 Employee Management",
-                "📍 Live Resume Counter",
-                "📤 Email Candidates",
-                "🔍 Search Resumes",
-                "📝 Candidate Notes",
-                "✅ Certificate Verification",
-                "📣 Partner With Us",
-                "🏢 About Us",
-                "⚖️ Privacy Policy & Terms",
-                "❓ Feedback & Help",
-                "🚪 Logout"
+                "Resume Screener",
+                "Top Leaderboard",
+                "Verify Certificate",
+                "Total Resumes Screened",
+                "About Us",
+                "Feedback Form",
+                "Logout"
             ]
-            default_tab_name = st.session_state.get("tab_override", "🏠 Dashboard Home")
+            default_tab_name = st.session_state.get("current_page", "Resume Screener")
             default_sidebar_index = current_sidebar_options.index(default_tab_name) if default_tab_name in current_sidebar_options else 0
 
             selected_tab = st.sidebar.radio(
@@ -749,71 +739,43 @@ def main():
             if st.session_state.get('user_company'):
                 st.sidebar.info(f"Company: **{st.session_state.user_company}**")
 
-        if st.session_state.current_page == "🏠 Dashboard Home":
-            display_welcome_dashboard()
-        elif st.session_state.current_page == "🧠 Resume Screener":
+        if st.session_state.current_page == "Resume Screener":
             st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
             resume_screener_page()
-        elif st.session_state.current_page == "📁 Manage JDs":
-            st.markdown('<h2 class="overview-dashboard-header">Manage Job Descriptions</h2>', unsafe_allow_html=True)
-            st.info("Content for managing Job Descriptions will go here.")
-        elif st.session_state.current_page == "📊 Screening Analytics":
-            st.markdown('<h2 class="overview-dashboard-header">Screening Analytics</h2>', unsafe_allow_html=True)
-            st.info("Content for Screening Analytics will go here.")
-        elif st.session_state.current_page == "📈 Advanced Tools":
-            st.markdown('<h2 class="overview-dashboard-header">Advanced Tools</h2>', unsafe_allow_html=True)
-            st.info("Content for Advanced Tools will go here.")
-        elif st.session_state.current_page == "🤝 Collaboration Hub":
-            st.markdown('<h2 class="overview-dashboard-header">Collaboration Hub</h2>', unsafe_allow_html=True)
-            st.info("Content for Collaboration Hub will go here.")
-        elif st.session_state.current_page == "🧑‍💼 Employee Management":
-            st.markdown('<h2 class="overview-dashboard-header">Employee Management</h2>', unsafe_allow_html=True)
-            st.info("Content for Employee Management will go here.")
-        elif st.session_state.current_page == "📍 Live Resume Counter":
-            st.markdown('<h2 class="overview-dashboard-header">Live Resume Counter</h2>', unsafe_allow_html=True)
-            st.info("Content for Live Resume Counter will go here.")
-        elif st.session_state.current_page == "📤 Email Candidates":
-            st.markdown('<h2 class="overview-dashboard-header">Email Candidates</h2>', unsafe_allow_html=True)
-            st.info("Content for Email Candidates will go here.")
-        elif st.session_state.current_page == "🔍 Search Resumes":
-            st.markdown('<h2 class="overview-dashboard-header">Search Resumes</h2>', unsafe_allow_html=True)
-            st.info("Content for Searching Resumes will go here.")
-        elif st.session_state.current_page == "📝 Candidate Notes":
-            st.markdown('<h2 class="overview-dashboard-header">Candidate Notes</h2>', unsafe_allow_html=True)
-            st.info("Content for Candidate Notes will go here.")
-        elif st.session_state.current_page == "✅ Certificate Verification":
+        elif st.session_state.current_page == "Top Leaderboard":
+            st.markdown('<h2 class="overview-dashboard-header">Top Leaderboard</h2>', unsafe_allow_html=True)
+            leaderboard_page()
+        elif st.session_state.current_page == "Verify Certificate":
             st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
             certificate_verifier_page()
-        elif st.session_state.current_page == "📣 Partner With Us":
-            st.markdown('<h2 class="overview-dashboard-header">Partner With Us</h2>', unsafe_allow_html=True)
-            st.info("Content for Partner With Us will go here.")
-        elif st.session_state.current_page == "🏢 About Us":
+        elif st.session_state.current_page == "Total Resumes Screened":
+            st.markdown('<h2 class="overview-dashboard-header">Total Resumes Screened</h2>', unsafe_allow_html=True)
+            total_screened_page()
+        elif st.session_state.current_page == "About Us":
             st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
             about_us_page()
-        elif st.session_state.current_page == "⚖️ Privacy Policy & Terms":
-            st.markdown('<h2 class="overview-dashboard-header">Privacy Policy & Terms</h2>', unsafe_allow_html=True)
-            st.info("Content for Privacy Policy and Terms will go here.")
-        elif st.session_state.current_page == "❓ Feedback & Help":
+        elif st.session_state.current_page == "Feedback Form":
             st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
             feedback_and_help_page()
-        elif st.session_state.current_page == "🚪 Logout":
+        elif st.session_state.current_page == "Logout":
             logout_page()
-        elif st.session_state.current_page == "Generate Fake Data":
-            st.markdown('<h2 class="overview-dashboard-header">Generate Fake Data</h2>', unsafe_allow_html=True)
-            generate_fake_data_page()
+        # Removed other pages that were not in the provided image.
+        # If 'generate_fake_data' is still needed and not admin-only, keep its elif block.
+        # For now, assuming it's removed as part of admin feature removal.
+        # elif st.session_state.current_page == "Generate Fake Data":
+        #     st.markdown('<h2 class="overview-dashboard-header">Generate Fake Data</h2>', unsafe_allow_html=True)
+        #     generate_fake_data_page()
 
-    else:
+    else: # Not authenticated
         with st.sidebar:
-            st.markdown("### Navigation")
+            st.markdown("### Navigate")
             current_sidebar_options = [
-                "🏠 Public Home",
-                "🔑 Login / Register",
-                "✅ Certificate Verification",
-                "📣 Partner With Us",
-                "⚖️ Privacy Policy & Terms",
-                "❓ Feedback & Help"
+                "Login / Register",
+                "Verify Certificate",
+                "About Us", # Assuming About Us is also public
+                "Feedback Form", # Assuming Feedback Form is also public
             ]
-            default_sidebar_index = current_sidebar_options.index("🏠 Public Home")
+            default_sidebar_index = current_sidebar_options.index("Login / Register") if "Login / Register" in current_sidebar_options else 0
 
             selected_tab = st.sidebar.radio(
                 "Select Page",
@@ -821,28 +783,25 @@ def main():
                 index=default_sidebar_index,
                 key="public_nav_radio"
             )
-            st.session_state.current_page = selected_tab
+            st.session_state.current_page = selected_tab # Update current_page for public view
 
-        if st.session_state.current_page == "🏠 Public Home":
+        if st.session_state.current_page == "Login / Register":
+            login_section()
+        elif st.session_state.current_page == "Verify Certificate":
+            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
+            certificate_verifier_page()
+        elif st.session_state.current_page == "About Us":
+            st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
+            about_us_page()
+        elif st.session_state.current_page == "Feedback Form":
+            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
+            feedback_and_help_page()
+        else: # Default public home if no specific page is selected
             st.title("Welcome to ScreenerPro - Public Access")
             st.info("Please login or register to access the full HR dashboard features.")
             st.write("---")
             st.subheader("What is ScreenerPro?")
             st.write("ScreenerPro is an AI-powered platform designed to streamline your HR processes, from resume screening to candidate management.")
-        elif st.session_state.current_page == "🔑 Login / Register":
-            login_section()
-        elif st.session_state.current_page == "✅ Certificate Verification":
-            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
-            certificate_verifier_page()
-        elif st.session_state.current_page == "📣 Partner With Us":
-            st.markdown('<h2 class="overview-dashboard-header">Partner With Us</h2>', unsafe_allow_html=True)
-            st.info("Learn more about partnering with ScreenerPro.")
-        elif st.session_state.current_page == "⚖️ Privacy Policy & Terms":
-            st.markdown('<h2 class="overview-dashboard-header">Privacy Policy & Terms</h2>', unsafe_allow_html=True)
-            st.info("Read our Privacy Policy and Terms of Service.")
-        elif st.session_state.current_page == "❓ Feedback & Help":
-            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
-            feedback_and_help_page()
 
 
 if __name__ == "__main__":
