@@ -467,9 +467,7 @@ def main():
         # Create a hidden button that will actually trigger the Streamlit rerun and state change
         # This button's click event will be triggered by the visible HTML element.
         # Its label is used for targeting via aria-label.
-        if st.button("Internal_Toggle_Sidebar_Button", key="hidden_sidebar_toggle_button_actual"):
-            st.session_state.sidebar_expanded = not st.session_state.sidebar_expanded
-            st.rerun() # This will re-evaluate initial_sidebar_state on the next run
+        
 
         # Inject CSS to hide the actual Streamlit button (using its aria-label for precise targeting)
         st.markdown("""
