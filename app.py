@@ -461,30 +461,39 @@ def main():
     load_css_and_fonts()
     set_body_class()
 
-    # --- Sidebar Toggle Button (placed in the main content area for visibility) ---
+    # --- Sidebar Toggle (icon with text, triggering a hidden button for state sync) ---
     col1, col2 = st.columns([1, 10])
     with col1:
-        if st.button("Toggle Sidebar"):
+        # Create a hidden button that will actually trigger the Streamlit rerun and state change
+        # This button's click event will be triggered by the visible HTML element.
+        # Its label is used for targeting via aria-label.
+        if st.button("Internal_Toggle_Sidebar_Button", key="hidden_sidebar_toggle_button_actual"):
             st.session_state.sidebar_expanded = not st.session_state.sidebar_expanded
-            # Inject JavaScript to toggle sidebar visibility
-            js_code = """
-            <script>
-                var sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-                if (sidebar) {
-                    if (sidebar.style.width === '0px' || sidebar.style.width === '') {
-                        sidebar.style.width = '210px'; // Adjust as needed
-                        sidebar.style.opacity = '1';
-                        sidebar.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
-                    } else {
-                        sidebar.style.width = '0px';
-                        sidebar.style.opacity = '0';
-                        sidebar.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
-                    }
-                }
-            </script>
-            """
-            st.markdown(js_code, unsafe_allow_html=True)
-            st.rerun() # Rerun to apply the initial_sidebar_state change if needed
+            st.rerun() # This will re-evaluate initial_sidebar_state on the next run
+
+        # Inject CSS to hide the actual Streamlit button (using its aria-label for precise targeting)
+        st.markdown("""
+        <style>
+            button[aria-label*="Internal_Toggle_Sidebar_Button"] {
+                display: none !important; /* Hide the entire button element */
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Visible toggle element (icon + text) with JavaScript to click the hidden button
+        current_icon = "fa-angles-left" if st.session_state.sidebar_expanded else "fa-angles-right"
+        current_text = "Collapse Sidebar" if st.session_state.sidebar_expanded else "Expand Sidebar"
+
+        st.markdown(
+            f"""
+            <div style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #00cec9; user-select: none; padding: 5px 0;"
+                 onclick="document.querySelector('button[aria-label*=\"Internal_Toggle_Sidebar_Button\"]').click();">
+                <i class="fa-solid {current_icon}"></i>
+                <span>{current_text}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # --- Permanent Sidebar Content ---
     with st.sidebar:
