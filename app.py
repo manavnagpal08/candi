@@ -33,27 +33,260 @@ AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:s
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
 # --- CSS Loading and Body Class Functions ---
-def load_css(file_name="style.css"):
+def load_css_and_fonts():
     """
-    Loads a CSS file from the same directory as the app.py.
-    Also ensures Font Awesome is loaded for icons.
+    Loads custom CSS for styling and ensures Font Awesome is loaded for icons.
+    Includes the provided beautiful UI CSS directly.
     """
-    try:
-        current_dir = os.path.dirname(__file__)
-        css_file_path = os.path.join(current_dir, file_name)
-        with open(css_file_path) as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.error(f"Error: '{file_name}' not found. Please ensure it's in the same directory as app.py.")
+    st.markdown("""
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    /* Global Font and Body Styling (relevant for overall app, including sidebar) */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f5f0; /* Light background for the main app */
+        color: #333333;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
-    st.markdown(
-        '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">',
-        unsafe_allow_html=True
-    )
+    /* Specific styling for the Streamlit sidebar */
+    .st-emotion-cache-vk330y { /* This class targets the sidebar container */
+        background-color: #ffffff; /* White background for the sidebar */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Subtle shadow for depth */
+        border-right: 1px solid #e0e0e0; /* Light border on the right */
+        padding: 2rem 1.5rem; /* Padding inside the sidebar */
+        animation: slideInLeftSidebar 0.5s ease-out; /* Animation for sidebar appearance */
+    }
+
+    @keyframes slideInLeftSidebar {
+        0% { transform: translateX(-100%); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Styling for the sidebar title */
+    .st-emotion-cache-10qj611 { /* This class targets the sidebar title (h1 in sidebar) */
+        color: #00cec9; /* Teal color for the title */
+        font-weight: 700;
+        font-size: 1.8rem; /* Larger font size for prominence */
+        margin-bottom: 1.5rem; /* Space below the title */
+        text-align: center; /* Center align the title */
+    }
+
+    /* Styling for the sidebar radio buttons (navigation) */
+    .stRadio > label { /* Label for the radio group */
+        color: #333333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stRadio div[role="radiogroup"] label { /* Individual radio button labels */
+        background-color: #f0f2f6; /* Light grey background for unselected items */
+        border-radius: 8px;
+        padding: 0.8rem 1.2rem;
+        margin: 0.4rem 0; /* Vertical spacing between items */
+        color: #333333;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        cursor: pointer;
+        display: flex; /* Use flexbox for alignment of icon and text */
+        align-items: center;
+    }
+
+    .stRadio div[role="radiogroup"] label:hover {
+        background-color: #e0e2e6; /* Darker grey on hover */
+        transform: translateX(3px); /* Slight slide effect on hover */
+    }
+
+    /* Styling for the selected radio button */
+    .stRadio div[role="radiogroup"] label[data-baseweb="radio"] span:first-child {
+        background-color: #00cec9 !important;
+        border-color: #00cec9 !important;
+    }
+
+    /* Text color for selected radio button */
+    .stRadio div[role="radiogroup"] label[data-baseweb="radio"][aria-checked="true"] {
+        background-color: #00cec9; /* Teal background for selected item */
+        color: white; /* White text for selected item */
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Ensure the image in the sidebar is styled */
+    .st-emotion-cache-1v0bb1h { /* This class targets the image container in the sidebar */
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .st-emotion-cache-1v0bb1h img { /* The image itself */
+        border-radius: 10px; /* Slightly rounded corners for the image */
+    }
+
+    /* Hide specific Streamlit default header elements that might appear near sidebar */
+    .st-emotion-cache-16txt4y,
+    .st-emotion-cache-1gh866l,
+    .st-emotion-cache-30do4w,
+    .stToolbarActionButtonLabel,
+    .st-emotion-cache-1wbqy5l,
+    #_link_gzau3_10,
+    .st-emotion-cache-h6us5p
+    {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        width: 0px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ensure body and html have no default margins/paddings */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ensure the main content starts from the top */
+    .main .block-container {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* General styling for other Streamlit elements to maintain consistency */
+    .stButton > button {
+        background-color: #ffffff;
+        color: #333333;
+        border-radius: 9999px;
+        padding: 0.7rem 1.2rem;
+        font-weight: 500;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        text-transform: none;
+        background-image: none;
+        gap: 0.8rem;
+        width: 100%;
+        text-align: left;
+    }
+
+    .stButton > button:hover {
+        background-color: rgba(0, 206, 201, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        outline: none;
+        border-color: #00cec9;
+    }
+
+    .stButton > button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 206, 201, 0.2);
+    }
+
+    .stTextInput > div > div > input,
+    .stTextArea > div > div {
+        border-radius: 18px;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        padding: 1.1rem 1.4rem;
+        transition: all 0.4s ease;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
+        background: rgba(255,255,255,0.9);
+        color: #333333 !important;
+        -webkit-text-fill-color: #333333 !important;
+    }
+
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div:focus-within {
+        border-color: #00cec9;
+        box-shadow: 0 0 0 5px rgba(0, 206, 201, 0.6);
+        outline: none;
+    }
+
+    .stTextInput > label,
+    .stTextArea > label {
+        font-weight: 600;
+        margin-bottom: 0.7rem;
+        display: block;
+        font-size: 1.1rem;
+        color: #333333;
+    }
+
+    /* Additional UI elements from previous style.css that are still relevant */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00cec9;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 1.1;
+        margin-bottom: 1em;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .main .block-container {
+        padding: 4rem;
+        border-radius: 35px;
+        background: rgba(255,255,255,0.98);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.15);
+        animation: fadeInScaleBounce 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        transition: background 0.7s ease-in-out, box-shadow 0.7s ease-in-out, border 0.7s ease-in-out;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 3.5rem;
+        overflow: hidden;
+    }
+
+    @keyframes fadeInScaleBounce {
+        0% { transform: scale(0.9); opacity: 0; }
+        60% { transform: scale(1.02); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .stMetric {
+        border-radius: 25px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.5s ease-in-out;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(240,242,246,0.9));
+    }
+
+    .stMetric > div[data-testid="stMetricValue"] {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #00cec9;
+        animation: pulseValue 3s infinite alternate ease-in-out;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stMetric > div[data-testid="stMetricLabel"] {
+        font-size: 1.4rem;
+        opacity: 0.8;
+        font-weight: 600;
+    }
+
+    p {
+        line-height: 1.9;
+        margin-bottom: 1.5em;
+        font-size: 1.1rem;
+        color: #333333;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 def set_body_class():
     """
     Sets a class on the body element to force light mode styling.
+    This function is kept for consistency but the main CSS is now inline.
     """
     body_class = "light-mode"
     js_code = f"""
@@ -444,57 +677,9 @@ def main():
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
 
-    load_css("style.css")
+    load_css_and_fonts() # Call the updated function
 
     set_body_class()
-
-    st.markdown("""
-    <style>
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .main .block-container {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }
-
-    header {
-        visibility: visible !important;
-        height: auto !important;
-        display: block !important;
-        margin: initial !important;
-        padding: initial !important;
-        position: initial !important;
-        top: initial !important;
-    }
-
-    [data-testid="stSidebar"] {
-        position: relative !important;
-        display: block !important;
-        visibility: visible !important;
-        width: auto !important;
-        height: auto !important;
-        top: auto !important;
-        left: auto !important;
-        z-index: auto !important;
-    }
-
-    .st-emotion-cache-1wbqy5l,
-    #_link_gzau3_10,
-    .st-emotion-cache-h6us5p
-    {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        width: 0px !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
     # --- Permanent Sidebar Content ---
     with st.sidebar:
@@ -519,6 +704,8 @@ def main():
         else:
             st.warning(f"Logo file not found at: {logo_path}")
 
+        st.sidebar.title("🧠 ScreenerPro")
+
         st.sidebar.write("---")
 
     # --- Main Content Area Logic ---
@@ -526,196 +713,137 @@ def main():
 
     if is_authenticated:
         with st.sidebar:
-            st.markdown("<p>Navigate</p>", unsafe_allow_html=True)
+            st.markdown("### Navigation")
+            current_sidebar_options = [
+                "🏠 Dashboard Home",
+                "🧠 Resume Screener",
+                "📁 Manage JDs",
+                "📊 Screening Analytics",
+                "📈 Advanced Tools",
+                "🤝 Collaboration Hub",
+                "🧑‍💼 Employee Management",
+                "📍 Live Resume Counter",
+                "📤 Email Candidates",
+                "🔍 Search Resumes",
+                "📝 Candidate Notes",
+                "✅ Certificate Verification",
+                "📣 Partner With Us",
+                "🏢 About Us",
+                "⚖️ Privacy Policy & Terms",
+                "❓ Feedback & Help",
+                "🚪 Logout"
+            ]
+            default_tab_name = st.session_state.get("tab_override", "🏠 Dashboard Home")
+            default_sidebar_index = current_sidebar_options.index(default_tab_name) if default_tab_name in current_sidebar_options else 0
 
-            if st.button("Resume Screener", key="nav_resume_screen"):
-                st.session_state.current_page = "resume_screen"
-                st.rerun()
-            if st.session_state.current_page == "resume_screen":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_resume_screen"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_resume_screen"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_resume_screen"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_resume_screen"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("Top Leaderboard", key="nav_top_leaderboard"):
-                st.session_state.current_page = "top_leaderboard"
-                st.rerun()
-            if st.session_state.current_page == "top_leaderboard":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_top_leaderboard"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_top_leaderboard"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_top_leaderboard"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_top_leaderboard"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("Verify Certificate", key="nav_certificate_verify"):
-                st.session_state.current_page = "certificate_verify"
-                st.rerun()
-            if st.session_state.current_page == "certificate_verify":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_certificate_verify"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_certificate_verify"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_certificate_verify"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_certificate_verify"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("Total Resumes Screened", key="nav_total_screened"):
-                st.session_state.current_page = "total_screened"
-                st.rerun()
-            if st.session_state.current_page == "total_screened":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_total_screened"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_total_screened"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_total_screened"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_total_screened"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("About Us", key="nav_about_us"):
-                st.session_state.current_page = "about_us"
-                st.rerun()
-            if st.session_state.current_page == "about_us":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_about_us"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_about_us"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_about_us"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_about_us"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("Feedback Form", key="nav_feedback_form"):
-                st.session_state.current_page = "feedback_form"
-                st.rerun()
-            if st.session_state.current_page == "feedback_form":
-                st.markdown(f"""
-                <style>
-                    div[data-testid="stButton-nav_feedback_form"] > button {{
-                        background-color: #00cec9 !important;
-                        color: white !important;
-                        font-weight: 700 !important;
-                        box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-                        border: none !important;
-                    }}
-                    div[data-testid="stButton-nav_feedback_form"] > button:hover {{
-                        background-color: #00b0a8 !important;
-                        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
-                    }}
-                    div[data-testid="stButton-nav_feedback_form"] > button:active {{
-                        background-color: #009a93 !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-            st.markdown(f'<style>div[data-testid="stButton-nav_feedback_form"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
-
-            if st.button("Logout", key="nav_logout"):
-                st.session_state.current_page = "logout"
-                st.rerun()
-            st.markdown(f'<style>div[data-testid="stButton-nav_logout"] {{ margin: 0.3rem 0; }}</style>', unsafe_allow_html=True)
+            selected_tab = st.sidebar.radio(
+                "Select Page",
+                current_sidebar_options,
+                index=default_sidebar_index,
+                key="main_nav_radio"
+            )
+            st.session_state.current_page = selected_tab
 
             st.sidebar.markdown("---")
             st.sidebar.success(f"Logged in as: **{st.session_state.username}**")
             if st.session_state.get('user_company'):
                 st.sidebar.info(f"Company: **{st.session_state.user_company}**")
 
-        if st.session_state.current_page == "welcome_dashboard":
+        if st.session_state.current_page == "🏠 Dashboard Home":
             display_welcome_dashboard()
-        elif st.session_state.current_page == "resume_screen":
+        elif st.session_state.current_page == "🧠 Resume Screener":
             st.markdown('<h2 class="overview-dashboard-header">Resume Screener</h2>', unsafe_allow_html=True)
             resume_screener_page()
-        elif st.session_state.current_page == "top_leaderboard":
-            st.markdown('<h2 class="overview-dashboard-header">Top Leaderboard</h2>', unsafe_allow_html=True)
-            leaderboard_page()
-        elif st.session_state.current_page == "certificate_verify":
+        elif st.session_state.current_page == "📁 Manage JDs":
+            st.markdown('<h2 class="overview-dashboard-header">Manage Job Descriptions</h2>', unsafe_allow_html=True)
+            st.info("Content for managing Job Descriptions will go here.")
+        elif st.session_state.current_page == "📊 Screening Analytics":
+            st.markdown('<h2 class="overview-dashboard-header">Screening Analytics</h2>', unsafe_allow_html=True)
+            st.info("Content for Screening Analytics will go here.")
+        elif st.session_state.current_page == "📈 Advanced Tools":
+            st.markdown('<h2 class="overview-dashboard-header">Advanced Tools</h2>', unsafe_allow_html=True)
+            st.info("Content for Advanced Tools will go here.")
+        elif st.session_state.current_page == "🤝 Collaboration Hub":
+            st.markdown('<h2 class="overview-dashboard-header">Collaboration Hub</h2>', unsafe_allow_html=True)
+            st.info("Content for Collaboration Hub will go here.")
+        elif st.session_state.current_page == "🧑‍💼 Employee Management":
+            st.markdown('<h2 class="overview-dashboard-header">Employee Management</h2>', unsafe_allow_html=True)
+            st.info("Content for Employee Management will go here.")
+        elif st.session_state.current_page == "📍 Live Resume Counter":
+            st.markdown('<h2 class="overview-dashboard-header">Live Resume Counter</h2>', unsafe_allow_html=True)
+            st.info("Content for Live Resume Counter will go here.")
+        elif st.session_state.current_page == "📤 Email Candidates":
+            st.markdown('<h2 class="overview-dashboard-header">Email Candidates</h2>', unsafe_allow_html=True)
+            st.info("Content for Email Candidates will go here.")
+        elif st.session_state.current_page == "🔍 Search Resumes":
+            st.markdown('<h2 class="overview-dashboard-header">Search Resumes</h2>', unsafe_allow_html=True)
+            st.info("Content for Searching Resumes will go here.")
+        elif st.session_state.current_page == "📝 Candidate Notes":
+            st.markdown('<h2 class="overview-dashboard-header">Candidate Notes</h2>', unsafe_allow_html=True)
+            st.info("Content for Candidate Notes will go here.")
+        elif st.session_state.current_page == "✅ Certificate Verification":
             st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
             certificate_verifier_page()
-        elif st.session_state.current_page == "total_screened":
-            st.markdown('<h2 class="overview-dashboard-header">Total Resumes Screened</h2>', unsafe_allow_html=True)
-            total_screened_page()
-        elif st.session_state.current_page == "about_us":
+        elif st.session_state.current_page == "📣 Partner With Us":
+            st.markdown('<h2 class="overview-dashboard-header">Partner With Us</h2>', unsafe_allow_html=True)
+            st.info("Content for Partner With Us will go here.")
+        elif st.session_state.current_page == "🏢 About Us":
             st.markdown('<h2 class="overview-dashboard-header">About Us</h2>', unsafe_allow_html=True)
             about_us_page()
-        elif st.session_state.current_page == "feedback_form":
+        elif st.session_state.current_page == "⚖️ Privacy Policy & Terms":
+            st.markdown('<h2 class="overview-dashboard-header">Privacy Policy & Terms</h2>', unsafe_allow_html=True)
+            st.info("Content for Privacy Policy and Terms will go here.")
+        elif st.session_state.current_page == "❓ Feedback & Help":
             st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
             feedback_and_help_page()
-        elif st.session_state.current_page == "logout":
+        elif st.session_state.current_page == "🚪 Logout":
             logout_page()
-        elif st.session_state.current_page == "generate_fake_data":
+        elif st.session_state.current_page == "Generate Fake Data":
             st.markdown('<h2 class="overview-dashboard-header">Generate Fake Data</h2>', unsafe_allow_html=True)
             generate_fake_data_page()
 
     else:
-        pass
+        with st.sidebar:
+            st.markdown("### Navigation")
+            current_sidebar_options = [
+                "🏠 Public Home",
+                "🔑 Login / Register",
+                "✅ Certificate Verification",
+                "📣 Partner With Us",
+                "⚖️ Privacy Policy & Terms",
+                "❓ Feedback & Help"
+            ]
+            default_sidebar_index = current_sidebar_options.index("🏠 Public Home")
+
+            selected_tab = st.sidebar.radio(
+                "Select Page",
+                current_sidebar_options,
+                index=default_sidebar_index,
+                key="public_nav_radio"
+            )
+            st.session_state.current_page = selected_tab
+
+        if st.session_state.current_page == "🏠 Public Home":
+            st.title("Welcome to ScreenerPro - Public Access")
+            st.info("Please login or register to access the full HR dashboard features.")
+            st.write("---")
+            st.subheader("What is ScreenerPro?")
+            st.write("ScreenerPro is an AI-powered platform designed to streamline your HR processes, from resume screening to candidate management.")
+        elif st.session_state.current_page == "🔑 Login / Register":
+            login_section()
+        elif st.session_state.current_page == "✅ Certificate Verification":
+            st.markdown('<h2 class="overview-dashboard-header">Certificate Verifier</h2>', unsafe_allow_html=True)
+            certificate_verifier_page()
+        elif st.session_state.current_page == "📣 Partner With Us":
+            st.markdown('<h2 class="overview-dashboard-header">Partner With Us</h2>', unsafe_allow_html=True)
+            st.info("Learn more about partnering with ScreenerPro.")
+        elif st.session_state.current_page == "⚖️ Privacy Policy & Terms":
+            st.markdown('<h2 class="overview-dashboard-header">Privacy Policy & Terms</h2>', unsafe_allow_html=True)
+            st.info("Read our Privacy Policy and Terms of Service.")
+        elif st.session_state.current_page == "❓ Feedback & Help":
+            st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
+            feedback_and_help_page()
+
 
 if __name__ == "__main__":
     main()
