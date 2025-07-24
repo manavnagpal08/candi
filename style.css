@@ -10,9 +10,9 @@ footer {
     visibility: hidden;
 }
 
-header {
+/* header {
     visibility: hidden; /* Optional: hides the top bar */
-}
+} */
 
 /* Global body and HTML styling */
 html,
@@ -266,26 +266,29 @@ html[data-theme="dark"] h6 {
     color: #cccccc;
 } */
 
-/* Button styling */
+/* Button styling - Default (inactive) */
 .stButton > button {
-    background-color: #00cec9;
-    color: white;
-    border-radius: 18px;
-    padding: 1rem 2rem;
-    font-weight: 700;
-    border: none;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    background-color: var(--card-background); /* Use card background for light look */
+    color: var(--text-color); /* Dark text */
+    border-radius: 9999px; /* More rounded, closer to image */
+    padding: 0.7rem 1.2rem; /* Adjusted padding */
+    font-weight: 500; /* Lighter font weight for inactive */
+    border: 1px solid var(--border-color-light); /* Subtle border */
+    transition: all 0.3s ease; /* Faster transition for responsiveness */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Lighter shadow */
     cursor: pointer;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em; /* Reduced letter spacing */
     position: relative;
     overflow: hidden;
     z-index: 1;
-    display: inline-flex;
+    display: flex; /* Ensure flex for icon alignment */
     align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
-    background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    justify-content: flex-start; /* Align text to left */
+    text-transform: none; /* No uppercase by default */
+    background-image: none; /* Remove radial gradient */
+    gap: 0.8rem; /* Gap for icon if present */
+    width: 100%; /* Full width for sidebar buttons */
+    text-align: left; /* Ensure text is left-aligned */
 }
 
 /* Removed dark mode specific button styles */
@@ -295,11 +298,11 @@ html[data-theme="dark"] h6 {
 } */
 
 .stButton > button:hover {
-    background-color: #00b0a8;
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    outline: 3px solid rgba(0, 206, 201, 0.6);
-    outline-offset: 4px;
+    background-color: rgba(0, 206, 201, 0.1); /* Light teal hover */
+    transform: translateY(-2px); /* Subtle lift */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    outline: none; /* Remove outline */
+    border-color: #00cec9; /* Teal border on hover */
 }
 
 /* Removed dark mode specific button hover styles */
@@ -310,9 +313,9 @@ html[data-theme="dark"] h6 {
 } */
 
 .stButton > button:active {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    background-color: #009a93;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 206, 201, 0.2);
 }
 
 /* Removed dark mode specific button active styles */
@@ -321,26 +324,12 @@ html[data-theme="dark"] h6 {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 } */
 
-/* Ripple effect for buttons */
+/* Ripple effect for buttons - REMOVED */
 .stButton > button:after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(1) translate(-50%, -50%);
-    transition: all 0.7s ease-out;
-    z-index: -1;
+    content: none;
 }
-
 .stButton > button:active:after {
-    transform: scale(40) translate(-50%, -50%);
-    opacity: 1;
-    transition: 0s;
+    content: none;
 }
 
 /* Expander styling */
