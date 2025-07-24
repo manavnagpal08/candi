@@ -469,18 +469,9 @@ def main():
         # Its label is used for targeting via aria-label.
         
 
-        # Inject CSS to hide the actual Streamlit button (using its aria-label for precise targeting)
-        st.markdown("""
-        <style>
-            button[aria-label*="Internal_Toggle_Sidebar_Button"] {
-                display: none !important; /* Hide the entire button element */
-            }
-        </style>
-        """, unsafe_allow_html=True)
-
         # Visible toggle element (icon + text) with JavaScript to click the hidden button
         current_icon = "fa-angles-left" if st.session_state.sidebar_expanded else "fa-angles-right"
-       
+        current_text = "Collapse Sidebar" if st.session_state.sidebar_expanded else "Expand Sidebar"
 
         st.markdown(
             f"""
