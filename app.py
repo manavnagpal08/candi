@@ -33,7 +33,6 @@ AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:s
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
 # --- CSS Loading and Body Class Functions ---
-# --- CSS Loading and Body Class Functions ---
 def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
@@ -52,7 +51,6 @@ def load_css_and_fonts():
     except Exception as e:
         st.error(f"An error occurred while loading style.css: {e}")
 
-# ... rest of your app.py code ...
 def set_body_class():
     """
     Sets a class on the body element to force light mode styling.
