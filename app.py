@@ -33,7 +33,6 @@ AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:s
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
 # --- CSS Loading and Body Class Functions ---
-
 def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
@@ -432,7 +431,15 @@ def display_welcome_dashboard():
 # --- Main Application Logic ---
 
 def main():
-    st.set_page_config(page_title="ScreenerPro Candidate Portal", layout="wide", initial_sidebar_state="expanded")
+    # Initialize sidebar state
+    if "sidebar_expanded" not in st.session_state:
+        st.session_state.sidebar_expanded = True # Default to expanded
+
+    st.set_page_config(
+        page_title="ScreenerPro Candidate Portal",
+        layout="wide",
+        initial_sidebar_state="expanded" if st.session_state.sidebar_expanded else "collapsed"
+    )
 
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
@@ -453,6 +460,31 @@ def main():
 
     load_css_and_fonts()
     set_body_class()
+
+    # --- Sidebar Toggle Button (placed in the main content area for visibility) ---
+    col1, col2 = st.columns([1, 10])
+    with col1:
+        if st.button("Toggle Sidebar"):
+            st.session_state.sidebar_expanded = not st.session_state.sidebar_expanded
+            # Inject JavaScript to toggle sidebar visibility
+            js_code = """
+            <script>
+                var sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+                if (sidebar) {
+                    if (sidebar.style.width === '0px' || sidebar.style.width === '') {
+                        sidebar.style.width = '210px'; // Adjust as needed
+                        sidebar.style.opacity = '1';
+                        sidebar.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                    } else {
+                        sidebar.style.width = '0px';
+                        sidebar.style.opacity = '0';
+                        sidebar.style.transition = 'width 0.3s ease-in-out, opacity 0.3s ease-in-out';
+                    }
+                }
+            </script>
+            """
+            st.markdown(js_code, unsafe_allow_html=True)
+            st.rerun() # Rerun to apply the initial_sidebar_state change if needed
 
     # --- Permanent Sidebar Content ---
     with st.sidebar:
