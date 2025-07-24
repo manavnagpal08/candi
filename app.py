@@ -470,14 +470,14 @@ def main():
         
 
         # Visible toggle element (icon + text) with JavaScript to click the hidden button
-        current_icon = "fa-angles-left" if st.session_state.sidebar_expanded else "fa-angles-right"
+        
         
 
         st.markdown(
             f"""
             <div style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #00cec9; user-select: none; padding: 5px 0;"
                  onclick="document.querySelector('button[aria-label*=\"Internal_Toggle_Sidebar_Button\"]').click();">
-                <i class="fa-solid {current_icon}"></i>
+                
                 
             </div>
             """,
