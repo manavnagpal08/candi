@@ -33,14 +33,26 @@ AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:s
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
 # --- CSS Loading and Body Class Functions ---
+# --- CSS Loading and Body Class Functions ---
 def load_css_and_fonts():
     """
-    Loads custom CSS for styling and ensures Font Awesome is loaded for icons.
-    Includes the beautiful UI CSS directly.
+    Loads custom CSS from style.css and ensures Font Awesome is loaded.
     """
-    st.markdown("""
-    """)
+    st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
+    st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
+    
+    # Load the external style.css file
+    try:
+        current_dir = os.path.dirname(__file__)
+        css_file_path = os.path.join(current_dir, "style.css")
+        with open(css_file_path) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.error("Error: 'style.css' not found. Please ensure it's in the same directory as app.py.")
+    except Exception as e:
+        st.error(f"An error occurred while loading style.css: {e}")
 
+# ... rest of your app.py code ...
 def set_body_class():
     """
     Sets a class on the body element to force light mode styling.
