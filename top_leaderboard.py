@@ -197,6 +197,9 @@ def leaderboard_page():
         filtered_df['Rank'] = filtered_df['Score (%)'].rank(ascending=False, method='min').astype(int)
         filtered_df = filtered_df.sort_values(by="Rank").reset_index(drop=True)
 
+    # Limit to top 300 entries after all filtering and sorting
+    filtered_df = filtered_df.head(300)
+
     # Display Average Score
     if not filtered_df.empty:
         avg_score = filtered_df["Score (%)"].mean()
