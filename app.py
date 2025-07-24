@@ -480,7 +480,7 @@ def main():
 
         # Visible toggle element (icon + text) with JavaScript to click the hidden button
         current_icon = "fa-angles-left" if st.session_state.sidebar_expanded else "fa-angles-right"
-        current_text = "Collapse Sidebar" if st.session_state.sidebar_expanded else "Expand Sidebar"
+       
 
         st.markdown(
             f"""
