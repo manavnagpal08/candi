@@ -33,6 +33,7 @@ AUTH_RESET_PASSWORD_URL = f"https://identitytoolkit.googleapis.com/v1/accounts:s
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/databases/(default)/documents/artifacts/{APP_ID}/public/data/user_profiles"
 
 # --- CSS Loading and Body Class Functions ---
+
 def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
