@@ -657,24 +657,6 @@ def main():
     # CSS for hiding specific Streamlit elements globally and ensuring sidebar responsiveness
     st.markdown("""
     <style>
-    /* Hide specific Streamlit default header elements on all devices */
-    .st-emotion-cache-16txt4y, /* For the main header buttons */
-    .st-emotion-cache-1gh866l, /* Specific for the GitHub icon/link */
-    .st-emotion-cache-30do4w, /* Another specific class ID to hide */
-    .stToolbarActionButtonLabel, /* ID to hide */
-    .st-emotion-cache-1wbqy5l, /* Class to hide */
-    #_link_gzau3_10, /* ID to hide */
-    .st-emotion-cache-h6us5p /* Class to hide the "Manage app" button */
-    {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        width: 0px !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
     /* Ensure body and html have no default margins/paddings */
     html, body {
         margin: 0 !important;
@@ -722,7 +704,7 @@ def main():
         if os.path.exists(logo_path):
             try:
                 with open(logo_path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode()
+                    encoded_string = base66.b64encode(image_file.read()).decode()
 
                 st.markdown(f"""
                 <a href="https://screenerpro.streamlit.app/" target="_self">
