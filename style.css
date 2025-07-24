@@ -9,9 +9,9 @@
 footer {
     visibility: hidden;
 }
-header {
+/* header {
     visibility: hidden; /* Optional: hides the top bar */
-}
+} */
 
 
 /* Global body and HTML styling */
