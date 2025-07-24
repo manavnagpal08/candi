@@ -693,6 +693,20 @@ def main():
         z-index: auto !important;
         /* Streamlit's internal JS will handle the transform/transition for collapsing/expanding */
     }
+
+    /* Hide specific Streamlit elements by ID/class */
+    .st-emotion-cache-1wbqy5l, /* Class to hide */
+    #_link_gzau3_10, /* ID to hide */
+    .st-emotion-cache-h6us5p /* Class to hide the "Manage app" button */
+    {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        width: 0px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -704,7 +718,7 @@ def main():
         if os.path.exists(logo_path):
             try:
                 with open(logo_path, "rb") as image_file:
-                    encoded_string = base66.b64encode(image_file.read()).decode()
+                    encoded_string = base64.b64encode(image_file.read()).decode() # Corrected from base66 to base64
 
                 st.markdown(f"""
                 <a href="https://screenerpro.streamlit.app/" target="_self">
