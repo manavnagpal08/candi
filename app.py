@@ -36,28 +36,26 @@ FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PR
 def load_css_and_fonts():
     """
     Loads custom CSS for styling and ensures Font Awesome is loaded for icons.
-    Includes the provided beautiful UI CSS directly.
+    Includes the beautiful UI CSS directly.
     """
     st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    /* Global Font and Body Styling (relevant for overall app, including sidebar) */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
-        background-color: #f8f5f0; /* Light background for the main app */
+        background-color: #f8f5f0;
         color: #333333;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* Specific styling for the Streamlit sidebar */
-    .st-emotion-cache-vk330y { /* This class targets the sidebar container */
-        background-color: #ffffff; /* White background for the sidebar */
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Subtle shadow for depth */
-        border-right: 1px solid #e0e0e0; /* Light border on the right */
-        padding: 2rem 1.5rem; /* Padding inside the sidebar */
-        animation: slideInLeftSidebar 0.5s ease-out; /* Animation for sidebar appearance */
+    .st-emotion-cache-vk330y {
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-right: 1px solid #e0e0e0;
+        padding: 2rem 1.5rem;
+        animation: slideInLeftSidebar 0.5s ease-out;
     }
 
     @keyframes slideInLeftSidebar {
@@ -65,65 +63,59 @@ def load_css_and_fonts():
         100% { transform: translateX(0); opacity: 1; }
     }
 
-    /* Styling for the sidebar title */
-    .st-emotion-cache-10qj611 { /* This class targets the sidebar title (h1 in sidebar) */
-        color: #00cec9; /* Teal color for the title */
+    .st-emotion-cache-10qj611 {
+        color: #00cec9;
         font-weight: 700;
-        font-size: 1.8rem; /* Larger font size for prominence */
-        margin-bottom: 1.5rem; /* Space below the title */
-        text-align: center; /* Center align the title */
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
     }
 
-    /* Styling for the sidebar radio buttons (navigation) */
-    .stRadio > label { /* Label for the radio group */
+    .stRadio > label {
         color: #333333;
         font-weight: 600;
         margin-bottom: 0.5rem;
         display: block;
     }
 
-    .stRadio div[role="radiogroup"] label { /* Individual radio button labels */
-        background-color: #f0f2f6; /* Light grey background for unselected items */
+    .stRadio div[role="radiogroup"] label {
+        background-color: #f0f2f6;
         border-radius: 8px;
         padding: 0.8rem 1.2rem;
-        margin: 0.4rem 0; /* Vertical spacing between items */
+        margin: 0.4rem 0;
         color: #333333;
         transition: background-color 0.3s ease, transform 0.2s ease;
         cursor: pointer;
-        display: flex; /* Use flexbox for alignment of icon and text */
+        display: flex;
         align-items: center;
     }
 
     .stRadio div[role="radiogroup"] label:hover {
-        background-color: #e0e2e6; /* Darker grey on hover */
-        transform: translateX(3px); /* Slight slide effect on hover */
+        background-color: #e0e2e6;
+        transform: translateX(3px);
     }
 
-    /* Styling for the selected radio button */
     .stRadio div[role="radiogroup"] label[data-baseweb="radio"] span:first-child {
         background-color: #00cec9 !important;
         border-color: #00cec9 !important;
     }
 
-    /* Text color for selected radio button */
     .stRadio div[role="radiogroup"] label[data-baseweb="radio"][aria-checked="true"] {
-        background-color: #00cec9; /* Teal background for selected item */
-        color: white; /* White text for selected item */
+        background-color: #00cec9;
+        color: white;
         font-weight: 700;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    /* Ensure the image in the sidebar is styled */
-    .st-emotion-cache-1v0bb1h { /* This class targets the image container in the sidebar */
+    .st-emotion-cache-1v0bb1h {
         text-align: center;
         margin-bottom: 1.5rem;
     }
 
-    .st-emotion-cache-1v0bb1h img { /* The image itself */
-        border-radius: 10px; /* Slightly rounded corners for the image */
+    .st-emotion-cache-1v0bb1h img {
+        border-radius: 10px;
     }
 
-    /* Hide specific Streamlit default header elements that might appear near sidebar */
     .st-emotion-cache-16txt4y,
     .st-emotion-cache-1gh866l,
     .st-emotion-cache-30do4w,
@@ -141,19 +133,16 @@ def load_css_and_fonts():
         padding: 0 !important;
     }
 
-    /* Ensure body and html have no default margins/paddings */
     html, body {
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* Ensure the main content starts from the top */
     .main .block-container {
         padding-top: 0 !important;
         margin-top: 0 !important;
     }
 
-    /* General styling for other Streamlit elements to maintain consistency */
     .stButton > button {
         background-color: #ffffff;
         color: #333333;
@@ -220,7 +209,6 @@ def load_css_and_fonts():
         color: #333333;
     }
 
-    /* Additional UI elements from previous style.css that are still relevant */
     h1, h2, h3, h4, h5, h6 {
         color: #00cec9;
         font-weight: 800;
@@ -713,7 +701,7 @@ def main():
 
     if is_authenticated:
         with st.sidebar:
-            st.markdown("### Navigate") # Changed to h3 for consistency with provided design
+            st.markdown("### Navigate")
             current_sidebar_options = [
                 "Resume Screener",
                 "Top Leaderboard",
@@ -759,12 +747,6 @@ def main():
             feedback_and_help_page()
         elif st.session_state.current_page == "Logout":
             logout_page()
-        # Removed other pages that were not in the provided image.
-        # If 'generate_fake_data' is still needed and not admin-only, keep its elif block.
-        # For now, assuming it's removed as part of admin feature removal.
-        # elif st.session_state.current_page == "Generate Fake Data":
-        #     st.markdown('<h2 class="overview-dashboard-header">Generate Fake Data</h2>', unsafe_allow_html=True)
-        #     generate_fake_data_page()
 
     else: # Not authenticated
         with st.sidebar:
@@ -772,8 +754,8 @@ def main():
             current_sidebar_options = [
                 "Login / Register",
                 "Verify Certificate",
-                "About Us", # Assuming About Us is also public
-                "Feedback Form", # Assuming Feedback Form is also public
+                "About Us",
+                "Feedback Form",
             ]
             default_sidebar_index = current_sidebar_options.index("Login / Register") if "Login / Register" in current_sidebar_options else 0
 
@@ -783,7 +765,7 @@ def main():
                 index=default_sidebar_index,
                 key="public_nav_radio"
             )
-            st.session_state.current_page = selected_tab # Update current_page for public view
+            st.session_state.current_page = selected_tab
 
         if st.session_state.current_page == "Login / Register":
             login_section()
@@ -796,7 +778,7 @@ def main():
         elif st.session_state.current_page == "Feedback Form":
             st.markdown('<h2 class="overview-dashboard-header">Feedback & Help</h2>', unsafe_allow_html=True)
             feedback_and_help_page()
-        else: # Default public home if no specific page is selected
+        else:
             st.title("Welcome to ScreenerPro - Public Access")
             st.info("Please login or register to access the full HR dashboard features.")
             st.write("---")
