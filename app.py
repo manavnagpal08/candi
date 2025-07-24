@@ -7,7 +7,7 @@ import requests
 import base64
 import random
 
-from pages.certificate_verify import certificate_verifier_page
+
 from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
@@ -443,6 +443,7 @@ def main():
 
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
+    st.info("Click the >> or << icon to toggle the sidebar.") # Info line added
 
     # Initialize session state variables if they don't exist
     if "authenticated" not in st.session_state:
