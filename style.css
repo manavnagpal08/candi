@@ -13,6 +13,14 @@ footer {
     visibility: hidden; /* Optional: hides the top bar */
 } */
 
+/* Hide specific Streamlit internal elements as requested */
+/* Be cautious: Hiding these general internal classes might affect unexpected parts of your layout. */
+.st-emotion-cache-1wbqy5l.ekuhni80 {
+    display: none !important;
+}
+
+/* Removed: .stVerticalBlock.st-emotion-cache-8fjoqp.e1msl4mp2 */
+
 
 /* Global body and HTML styling */
 html,
@@ -762,6 +770,7 @@ html[data-theme="dark"] .top-header .profile {
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease, text-decoration 0.3s ease;
+    font-weight: 600;
 }
 
 html[data-theme="dark"] .top-header .profile a {
@@ -1184,11 +1193,6 @@ div[data-baseweb="select"] .css-1p3m7a8 {
 }
 
 /* Fix selected item inside dropdown */
-div[data-baseweb="select"] .css-1p3m7a8 > div {
-    color: #ffffff !important;
-}
-
-/* Ensure dropdown options are also visible */
 div[data-baseweb="select"] .css-1n7v3ny-option {
     color: #ffffff !important;
     background-color: #1e1e1e !important;
