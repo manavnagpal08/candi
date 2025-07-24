@@ -654,6 +654,66 @@ def main():
     # Set the body class based on the current theme (which is now forced to light)
     set_body_class()
 
+    # CSS for hiding specific Streamlit elements globally and ensuring sidebar responsiveness
+    st.markdown("""
+    <style>
+    /* Hide specific Streamlit default header elements on all devices */
+    .st-emotion-cache-16txt4y, /* For the main header buttons */
+    .st-emotion-cache-1gh866l, /* Specific for the GitHub icon/link */
+    .st-emotion-cache-30do4w, /* Another specific class ID to hide */
+    .stToolbarActionButtonLabel, /* ID to hide */
+    .st-emotion-cache-1wbqy5l, /* Class to hide */
+    #_link_gzau3_10, /* ID to hide */
+    .st-emotion-cache-h6us5p /* Class to hide the "Manage app" button */
+    {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        width: 0px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ensure body and html have no default margins/paddings */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ensure the main content starts from the top */
+    .main .block-container {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Ensure header is visible (contains the hamburger menu) */
+    header {
+        visibility: visible !important;
+        height: auto !important;
+        display: block !important;
+        margin: initial !important;
+        padding: initial !important;
+        position: initial !important;
+        top: initial !important;
+    }
+
+    /* Revert sidebar specific CSS to allow Streamlit's native behavior */
+    /* Remove fixed positioning and explicit size overrides */
+    [data-testid="stSidebar"] {
+        position: relative !important; /* Allow it to be part of the normal document flow */
+        display: block !important; /* Ensure it's not hidden by other rules */
+        visibility: visible !important;
+        width: auto !important; /* Let Streamlit control width */
+        height: auto !important; /* Let Streamlit control height */
+        top: auto !important;
+        left: auto !important;
+        z-index: auto !important;
+        /* Streamlit's internal JS will handle the transform/transition for collapsing/expanding */
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     # --- Permanent Sidebar Content (Always Visible) ---
     with st.sidebar:
         st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
@@ -803,4 +863,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
