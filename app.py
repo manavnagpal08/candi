@@ -15,6 +15,7 @@ from feedback_form import feedback_and_help_page
 from total_screened_page import total_screened_page
 from generate_fake_data import generate_fake_data_page
 from certificate_verifier import certificate_verifier_page
+
 # --- Firebase Configuration ---
 FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
@@ -36,7 +37,8 @@ FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PR
 def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
-    Also includes custom CSS to hide specific Streamlit elements.
+    Also includes custom CSS to hide specific Streamlit elements and
+    add styling for login/register pages.
     """
     st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
     st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
@@ -52,7 +54,7 @@ def load_css_and_fonts():
     except Exception as e:
         st.error(f"An error occurred while loading style.css: {e}")
 
-    # Custom CSS to hide Streamlit toolbar buttons
+    # Custom CSS to hide Streamlit toolbar buttons and style login/register
     st.markdown(
         """
         <style>
@@ -63,6 +65,163 @@ def load_css_and_fonts():
         /* Hide the three dots menu button in the header */
         button[data-testid="stBaseButton-header"] {
             display: none !important;
+        }
+
+        /* General body styling for login/register pages */
+        .login-page-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh; /* Adjust as needed */
+            background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+            padding: 20px;
+        }
+        html[data-theme="dark"] .login-page-container {
+            background: linear-gradient(135deg, #2c2c44 0%, #3a3a50 100%);
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        html[data-theme="dark"] .login-card {
+            background-color: #3b3b55;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 {
+            color: #333333;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        html[data-theme="dark"] .login-card h2 {
+            color: #e0e0e0;
+        }
+
+        .login-card label {
+            font-weight: 600;
+            color: #555555;
+            margin-bottom: 8px;
+            display: block;
+            text-align: left;
+        }
+        html[data-theme="dark"] .login-card label {
+            color: #b0b0b0;
+        }
+
+        .stTextInput > div > div > input {
+            border-radius: 8px;
+            border: 1px solid #cccccc;
+            padding: 12px 15px;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        .stTextInput > div > div > input:focus {
+            border-color: #00cec9;
+            box-shadow: 0 0 0 3px rgba(0, 206, 201, 0.2);
+            outline: none;
+        }
+        html[data-theme="dark"] .stTextInput > div > div > input {
+            background-color: #4a4a60;
+            border-color: #555570;
+            color: #e0e0e0;
+        }
+        html[data-theme="dark"] .stTextInput > div > div > input:focus {
+            border-color: #6fa8f7;
+            box-shadow: 0 0 0 3px rgba(111, 168, 247, 0.2);
+        }
+
+        .stButton > button {
+            background-color: #00cec9;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 206, 201, 0.2);
+        }
+
+        .stButton > button:hover {
+            background-color: #00b3a8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 206, 201, 0.3);
+        }
+        html[data-theme="dark"] .stButton > button {
+            background-color: #6fa8f7;
+            box-shadow: 0 4px 10px rgba(111, 168, 247, 0.2);
+        }
+        html[data-theme="dark"] .stButton > button:hover {
+            background-color: #5a94e0;
+            box-shadow: 0 6px 15px rgba(111, 168, 247, 0.3);
+        }
+
+        .stRadio > label {
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+        html[data-theme="dark"] .stRadio > label {
+            color: #e0e0e0;
+        }
+        .stRadio > div {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .stRadio > div > label > div {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .stRadio > div > label > div:hover {
+            background-color: #f0f0f0;
+            border-color: #00cec9;
+        }
+        .stRadio > div > label[data-baseweb="radio"] > div[aria-checked="true"] {
+            background-color: #00cec9 !important;
+            color: white !important;
+            border-color: #00cec9 !important;
+            box-shadow: 0 2px 8px rgba(0, 206, 201, 0.2);
+        }
+        html[data-theme="dark"] .stRadio > div > label > div {
+            background-color: #4a4a60;
+            border-color: #555570;
+            color: #e0e0e0;
+        }
+        html[data-theme="dark"] .stRadio > div > label > div:hover {
+            background-color: #5a5a70;
+            border-color: #6fa8f7;
+        }
+        html[data-theme="dark"] .stRadio > div > label[data-baseweb="radio"] > div[aria-checked="true"] {
+            background-color: #6fa8f7 !important;
+            color: white !important;
+            border-color: #6fa8f7 !important;
+            box-shadow: 0 2px 8px rgba(111, 168, 247, 0.2);
         }
         </style>
         """,
@@ -234,6 +393,7 @@ def send_password_reset_email_firebase(email):
 
 def register_section():
     """Public self-registration form."""
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
     st.subheader("📝 Create New Account")
     with st.form("registration_form", clear_on_submit=True):
         new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
@@ -260,18 +420,20 @@ def register_section():
                     st.session_state.id_token = result["idToken"]
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True) # Close login-card
 
 def login_section():
     """Handles user login and public registration."""
-    # This section now assumes it's only called when not authenticated.
-    # The st.radio for "Login" vs "Register" is handled here.
+    st.markdown('<div class="login-page-container">', unsafe_allow_html=True)
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
 
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
-        key="login_register_radio", # This key is unique to this section
+        key="login_register_radio",
         index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
@@ -295,13 +457,17 @@ def login_section():
                         st.session_state.user_company = result["company"]
                         st.session_state.user_uid = result["uid"]
                         st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
+                        st.session_state.current_page = "Resume Screener"
                         st.rerun()
     elif tab_selection == "Register":
-        register_section()
+        # This will now be handled by the register_section which also has the card
+        st.markdown('</div>', unsafe_allow_html=True) # Close login-card for the radio part
+        st.markdown('</div>', unsafe_allow_html=True) # Close login-page-container for the radio part
+        register_section() # Call register section which now includes its own card
+        return # Exit to prevent double rendering of the container/card
 
-    # This function no longer returns authentication status.
-    # The main loop will check st.session_state.authenticated directly.
+    st.markdown('</div>', unsafe_allow_html=True) # Close login-card
+    st.markdown('</div>', unsafe_allow_html=True) # Close login-page-container
 
 
 def logout_page():
