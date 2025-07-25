@@ -19,6 +19,72 @@ from certificate_verifier import certificate_verifier_page
 FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
 APP_ID = st.secrets.get('FIREBASE_APP_ID', 'your-default-app-id')
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #dceeff 0%, #a0dfff 100%);
+}
+
+.login-card {
+    display: flex;
+    width: 80%;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-left {
+    flex: 1;
+    padding: 3rem;
+    background: linear-gradient(145deg, #007cf0, #00dfd8);
+    color: white;
+}
+
+.card-right {
+    flex: 1;
+    padding: 3rem;
+    background: #fff;
+}
+
+.auth-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.auth-subtext {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+</style>
+
+<!-- Streamlit section wrapper -->
+<div class="login-container">
+  <div class="login-card">
+    <div class="card-left">
+      <h2>Welcome to ScreenerPro</h2>
+      <p>Organized online screening, data-powered shortlists for smart hiring decisions.</p>
+    </div>
+
+    <div class="card-right">
+      <div class="auth-title">Login to ScreenerPro</div>
+      <div class="auth-subtext">Welcome back. Please enter your credentials.</div>
+      <!-- Your Streamlit login form goes here -->
+    </div>
+  </div>
+</div>
 
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
     st.error("Firebase API Key or Project ID not found. Please ensure they are configured directly at the top level of your .streamlit/secrets.toml file with correct capitalization (FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIREBASE_APP_ID).")
