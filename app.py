@@ -264,9 +264,15 @@ def register_section():
 
 def login_section():
     """Handles user login and public registration."""
+    # Initialize tab state
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
 
+    # Toggle for showing reset password form
+    if "show_reset_password" not in st.session_state:
+        st.session_state.show_reset_password = False
+
+    # Radio tab selector
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -278,6 +284,7 @@ def login_section():
         st.subheader("🔐 HR Login")
         st.info("If you don't have an account, please go to the 'Register' option first.")
 
+        # --- Login Form ---
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
@@ -298,19 +305,30 @@ def login_section():
                         st.session_state.current_page = "Resume Screener"
                         st.rerun()
 
-        # ❓ Forgot Password Link (styled as small text)
-        st.markdown('<p style="font-size: 14px; color: #3498db; cursor: pointer;">🔑 Forgot your password?</p>', unsafe_allow_html=True)
+        # --- Forgot Password Link ---
+        forgot_password_clicked = st.markdown(
+            '<a href="javascript:window.location.reload();" style="font-size: 14px; color: #3498db; text-decoration: none;">🔑 Forgot your password?</a>',
+            unsafe_allow_html=True
+        )
 
-        with st.expander("Reset Password"):
-            reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
+        # Simulate click behavior using a separate checkbox (since Streamlit doesn't allow JS callbacks directly)
+        if st.button("Click here to reset your password", key="toggle_reset"):
+            st.session_state.show_reset_password = not st.session_state.show_reset_password
+
+        # --- Reset Password Form (conditionally shown) ---
+        if st.session_state.show_reset_password:
+            st.markdown("### 🔄 Reset Password")
+            reset_email = st.text_input("Enter your registered email", key="forgot_password_email")
             if st.button("Send Password Reset Email", key="reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
+                    st.session_state.show_reset_password = False  # Optionally hide form after sending
 
     elif tab_selection == "Register":
         register_section()
+
 
 
 
