@@ -339,6 +339,8 @@ def login_section():
                 else:
                     send_password_reset_email_firebase(reset_email)
                     st.success("✅ Reset link sent! Check your inbox.")
+                    st.info("📧 If you don’t see the email, check your **Spam**, **Junk**, or **Promotions** folder.")
+
                     st.session_state.show_reset_password = False  # Hide form after sending
 
     elif tab_selection == "Register":
