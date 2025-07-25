@@ -329,33 +329,7 @@ def login_section():
 
     tab_selection = st.radio("Select", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
 
-    if tab_selection == "Login":
-        st.markdown('<div class="auth-title">Login to ScreenerPro</div>', unsafe_allow_html=True)
-        st.markdown('<div class="auth-subtext">Welcome back! Please enter your credentials.</div>', unsafe_allow_html=True)
-
-        with st.form("login_form", clear_on_submit=False):
-            email = st.text_input("Email", key="email_login")
-            password = st.text_input("Password", type="password", key="password_login")
-            submit = st.form_submit_button("Login")
-
-            if submit:
-                if not email or not password:
-                    st.error("All fields are required.")
-                else:
-                    result = sign_in_user_firebase(email, password)
-                    if result["success"]:
-                        st.success("Login successful!")
-                        st.session_state.authenticated = True
-                        st.session_state.username = result["email"]
-                        st.session_state.user_company = result["company"]
-                        st.session_state.user_uid = result["uid"]
-                        st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener"
-                        st.rerun()
-    else:
-        register_section()
-
-    st.markdown('</div></div></div>', unsafe_allow_html=True)
+    
 
 
 
