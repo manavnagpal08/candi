@@ -20,7 +20,6 @@ FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
 APP_ID = st.secrets.get('FIREBASE_APP_ID', 'your-default-app-id')
 
-
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
     st.error("Firebase API Key or Project ID not found. Please ensure they are configured directly at the top level of your .streamlit/secrets.toml file with correct capitalization (FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIREBASE_APP_ID).")
     st.stop()
@@ -234,27 +233,26 @@ def send_password_reset_email_firebase(email):
         return False
 
 def register_section():
-    st.markdown('<div class="auth-title">Create Your Account</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-subtext">Register your HR account to start screening.</div>', unsafe_allow_html=True)
-
+    """Public self-registration form."""
+    st.subheader("📝 Create New Account")
     with st.form("registration_form", clear_on_submit=True):
-        email = st.text_input("Email", key="register_email")
-        company = st.text_input("Company Name", key="register_company")
-        password = st.text_input("Password", type="password", key="register_password")
-        confirm = st.text_input("Confirm Password", type="password", key="register_confirm")
-        submit = st.form_submit_button("Register")
+        new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
+        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public")
+        new_password = st.text_input("Choose Password", type="password", key="new_password_reg_public")
+        confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password_reg_public")
+        register_button = st.form_submit_button("Register New Account")
 
-        if submit:
-            if not email or not password or not confirm or not company:
-                st.error("Please fill all the fields.")
-            elif not is_valid_email(email):
-                st.error("Invalid email format.")
-            elif password != confirm:
+        if register_button:
+            if not new_username or not new_password or not confirm_password or not new_company_name:
+                st.error("Please fill in all fields.")
+            elif not is_valid_email(new_username):
+                st.error("Please enter a valid email address for the username.")
+            elif new_password != confirm_password:
                 st.error("Passwords do not match.")
             else:
-                result = register_user_firebase(email, password, company)
+                result = register_user_firebase(new_username, new_password, new_company_name)
                 if result["success"]:
-                    st.success("Registration successful!")
+                    st.success("✅ Registration successful! You are now logged in.")
                     st.session_state.authenticated = True
                     st.session_state.username = result["email"]
                     st.session_state.user_company = result["company"]
@@ -263,74 +261,47 @@ def register_section():
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
 
-
-
-
-import streamlit as st
-
 def login_section():
-    # Set full page width and background
-    st.markdown("""
-        <style>
-            .main {
-                background: linear-gradient(to bottom right, #c9f0ff, #a2e1ff);
-            }
-            .login-box {
-                max-width: 600px;
-                margin: 5% auto;
-                padding: 3rem 2rem;
-                background-color: white;
-                border-radius: 20px;
-                box-shadow: 0 0 25px rgba(0,0,0,0.1);
-            }
-            .login-title {
-                font-size: 2rem;
-                font-weight: 700;
-                color: #007cf0;
-                text-align: center;
-                margin-bottom: 1rem;
-            }
-            .login-subtitle {
-                text-align: center;
-                font-size: 0.95rem;
-                color: #555;
-                margin-bottom: 2rem;
-            }
-            .login-button {
-                background-color: #007cf0;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                padding: 0.75rem;
-                font-size: 1rem;
-                width: 100%;
-                margin-top: 1rem;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    """Handles user login and public registration."""
+    # This section now assumes it's only called when not authenticated.
+    # The st.radio for "Login" vs "Register" is handled here.
+    if "active_login_tab_selection" not in st.session_state:
+        st.session_state.active_login_tab_selection = "Login"
 
-    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    tab_selection = st.radio(
+        "Select an option:",
+        ("Login", "Register"),
+        key="login_register_radio", # This key is unique to this section
+        index=0 if st.session_state.active_login_tab_selection == "Login" else 1
+    )
 
-    st.markdown('<div class="login-title">Login to ScreenerPro</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitle">AI-powered screening for smarter hiring decisions.</div>', unsafe_allow_html=True)
+    if tab_selection == "Login":
+        st.subheader("🔐 HR Login")
+        st.info("If you don't have an account, please go to the 'Register' option first.")
+        with st.form("login_form", clear_on_submit=False):
+            username = st.text_input("Username (Email)", key="username_login")
+            password = st.text_input("Password", type="password", key="password_login")
+            submitted = st.form_submit_button("Login")
 
-    with st.form("login_form"):
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Login")
-        if submitted:
-            if email and password:
-                st.success(f"✅ Welcome back, {email}!")
-            else:
-                st.error("Please enter both email and password.")
+            if submitted:
+                if not username or not password:
+                    st.error("Please enter both username and password.")
+                else:
+                    result = sign_in_user_firebase(username, password)
+                    if result["success"]:
+                        st.success("✅ Login successful!")
+                        st.session_state.authenticated = True
+                        st.session_state.username = result["email"]
+                        st.session_state.user_company = result["company"]
+                        st.session_state.user_uid = result["uid"]
+                        st.session_state.id_token = result["idToken"]
+                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
+                        st.rerun()
+    elif tab_selection == "Register":
+        register_section()
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-    tab_selection = st.radio("Select", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
-
-    
-
+    # This function no longer returns authentication status.
+    # The main loop will check st.session_state.authenticated directly.
 
 
 def logout_page():
