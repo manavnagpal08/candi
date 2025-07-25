@@ -261,6 +261,8 @@ def register_section():
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
 
+
+
 def login_section():
     """Handles user login and public registration."""
     if "active_login_tab_selection" not in st.session_state:
@@ -297,23 +299,21 @@ def login_section():
                         st.session_state.current_page = "Resume Screener"
                         st.rerun()
 
-        # 🔐 Forgot password section - placed OUTSIDE the form
-        st.markdown("---")
-        with st.expander("🔑 Forgot Password?"):
-            reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
-            reset_button = st.button("Send Password Reset Email", key="send_reset_button")
-            if reset_button:
-                if not reset_email or not is_valid_email(reset_email):
-                    st.error("Please enter a valid email address.")
-                else:
-                    send_password_reset_email_firebase(reset_email)
+        # 🧠 Forgot Password Modal Trigger
+        if st.button("🔑 Forgot Password?"):
+            with st.experimental_dialog("Reset Your Password") as dialog:
+                st.markdown("Enter the email associated with your account, and we'll send you a reset link.")
+                reset_email = st.text_input("Email", key="reset_modal_email")
+                reset_btn = st.button("Send Reset Email", key="reset_modal_button")
+                if reset_btn:
+                    if not reset_email or not is_valid_email(reset_email):
+                        st.error("Please enter a valid email address.")
+                    else:
+                        send_password_reset_email_firebase(reset_email)
+                        dialog.close()
 
     elif tab_selection == "Register":
         register_section()
-
-
-    # This function no longer returns authentication status.
-    # The main loop will check st.session_state.authenticated directly.
 
 
 def logout_page():
