@@ -266,39 +266,74 @@ def register_section():
 
 
 def login_section():
+    st.set_page_config(layout="wide")
     st.markdown("""
         <style>
-            .auth-container {
-                background-color: #ffffff;
-                padding: 3rem;
-                border-radius: 12px;
-                max-width: 420px;
-                margin: 3rem auto;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            body {
                 font-family: 'Inter', sans-serif;
-                animation: fadeSlideIn 0.5s ease-in-out;
+            }
+
+            .main-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background: linear-gradient(to right, #dbeafe, #e0f2fe);
+                padding: 1rem;
+            }
+
+            .login-card {
+                display: flex;
+                width: 900px;
+                background: #ffffff;
+                border-radius: 24px;
+                box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+                overflow: hidden;
+                animation: fadeSlideIn 0.6s ease-in-out;
+            }
+
+            .card-left {
+                flex: 1.2;
+                background: linear-gradient(to bottom right, #3a7bd5, #00d2ff);
+                color: white;
+                padding: 60px 40px;
+            }
+
+            .card-left h2 {
+                font-size: 32px;
+                font-weight: 800;
+                margin-bottom: 20px;
+            }
+
+            .card-left p {
+                font-size: 15px;
+                line-height: 1.6;
+            }
+
+            .card-right {
+                flex: 1;
+                padding: 50px 40px;
+                background: #fff;
             }
 
             .auth-title {
-                font-size: 2rem;
+                font-size: 26px;
                 font-weight: 700;
+                margin-bottom: 10px;
                 color: #1e272e;
-                margin-bottom: 0.5rem;
-                text-align: center;
             }
 
             .auth-subtext {
+                font-size: 15px;
                 color: #7f8c8d;
-                font-size: 0.95rem;
-                text-align: center;
-                margin-bottom: 1.5rem;
+                margin-bottom: 20px;
             }
 
             .stTextInput > div > div > input {
                 padding: 0.6rem;
-                border-radius: 6px;
+                border-radius: 8px;
                 border: 1px solid #ced6e0;
-                font-size: 0.95rem;
+                font-size: 15px;
             }
 
             .stTextInput label {
@@ -314,7 +349,9 @@ def login_section():
                 padding: 0.6rem 1rem;
                 font-weight: 600;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
+                width: 100%;
+                margin-top: 10px;
                 transition: background-color 0.3s ease;
             }
 
@@ -322,21 +359,10 @@ def login_section():
                 background-color: #1c7ed6;
             }
 
-            @keyframes fadeSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
             .switch-tab {
                 text-align: center;
-                margin-top: 1rem;
-                font-size: 0.9rem;
+                margin-top: 1.5rem;
+                font-size: 14px;
                 color: #576574;
             }
 
@@ -347,16 +373,48 @@ def login_section():
                 margin-left: 4px;
             }
 
+            @keyframes fadeSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .login-card {
+                    flex-direction: column;
+                    width: 100%;
+                }
+
+                .card-left, .card-right {
+                    padding: 30px;
+                }
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+    st.markdown('<div class="main-wrapper"><div class="login-card">', unsafe_allow_html=True)
 
-    tab_selection = st.radio("Select:", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
+    # Left side - Branding / Illustration
+    st.markdown("""
+        <div class="card-left">
+            <h2>Welcome to ScreenerPro</h2>
+            <p>AI-powered talent screening. Reduce manual effort and make smarter hiring decisions.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Right side - Login/Register UI
+    st.markdown('<div class="card-right">', unsafe_allow_html=True)
+
+    tab_selection = st.radio("Select", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
 
     if tab_selection == "Login":
         st.markdown('<div class="auth-title">Login to ScreenerPro</div>', unsafe_allow_html=True)
-        st.markdown('<div class="auth-subtext">Welcome back. Please enter your credentials.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-subtext">Welcome back! Please enter your credentials.</div>', unsafe_allow_html=True)
 
         with st.form("login_form", clear_on_submit=False):
             email = st.text_input("Email", key="email_login")
@@ -380,7 +438,7 @@ def login_section():
     else:
         register_section()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div></div></div>', unsafe_allow_html=True)
 
 
 
