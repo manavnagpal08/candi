@@ -443,7 +443,7 @@ def main():
 
     st.session_state.theme = "light"
     st._config.set_option("theme.base", "light")
-    st.info("Click the >> or << icon to toggle the sidebar.") # Info line added
+    st.info("To expand or collapse the navigation sidebar, simply click the >> or << arrow icon located in the top-left corner of the main content area.") 
 
     # Initialize session state variables if they don't exist
     if "authenticated" not in st.session_state:
