@@ -36,6 +36,7 @@ FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PR
 def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
+    Also includes custom CSS to hide specific Streamlit elements.
     """
     st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
     st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
@@ -50,6 +51,23 @@ def load_css_and_fonts():
         st.error("Error: 'style.css' not found. Please ensure it's in the same directory as app.py.")
     except Exception as e:
         st.error(f"An error occurred while loading style.css: {e}")
+
+    # Custom CSS to hide Streamlit toolbar buttons
+    st.markdown(
+        """
+        <style>
+        /* Hide the 'Deploy' button */
+        div[data-testid="stToolbarActionButton"] {
+            display: none !important;
+        }
+        /* Hide the three dots menu button in the header */
+        button[data-testid="stBaseButton-header"] {
+            display: none !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 def set_body_class():
     """
