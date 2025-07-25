@@ -475,7 +475,8 @@ def main():
     if "id_token" not in st.session_state:
         st.session_state.id_token = None
     if "current_page" not in st.session_state:
-        st.session_state.current_page = "Login / Register" # Default for unauthenticated
+        # Changed default page for unauthenticated users from "Login / Register" to "About Us"
+        st.session_state.current_page = "About Us" # Default for unauthenticated
 
     load_css_and_fonts()
     set_body_class()
