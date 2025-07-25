@@ -38,7 +38,7 @@ def load_css_and_fonts():
     """
     Loads custom CSS from style.css and ensures Font Awesome is loaded.
     Also includes custom CSS to hide specific Streamlit elements and
-    add styling for login/register pages.
+    add styling for login/register pages and the main content area.
     """
     st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
     st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
@@ -223,6 +223,21 @@ def load_css_and_fonts():
             border-color: #6fa8f7 !important;
             box-shadow: 0 2px 8px rgba(111, 168, 247, 0.2);
         }
+
+        /* Styling for the main content area (the large white box) */
+        .main .block-container {
+            background-color: #ffffff; /* White background for light mode */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+            padding: 30px; /* Internal padding */
+            margin-top: 20px; /* Space from the top */
+            margin-bottom: 20px; /* Space from the bottom */
+        }
+        html[data-theme="dark"] .main .block-container {
+            background-color: #3b3b55; /* Darker background for dark mode */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Stronger shadow for dark mode */
+        }
+
         </style>
         """,
         unsafe_allow_html=True
