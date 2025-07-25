@@ -263,6 +263,7 @@ def register_section():
                     st.rerun()
 
 
+
 def login_section():
     """Handles user login and public registration."""
 
@@ -290,24 +291,29 @@ def login_section():
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
 
-        # --- Forgot Password Link (styled, aligned right) ---
-        forgot_clicked = st.markdown(
+        # --- Forgot Password as text-like button (real trigger)
+        st.markdown(
             """
-            <div style="display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 20px;">
-                <a href="#" onclick="window.parent.postMessage({type: 'toggleForgot'}, '*');"
-                   style="color: #3498db; text-decoration: none; font-weight: 500; font-size: 14px;">
-                   🔑 Forgot Password?
-                </a>
-            </div>
+            <style>
+            div[data-testid="stButton"] > button {
+                background-color: white;
+                color: #3498db;
+                border: none;
+                padding: 0;
+                font-size: 14px;
+                text-decoration: underline;
+            }
+            div[data-testid="stButton"]:hover > button {
+                color: #1d6fa5;
+                cursor: pointer;
+            }
+            </style>
             """,
             unsafe_allow_html=True
         )
 
-        # Toggle forgot password manually (Streamlit doesn't support JS callbacks, so we use a button workaround)
-        toggle_col = st.columns([9, 1])
-        with toggle_col[1]:
-            if st.button(" ", key="toggle_forgot_click", help="Toggle forgot password form"):
-                st.session_state.show_reset_password = not st.session_state.show_reset_password
+        if st.button("🔑 Forgot Password?", key="toggle_forgot_pw"):
+            st.session_state.show_reset_password = not st.session_state.show_reset_password
 
         # --- Handle Login Logic ---
         if submitted:
@@ -325,19 +331,21 @@ def login_section():
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
 
-        # --- Reset Password Section ---
+        # --- Reset Password UI (shown conditionally) ---
         if st.session_state.show_reset_password:
-            st.markdown("### 🔑 Reset Password")
+            st.markdown("### 🔄 Reset Your Password")
             reset_email = st.text_input("Enter your registered email", key="forgot_password_email")
             if st.button("📩 Send Reset Link", key="reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
+                    st.success("✅ Reset link sent! Please check your email.")
                     st.session_state.show_reset_password = False
 
     elif tab_selection == "Register":
         register_section()
+
 
 
 
