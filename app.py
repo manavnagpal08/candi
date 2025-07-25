@@ -318,7 +318,7 @@ def login_section():
     ), unsafe_allow_html=True)
 
     # Track tab manually
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     if "login_tab" in query_params:
         st.session_state.active_login_tab_selection = query_params["login_tab"][0]
 
