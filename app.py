@@ -266,41 +266,77 @@ def register_section():
 def login_section():
     import streamlit as st
 
-    if "login_tab" not in st.session_state:
-        st.session_state.login_tab = "Login"
+    if "active_login_tab_selection" not in st.session_state:
+        st.session_state.active_login_tab_selection = "Login"
     if "show_reset_password" not in st.session_state:
         st.session_state.show_reset_password = False
 
-    # --- Clean Modern Tabs ---
-    tab_selection = st.radio(
-        "", ("Login", "Register"),
-        horizontal=True,
-        index=0 if st.session_state.login_tab == "Login" else 1,
-        label_visibility="collapsed",
-        key="login_tab_radio"
-    )
+    # ---- Tab Header (Styled Buttons) ----
+    st.markdown("""
+        <style>
+        .tab-button {
+            padding: 0.6em 1.4em;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 999px;
+            background-color: #f0f2f6;
+            color: #333;
+            margin-right: 0.8em;
+            cursor: pointer;
+            transition: all 0.25s ease-in-out;
+        }
+        .tab-button.selected {
+            background-color: #2c8cff;
+            color: white;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-    st.session_state.login_tab = tab_selection
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Login", key="login_btn_style"):
+            st.session_state.active_login_tab_selection = "Login"
+            st.session_state.show_reset_password = False
+    with col2:
+        if st.button("Register", key="register_btn_style"):
+            st.session_state.active_login_tab_selection = "Register"
+            st.session_state.show_reset_password = False
 
-    if st.session_state.login_tab == "Login":
+    # Style the selected tab manually
+    selected_tab = st.session_state.active_login_tab_selection
+    st.markdown(f"""
+        <script>
+        const buttons = window.parent.document.querySelectorAll('button');
+        buttons.forEach(b => {{
+            if (b.innerText === 'Login') {{
+                b.classList.toggle('selected', '{selected_tab}' === 'Login');
+            }}
+            if (b.innerText === 'Register') {{
+                b.classList.toggle('selected', '{selected_tab}' === 'Register');
+            }}
+        }});
+        </script>
+    """, unsafe_allow_html=True)
+
+    # ---- Login Tab ----
+    if selected_tab == "Login":
         st.subheader("🔐 Login to Your Account")
 
         with st.form("login_form"):
-            email = st.text_input("Email", placeholder="you@example.com")
-            password = st.text_input("Password", type="password", placeholder="Enter your password")
+            email = st.text_input("Email")
+            password = st.text_input("Password", type="password")
             col1, col2 = st.columns([3, 1])
-            with col1:
-                login_btn = st.form_submit_button("Login")
-            with col2:
-                forgot = st.form_submit_button("Forgot?")
+            login_submitted = col1.form_submit_button("Login")
+            forgot_clicked = col2.form_submit_button("Forgot?")
 
-        if login_btn:
+        if login_submitted:
             if not email or not password:
-                st.error("Please enter both email and password.")
+                st.error("Please fill in all fields.")
             else:
                 result = sign_in_user_firebase(email, password)
                 if result["success"]:
-                    st.success("✅ Logged in successfully!")
+                    st.success("✅ Login successful!")
                     st.session_state.authenticated = True
                     st.session_state.username = result["email"]
                     st.session_state.user_company = result["company"]
@@ -309,31 +345,32 @@ def login_section():
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
 
-        if forgot:
+        if forgot_clicked:
             st.session_state.show_reset_password = True
 
         if st.session_state.show_reset_password:
             st.markdown("### 🔁 Reset Password")
-            reset_email = st.text_input("Enter your email")
+            reset_email = st.text_input("Enter your registered email")
             if st.button("Send Reset Link"):
                 if not is_valid_email(reset_email):
                     st.error("Please enter a valid email.")
                 else:
                     send_password_reset_email_firebase(reset_email)
-                    st.success("Password reset link sent! Check your inbox/spam.")
-                    st.session_state.show_reset_password = False
+                    st.success("✅ Password reset link sent!")
+                    st.info("📧 Check your Spam/Junk if you don't see it.")
 
-    elif st.session_state.login_tab == "Register":
-        st.subheader("📝 Create a New Account")
+    # ---- Register Tab ----
+    elif selected_tab == "Register":
+        st.subheader("📝 Create Your Account")
 
         with st.form("register_form"):
-            email = st.text_input("Email", key="register_email", placeholder="you@example.com")
-            company = st.text_input("Company", key="register_company")
-            password = st.text_input("Password", type="password", key="register_password")
-            confirm = st.text_input("Confirm Password", type="password", key="register_confirm")
-            submit = st.form_submit_button("Register")
+            email = st.text_input("Email", key="reg_email")
+            company = st.text_input("Company", key="reg_company")
+            password = st.text_input("Password", type="password", key="reg_pass")
+            confirm = st.text_input("Confirm Password", type="password", key="reg_confirm")
+            submitted = st.form_submit_button("Register")
 
-        if submit:
+        if submitted:
             if not email or not company or not password or not confirm:
                 st.error("All fields are required.")
             elif password != confirm:
@@ -351,8 +388,6 @@ def login_section():
                     st.session_state.id_token = result["idToken"]
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
-
-
 
 
 def logout_page():
