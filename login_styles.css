@@ -182,34 +182,3 @@ html[data-theme="dark"] body {
     color: #00b3a8;
     text-decoration: underline;
 }
-
-/* Hide Streamlit's default radio button visuals */
-.stRadio > div {
-    display: none !important; /* Hide the default radio buttons completely */
-}
-
-/* --- Streamlit specific overrides for dark mode consistency --- */
-html[data-theme="dark"] .stTextInput > div > div > input {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #f0f0f0;
-}
-html[data-theme="dark"] .stTextInput > div > div > input:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: #ff6b6b;
-    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.3);
-}
-html[data-theme="dark"] .stButton > button {
-    background: linear-gradient(45deg, #ff6b6b, #ff4757);
-    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
-}
-html[data-theme="dark"] .stButton > button:hover {
-    background: linear-gradient(45deg, #ff4757, #ff6b6b);
-    box-shadow: 0 12px 25px rgba(255, 107, 107, 0.4);
-}
-html[data-theme="dark"] .stCheckbox > label {
-    color: #c0c0c0;
-}
-html[data-theme="dark"] .stRadio > label {
-    color: #e0e0e0;
-}
