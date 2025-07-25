@@ -19,72 +19,7 @@ from certificate_verifier import certificate_verifier_page
 FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
 APP_ID = st.secrets.get('FIREBASE_APP_ID', 'your-default-app-id')
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-}
 
-.login-container {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #dceeff 0%, #a0dfff 100%);
-}
-
-.login-card {
-    display: flex;
-    width: 80%;
-    max-width: 900px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.card-left {
-    flex: 1;
-    padding: 3rem;
-    background: linear-gradient(145deg, #007cf0, #00dfd8);
-    color: white;
-}
-
-.card-right {
-    flex: 1;
-    padding: 3rem;
-    background: #fff;
-}
-
-.auth-title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.auth-subtext {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-</style>
-
-<!-- Streamlit section wrapper -->
-<div class="login-container">
-  <div class="login-card">
-    <div class="card-left">
-      <h2>Welcome to ScreenerPro</h2>
-      <p>Organized online screening, data-powered shortlists for smart hiring decisions.</p>
-    </div>
-
-    <div class="card-right">
-      <div class="auth-title">Login to ScreenerPro</div>
-      <div class="auth-subtext">Welcome back. Please enter your credentials.</div>
-      <!-- Your Streamlit login form goes here -->
-    </div>
-  </div>
-</div>
 
 if not FIREBASE_API_KEY or not FIREBASE_PROJECT_ID:
     st.error("Firebase API Key or Project ID not found. Please ensure they are configured directly at the top level of your .streamlit/secrets.toml file with correct capitalization (FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIREBASE_APP_ID).")
@@ -335,132 +270,74 @@ def login_section():
     st.set_page_config(layout="wide")
     st.markdown("""
         <style>
-            body {
-                font-family: 'Inter', sans-serif;
-            }
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-            .main-wrapper {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background: linear-gradient(to right, #dbeafe, #e0f2fe);
-                padding: 1rem;
-            }
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #dceeff 0%, #a0dfff 100%);
+}
 
-            .login-card {
-                display: flex;
-                width: 900px;
-                background: #ffffff;
-                border-radius: 24px;
-                box-shadow: 0 10px 35px rgba(0,0,0,0.1);
-                overflow: hidden;
-                animation: fadeSlideIn 0.6s ease-in-out;
-            }
+.login-card {
+    display: flex;
+    width: 80%;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
 
-            .card-left {
-                flex: 1.2;
-                background: linear-gradient(to bottom right, #3a7bd5, #00d2ff);
-                color: white;
-                padding: 60px 40px;
-            }
+.card-left {
+    flex: 1;
+    padding: 3rem;
+    background: linear-gradient(145deg, #007cf0, #00dfd8);
+    color: white;
+}
 
-            .card-left h2 {
-                font-size: 32px;
-                font-weight: 800;
-                margin-bottom: 20px;
-            }
+.card-right {
+    flex: 1;
+    padding: 3rem;
+    background: #fff;
+}
 
-            .card-left p {
-                font-size: 15px;
-                line-height: 1.6;
-            }
+.auth-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
 
-            .card-right {
-                flex: 1;
-                padding: 50px 40px;
-                background: #fff;
-            }
+.auth-subtext {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+</style>
 
-            .auth-title {
-                font-size: 26px;
-                font-weight: 700;
-                margin-bottom: 10px;
-                color: #1e272e;
-            }
+<!-- Streamlit section wrapper -->
+<div class="login-container">
+  <div class="login-card">
+    <div class="card-left">
+      <h2>Welcome to ScreenerPro</h2>
+      <p>Organized online screening, data-powered shortlists for smart hiring decisions.</p>
+    </div>
 
-            .auth-subtext {
-                font-size: 15px;
-                color: #7f8c8d;
-                margin-bottom: 20px;
-            }
+    <div class="card-right">
+      <div class="auth-title">Login to ScreenerPro</div>
+      <div class="auth-subtext">Welcome back. Please enter your credentials.</div>
+      <!-- Your Streamlit login form goes here -->
+    </div>
+  </div>
+</div>
 
-            .stTextInput > div > div > input {
-                padding: 0.6rem;
-                border-radius: 8px;
-                border: 1px solid #ced6e0;
-                font-size: 15px;
-            }
-
-            .stTextInput label {
-                font-weight: 600;
-                font-size: 0.9rem;
-                color: #2d3436;
-                margin-bottom: 0.2rem;
-            }
-
-            .stButton > button {
-                background-color: #1e90ff;
-                color: white;
-                padding: 0.6rem 1rem;
-                font-weight: 600;
-                border: none;
-                border-radius: 8px;
-                width: 100%;
-                margin-top: 10px;
-                transition: background-color 0.3s ease;
-            }
-
-            .stButton > button:hover {
-                background-color: #1c7ed6;
-            }
-
-            .switch-tab {
-                text-align: center;
-                margin-top: 1.5rem;
-                font-size: 14px;
-                color: #576574;
-            }
-
-            .switch-tab a {
-                color: #1e90ff;
-                text-decoration: none;
-                font-weight: 600;
-                margin-left: 4px;
-            }
-
-            @keyframes fadeSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            @media (max-width: 768px) {
-                .login-card {
-                    flex-direction: column;
-                    width: 100%;
-                }
-
-                .card-left, .card-right {
-                    padding: 30px;
-                }
-            }
-        </style>
+     
+           
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="main-wrapper"><div class="login-card">', unsafe_allow_html=True)
