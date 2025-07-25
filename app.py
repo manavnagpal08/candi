@@ -262,14 +262,17 @@ def register_section():
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
 
+
 def login_section():
     """Handles user login and public registration."""
+
+    # Initialize session states
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
-
     if "show_reset_password" not in st.session_state:
         st.session_state.show_reset_password = False
 
+    # Tab selector
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -285,34 +288,48 @@ def login_section():
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                submitted = st.form_submit_button("Login")
-            with col2:
-                forgot_clicked = st.form_submit_button("Forgot?", help="Reset your password")
-                if forgot_clicked:
-                    st.session_state.show_reset_password = True
+            submitted = st.form_submit_button("Login")
 
-            if submitted:
-                if not username or not password:
-                    st.error("Please enter both username and password.")
-                else:
-                    result = sign_in_user_firebase(username, password)
-                    if result["success"]:
-                        st.success("✅ Login successful!")
-                        st.session_state.authenticated = True
-                        st.session_state.username = result["email"]
-                        st.session_state.user_company = result["company"]
-                        st.session_state.user_uid = result["uid"]
-                        st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener"
-                        st.rerun()
+        # --- Forgot Password Link (styled, aligned right) ---
+        forgot_clicked = st.markdown(
+            """
+            <div style="display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 20px;">
+                <a href="#" onclick="window.parent.postMessage({type: 'toggleForgot'}, '*');"
+                   style="color: #3498db; text-decoration: none; font-weight: 500; font-size: 14px;">
+                   🔑 Forgot Password?
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-        # --- Inline Reset Password UI ---
+        # Toggle forgot password manually (Streamlit doesn't support JS callbacks, so we use a button workaround)
+        toggle_col = st.columns([9, 1])
+        with toggle_col[1]:
+            if st.button(" ", key="toggle_forgot_click", help="Toggle forgot password form"):
+                st.session_state.show_reset_password = not st.session_state.show_reset_password
+
+        # --- Handle Login Logic ---
+        if submitted:
+            if not username or not password:
+                st.error("Please enter both username and password.")
+            else:
+                result = sign_in_user_firebase(username, password)
+                if result["success"]:
+                    st.success("✅ Login successful!")
+                    st.session_state.authenticated = True
+                    st.session_state.username = result["email"]
+                    st.session_state.user_company = result["company"]
+                    st.session_state.user_uid = result["uid"]
+                    st.session_state.id_token = result["idToken"]
+                    st.session_state.current_page = "Resume Screener"
+                    st.rerun()
+
+        # --- Reset Password Section ---
         if st.session_state.show_reset_password:
-            st.markdown("#### 🔑 Reset Password")
-            reset_email = st.text_input("Email", key="reset_email_field")
-            if st.button("📩 Send Reset Link"):
+            st.markdown("### 🔑 Reset Password")
+            reset_email = st.text_input("Enter your registered email", key="forgot_password_email")
+            if st.button("📩 Send Reset Link", key="reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
@@ -321,6 +338,7 @@ def login_section():
 
     elif tab_selection == "Register":
         register_section()
+
 
 
 
