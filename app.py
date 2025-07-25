@@ -263,17 +263,16 @@ def register_section():
                     st.rerun()
 
 
-
 def login_section():
     """Handles user login and public registration."""
 
-    # Initialize session states
+    # Session state setup
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
     if "show_reset_password" not in st.session_state:
         st.session_state.show_reset_password = False
 
-    # Tab selector
+    # Tabs: Login / Register
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -291,31 +290,38 @@ def login_section():
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
 
-        # --- Forgot Password as text-like button (real trigger)
+        # --- Forgot Password Styled Link (right-aligned) ---
         st.markdown(
             """
             <style>
-            div[data-testid="stButton"] > button {
-                background-color: white;
-                color: #3498db;
-                border: none;
-                padding: 0;
-                font-size: 14px;
-                text-decoration: underline;
+            .forgot-link {
+                text-align: right;
+                margin-top: -12px;
+                margin-bottom: 16px;
             }
-            div[data-testid="stButton"]:hover > button {
-                color: #1d6fa5;
-                cursor: pointer;
+            .forgot-link a {
+                color: #3498db;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+            }
+            .forgot-link a:hover {
+                text-decoration: underline;
+                color: #217dbb;
             }
             </style>
+            <div class="forgot-link">
+                <a href="#" onclick="window.parent.postMessage({type: 'toggleForgot'}, '*'); return false;">Forgot Password?</a>
+            </div>
             """,
             unsafe_allow_html=True
         )
 
-        if st.button("🔑 Forgot Password?", key="toggle_forgot_pw"):
+        # Fallback: Actual toggle logic since JS doesn't trigger Python
+        if st.button("Click here to reset your password", key="toggle_reset_pw"):
             st.session_state.show_reset_password = not st.session_state.show_reset_password
 
-        # --- Handle Login Logic ---
+        # --- Handle login result ---
         if submitted:
             if not username or not password:
                 st.error("Please enter both username and password.")
@@ -331,16 +337,18 @@ def login_section():
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
 
-        # --- Reset Password UI (shown conditionally) ---
+        # --- Reset Password Form ---
         if st.session_state.show_reset_password:
-            st.markdown("### 🔄 Reset Your Password")
-            reset_email = st.text_input("Enter your registered email", key="forgot_password_email")
-            if st.button("📩 Send Reset Link", key="reset_btn"):
+            st.markdown("#### Reset your password")
+            st.caption("Enter your registered email to receive a password reset link.")
+            reset_email = st.text_input("Email", key="forgot_password_email")
+
+            if st.button("Send Reset Link", key="send_reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
-                    st.success("✅ Reset link sent! Please check your email.")
+                    st.success("✅ Password reset link sent! Check your inbox.")
                     st.session_state.show_reset_password = False
 
     elif tab_selection == "Register":
