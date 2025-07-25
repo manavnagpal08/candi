@@ -264,58 +264,88 @@ def register_section():
 
 
 def login_section():
-    """Handles user login and public registration."""
+    """Modern UI for Login and Registration."""
 
-    # Initialize session states
+    # Init state
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
     if "show_reset_password" not in st.session_state:
         st.session_state.show_reset_password = False
 
-    # Radio for Login/Register
-    tab_selection = st.radio(
-        "Select an option:",
-        ("Login", "Register"),
-        key="login_register_radio",
-        index=0 if st.session_state.active_login_tab_selection == "Login" else 1
-    )
+    # --- CSS Styling ---
+    st.markdown("""
+        <style>
+            .tab-container {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+            .tab-button {
+                padding: 10px 30px;
+                margin: 0 5px;
+                border: 2px solid #3498db;
+                border-radius: 8px;
+                cursor: pointer;
+                background-color: white;
+                color: #3498db;
+                font-weight: 600;
+                transition: background-color 0.3s;
+            }
+            .tab-button.active {
+                background-color: #3498db;
+                color: white;
+            }
+            .forgot-link {
+                text-align: right;
+                font-size: 13px;
+                margin: -10px 0 16px 0;
+            }
+            .forgot-link a {
+                color: #3498db;
+                text-decoration: none;
+            }
+            .forgot-link a:hover {
+                text-decoration: underline;
+            }
+            .form-input {
+                border-radius: 10px;
+                border: 1px solid #dfe6e9;
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
-    if tab_selection == "Login":
-        st.subheader("🔐 HR Login")
-        st.info("If you don't have an account, please go to the 'Register' option first.")
+    # --- Tab Buttons ---
+    st.markdown('<div class="tab-container">', unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Login", key="tab_login"):
+            st.session_state.active_login_tab_selection = "Login"
+    with col2:
+        if st.button("Register", key="tab_register"):
+            st.session_state.active_login_tab_selection = "Register"
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        # --- Login Form ---
+    active_tab = st.session_state.active_login_tab_selection
+
+    # --- Login Form ---
+    if active_tab == "Login":
+        st.subheader("🔐 Login to Your Account")
+
         with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("Username (Email)", key="username_login")
-            password = st.text_input("Password", type="password", key="password_login")
+            username = st.text_input("Email", key="username_login", placeholder="you@example.com")
+            password = st.text_input("Password", type="password", key="password_login", placeholder="••••••••")
             submitted = st.form_submit_button("Login")
 
-        # --- Clickable Forgot Password Link (styled real button) ---
-        st.markdown("""
-            <style>
-            div[data-testid="stButton"] > button {
-                background: none;
-                border: none;
-                padding: 0;
-                font-size: 14px;
-                color: #3498db;
-                text-decoration: underline;
-                cursor: pointer;
-            }
-            div[data-testid="stButton"] > button:hover {
-                color: #1d6fa5;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-
-        # Real toggle trigger
+        # Forgot Password (styled link)
         if st.button("Forgot Password?", key="toggle_reset_pw"):
             st.session_state.show_reset_password = not st.session_state.show_reset_password
 
-        # --- Handle Login Submit ---
+        # Handle login
         if submitted:
             if not username or not password:
-                st.error("Please enter both username and password.")
+                st.error("Please enter both email and password.")
             else:
                 result = sign_in_user_firebase(username, password)
                 if result["success"]:
@@ -328,23 +358,47 @@ def login_section():
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
 
-        # --- Reset Password Form (conditionally shown) ---
+        # Reset password form
         if st.session_state.show_reset_password:
-            st.markdown("### 🔄 Reset Your Password")
-            st.caption("Enter the email address associated with your account.")
-            reset_email = st.text_input("Email", key="forgot_password_email")
+            st.markdown("#### 🔄 Reset Password")
+            reset_email = st.text_input("Registered Email", key="forgot_password_email", placeholder="you@example.com")
             if st.button("Send Reset Link", key="send_reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
-                    st.success("✅ Reset link sent! Check your inbox.")
-                    st.info("📧 If you don’t see the email, check your **Spam**, **Junk**, or **Promotions** folder.")
+                    st.success("✅ Reset link sent! Check inbox or spam.")
+                    st.session_state.show_reset_password = False
 
-                    st.session_state.show_reset_password = False  # Hide form after sending
+    # --- Registration Form ---
+    elif active_tab == "Register":
+        st.subheader("📝 Create Your Account")
 
-    elif tab_selection == "Register":
-        register_section()
+        with st.form("registration_form", clear_on_submit=True):
+            new_email = st.text_input("Email", key="new_username", placeholder="you@example.com")
+            new_company = st.text_input("Company Name", key="new_company", placeholder="Your Company")
+            new_password = st.text_input("Password", type="password", key="new_password", placeholder="Choose password")
+            confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password", placeholder="Re-enter password")
+            reg_submit = st.form_submit_button("Register")
+
+        if reg_submit:
+            if not new_email or not new_password or not confirm_password or not new_company:
+                st.error("Please fill in all fields.")
+            elif not is_valid_email(new_email):
+                st.error("Enter a valid email address.")
+            elif new_password != confirm_password:
+                st.error("Passwords do not match.")
+            else:
+                result = register_user_firebase(new_email, new_password, new_company)
+                if result["success"]:
+                    st.success("✅ Registration successful! You are now logged in.")
+                    st.session_state.authenticated = True
+                    st.session_state.username = result["email"]
+                    st.session_state.user_company = result["company"]
+                    st.session_state.user_uid = result["uid"]
+                    st.session_state.id_token = result["idToken"]
+                    st.session_state.current_page = "Resume Screener"
+                    st.rerun()
 
     # This function no longer returns authentication status.
     # The main loop will check st.session_state.authenticated directly.
