@@ -233,27 +233,27 @@ def send_password_reset_email_firebase(email):
         return False
 
 def register_section():
-    st.markdown('<div class="form-title">📝 Create New HR Account</div>', unsafe_allow_html=True)
-    st.markdown('<div class="form-info">Enter your company name and email to register.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="auth-title">Create Your Account</div>', unsafe_allow_html=True)
+    st.markdown('<div class="auth-subtext">Register your HR account to start screening.</div>', unsafe_allow_html=True)
 
     with st.form("registration_form", clear_on_submit=True):
-        new_username = st.text_input("📧 Email", key="new_username_reg_public")
-        new_company_name = st.text_input("🏢 Company Name", key="new_company_name_reg_public")
-        new_password = st.text_input("🔒 Password", type="password", key="new_password_reg_public")
-        confirm_password = st.text_input("🔒 Confirm Password", type="password", key="confirm_password_reg_public")
-        register_button = st.form_submit_button("Register Account 🎉")
+        email = st.text_input("Email", key="register_email")
+        company = st.text_input("Company Name", key="register_company")
+        password = st.text_input("Password", type="password", key="register_password")
+        confirm = st.text_input("Confirm Password", type="password", key="register_confirm")
+        submit = st.form_submit_button("Register")
 
-        if register_button:
-            if not new_username or not new_password or not confirm_password or not new_company_name:
-                st.error("Please fill in all fields.")
-            elif not is_valid_email(new_username):
-                st.error("Please enter a valid email address.")
-            elif new_password != confirm_password:
+        if submit:
+            if not email or not password or not confirm or not company:
+                st.error("Please fill all the fields.")
+            elif not is_valid_email(email):
+                st.error("Invalid email format.")
+            elif password != confirm:
                 st.error("Passwords do not match.")
             else:
-                result = register_user_firebase(new_username, new_password, new_company_name)
+                result = register_user_firebase(email, password, company)
                 if result["success"]:
-                    st.success("✅ Registration successful! Welcome aboard.")
+                    st.success("Registration successful!")
                     st.session_state.authenticated = True
                     st.session_state.username = result["email"]
                     st.session_state.user_company = result["company"]
@@ -263,72 +263,113 @@ def register_section():
                     st.rerun()
 
 
+
+
 def login_section():
     st.markdown("""
         <style>
-            .form-container {
-                background: linear-gradient(to right, #f5f7fa, #c3cfe2);
-                padding: 2.5rem;
+            .auth-container {
+                background-color: #ffffff;
+                padding: 3rem;
                 border-radius: 12px;
-                box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-                margin-top: 30px;
-                animation: fadeIn 0.8s ease-in-out;
+                max-width: 420px;
+                margin: 3rem auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+                font-family: 'Inter', sans-serif;
+                animation: fadeSlideIn 0.5s ease-in-out;
             }
 
-            .form-title {
+            .auth-title {
                 font-size: 2rem;
                 font-weight: 700;
-                color: #2d3436;
+                color: #1e272e;
+                margin-bottom: 0.5rem;
                 text-align: center;
-                margin-bottom: 20px;
             }
 
-            .form-info {
+            .auth-subtext {
+                color: #7f8c8d;
+                font-size: 0.95rem;
                 text-align: center;
-                color: #636e72;
-                font-size: 1rem;
                 margin-bottom: 1.5rem;
             }
 
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
+            .stTextInput > div > div > input {
+                padding: 0.6rem;
+                border-radius: 6px;
+                border: 1px solid #ced6e0;
+                font-size: 0.95rem;
             }
 
-            .stButton button {
-                background-color: #0984e3 !important;
-                color: white !important;
+            .stTextInput label {
                 font-weight: 600;
-                border-radius: 6px;
+                font-size: 0.9rem;
+                color: #2d3436;
+                margin-bottom: 0.2rem;
             }
 
-            .stTextInput>div>div>input {
-                border: 1px solid #dfe6e9;
+            .stButton > button {
+                background-color: #1e90ff;
+                color: white;
+                padding: 0.6rem 1rem;
+                font-weight: 600;
+                border: none;
                 border-radius: 6px;
-                padding: 0.5rem;
+                transition: background-color 0.3s ease;
             }
+
+            .stButton > button:hover {
+                background-color: #1c7ed6;
+            }
+
+            @keyframes fadeSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .switch-tab {
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 0.9rem;
+                color: #576574;
+            }
+
+            .switch-tab a {
+                color: #1e90ff;
+                text-decoration: none;
+                font-weight: 600;
+                margin-left: 4px;
+            }
+
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="form-container">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
 
-    tab_selection = st.radio("Select an option:", ("Login", "Register"), index=0)
+    tab_selection = st.radio("Select:", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
 
     if tab_selection == "Login":
-        st.markdown('<div class="form-title">🔐 HR Login</div>', unsafe_allow_html=True)
-        st.markdown('<div class="form-info">Please login to access the dashboard.</div>', unsafe_allow_html=True)
-        with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("📧 Email", key="username_login")
-            password = st.text_input("🔒 Password", type="password", key="password_login")
-            submitted = st.form_submit_button("Login 🚀")
+        st.markdown('<div class="auth-title">Login to ScreenerPro</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-subtext">Welcome back. Please enter your credentials.</div>', unsafe_allow_html=True)
 
-            if submitted:
-                if not username or not password:
-                    st.error("Please enter both email and password.")
+        with st.form("login_form", clear_on_submit=False):
+            email = st.text_input("Email", key="email_login")
+            password = st.text_input("Password", type="password", key="password_login")
+            submit = st.form_submit_button("Login")
+
+            if submit:
+                if not email or not password:
+                    st.error("All fields are required.")
                 else:
-                    result = sign_in_user_firebase(username, password)
+                    result = sign_in_user_firebase(email, password)
                     if result["success"]:
-                        st.success("✅ Login successful!")
+                        st.success("Login successful!")
                         st.session_state.authenticated = True
                         st.session_state.username = result["email"]
                         st.session_state.user_company = result["company"]
@@ -339,12 +380,8 @@ def login_section():
     else:
         register_section()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-   
-
-    # This function no longer returns authentication status.
-    # The main loop will check st.session_state.authenticated directly.
 
 
 def logout_page():
