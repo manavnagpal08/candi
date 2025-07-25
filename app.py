@@ -15,7 +15,6 @@ from feedback_form import feedback_and_help_page
 from total_screened_page import total_screened_page
 from generate_fake_data import generate_fake_data_page
 from certificate_verifier import certificate_verifier_page
-
 # --- Firebase Configuration ---
 FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
@@ -36,9 +35,8 @@ FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PR
 # --- CSS Loading and Body Class Functions ---
 def load_css_and_fonts():
     """
-    Loads custom CSS from style.css and login_styles.css, ensures Font Awesome is loaded.
-    Also includes custom CSS to hide specific Streamlit elements and
-    add styling for the main content area.
+    Loads custom CSS from style.css and ensures Font Awesome is loaded.
+    Also includes custom CSS to hide specific Streamlit elements.
     """
     st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
     st.markdown('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">', unsafe_allow_html=True)
@@ -54,18 +52,7 @@ def load_css_and_fonts():
     except Exception as e:
         st.error(f"An error occurred while loading style.css: {e}")
 
-    # Load the external login_styles.css file
-    try:
-        current_dir = os.path.dirname(__file__)
-        login_css_file_path = os.path.join(current_dir, "login_styles.css")
-        with open(login_css_file_path) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.error("Error: 'login_styles.css' not found. Please ensure it's in the same directory as app.py.")
-    except Exception as e:
-        st.error(f"An error occurred while loading login_styles.css: {e}")
-
-    # Custom CSS to hide Streamlit toolbar buttons and style login/register
+    # Custom CSS to hide Streamlit toolbar buttons
     st.markdown(
         """
         <style>
@@ -77,21 +64,6 @@ def load_css_and_fonts():
         button[data-testid="stBaseButton-header"] {
             display: none !important;
         }
-
-        /* Styling for the main content area (the large white box) */
-        .main .block-container {
-            background-color: #ffffff; /* White background for light mode */
-            border-radius: 15px; /* Rounded corners */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Subtle shadow */
-            padding: 30px; /* Internal padding */
-            margin-top: 20px; /* Space from the top */
-            margin-bottom: 20px; /* Space from the bottom */
-        }
-        html[data-theme="dark"] .main .block-container {
-            background-color: #3b3b55; /* Darker background for dark mode */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Stronger shadow for dark mode */
-        }
-
         </style>
         """,
         unsafe_allow_html=True
@@ -262,7 +234,6 @@ def send_password_reset_email_firebase(email):
 
 def register_section():
     """Public self-registration form."""
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
     st.subheader("📝 Create New Account")
     with st.form("registration_form", clear_on_submit=True):
         new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
@@ -289,20 +260,18 @@ def register_section():
                     st.session_state.id_token = result["idToken"]
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True) # Close login-card
 
 def login_section():
     """Handles user login and public registration."""
-    st.markdown('<div class="login-page-container">', unsafe_allow_html=True)
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
-    
+    # This section now assumes it's only called when not authenticated.
+    # The st.radio for "Login" vs "Register" is handled here.
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
 
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
-        key="login_register_radio",
+        key="login_register_radio", # This key is unique to this section
         index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
@@ -326,17 +295,13 @@ def login_section():
                         st.session_state.user_company = result["company"]
                         st.session_state.user_uid = result["uid"]
                         st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener"
+                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
                         st.rerun()
     elif tab_selection == "Register":
-        # This will now be handled by the register_section which also has the card
-        st.markdown('</div>', unsafe_allow_html=True) # Close login-card for the radio part
-        st.markdown('</div>', unsafe_allow_html=True) # Close login-page-container for the radio part
-        register_section() # Call register section which now includes its own card
-        return # Exit to prevent double rendering of the container/card
+        register_section()
 
-    st.markdown('</div>', unsafe_allow_html=True) # Close login-card
-    st.markdown('</div>', unsafe_allow_html=True) # Close login-page-container
+    # This function no longer returns authentication status.
+    # The main loop will check st.session_state.authenticated directly.
 
 
 def logout_page():
