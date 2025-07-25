@@ -266,92 +266,66 @@ def register_section():
 
 
 
+import streamlit as st
+
 def login_section():
-    st.set_page_config(layout="wide")
+    # Set full page width and background
     st.markdown("""
         <style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-.login-container {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #dceeff 0%, #a0dfff 100%);
-}
-
-.login-card {
-    display: flex;
-    width: 80%;
-    max-width: 900px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.card-left {
-    flex: 1;
-    padding: 3rem;
-    background: linear-gradient(145deg, #007cf0, #00dfd8);
-    color: white;
-}
-
-.card-right {
-    flex: 1;
-    padding: 3rem;
-    background: #fff;
-}
-
-.auth-title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.auth-subtext {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-</style>
-
-<!-- Streamlit section wrapper -->
-<div class="login-container">
-  <div class="login-card">
-    <div class="card-left">
-      <h2>Welcome to ScreenerPro</h2>
-      <p>Organized online screening, data-powered shortlists for smart hiring decisions.</p>
-    </div>
-
-    <div class="card-right">
-      <div class="auth-title">Login to ScreenerPro</div>
-      <div class="auth-subtext">Welcome back. Please enter your credentials.</div>
-      <!-- Your Streamlit login form goes here -->
-    </div>
-  </div>
-</div>
-
-     
-           
+            .main {
+                background: linear-gradient(to bottom right, #c9f0ff, #a2e1ff);
+            }
+            .login-box {
+                max-width: 600px;
+                margin: 5% auto;
+                padding: 3rem 2rem;
+                background-color: white;
+                border-radius: 20px;
+                box-shadow: 0 0 25px rgba(0,0,0,0.1);
+            }
+            .login-title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #007cf0;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            .login-subtitle {
+                text-align: center;
+                font-size: 0.95rem;
+                color: #555;
+                margin-bottom: 2rem;
+            }
+            .login-button {
+                background-color: #007cf0;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 0.75rem;
+                font-size: 1rem;
+                width: 100%;
+                margin-top: 1rem;
+            }
+        </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="main-wrapper"><div class="login-card">', unsafe_allow_html=True)
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
 
-    # Left side - Branding / Illustration
-    st.markdown("""
-        <div class="card-left">
-            <h2>Welcome to ScreenerPro</h2>
-            <p>AI-powered talent screening. Reduce manual effort and make smarter hiring decisions.</p>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="login-title">Login to ScreenerPro</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">AI-powered screening for smarter hiring decisions.</div>', unsafe_allow_html=True)
 
-    # Right side - Login/Register UI
-    st.markdown('<div class="card-right">', unsafe_allow_html=True)
+    with st.form("login_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login")
+        if submitted:
+            if email and password:
+                st.success(f"✅ Welcome back, {email}!")
+            else:
+                st.error("Please enter both email and password.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
     tab_selection = st.radio("Select", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
 
