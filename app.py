@@ -14,7 +14,7 @@ from about_us import about_us_page
 from feedback_form import feedback_and_help_page
 from total_screened_page import total_screened_page
 from generate_fake_data import generate_fake_data_page
-
+from certificate_verifier import certificate_verifier_page
 # --- Firebase Configuration ---
 FIREBASE_API_KEY = st.secrets.get('FIREBASE_API_KEY', '')
 FIREBASE_PROJECT_ID = st.secrets.get('FIREBASE_PROJECT_ID', '')
