@@ -266,13 +266,13 @@ def register_section():
 def login_section():
     """Handles user login and public registration."""
 
-    # Session state setup
+    # Initialize session states
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
     if "show_reset_password" not in st.session_state:
         st.session_state.show_reset_password = False
 
-    # Tabs: Login / Register
+    # Radio for Login/Register
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -290,38 +290,29 @@ def login_section():
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
 
-        # --- Forgot Password Styled Link (right-aligned) ---
-        st.markdown(
-            """
+        # --- Clickable Forgot Password Link (styled real button) ---
+        st.markdown("""
             <style>
-            .forgot-link {
-                text-align: right;
-                margin-top: -12px;
-                margin-bottom: 16px;
-            }
-            .forgot-link a {
-                color: #3498db;
-                text-decoration: none;
+            div[data-testid="stButton"] > button {
+                background: none;
+                border: none;
+                padding: 0;
                 font-size: 14px;
-                font-weight: 500;
-            }
-            .forgot-link a:hover {
+                color: #3498db;
                 text-decoration: underline;
-                color: #217dbb;
+                cursor: pointer;
+            }
+            div[data-testid="stButton"] > button:hover {
+                color: #1d6fa5;
             }
             </style>
-            <div class="forgot-link">
-                <a href="#" onclick="window.parent.postMessage({type: 'toggleForgot'}, '*'); return false;">Forgot Password?</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """, unsafe_allow_html=True)
 
-        # Fallback: Actual toggle logic since JS doesn't trigger Python
-        if st.button("Click here to reset your password", key="toggle_reset_pw"):
+        # Real toggle trigger
+        if st.button("Forgot Password?", key="toggle_reset_pw"):
             st.session_state.show_reset_password = not st.session_state.show_reset_password
 
-        # --- Handle login result ---
+        # --- Handle Login Submit ---
         if submitted:
             if not username or not password:
                 st.error("Please enter both username and password.")
@@ -337,26 +328,21 @@ def login_section():
                     st.session_state.current_page = "Resume Screener"
                     st.rerun()
 
-        # --- Reset Password Form ---
+        # --- Reset Password Form (conditionally shown) ---
         if st.session_state.show_reset_password:
-            st.markdown("#### Reset your password")
-            st.caption("Enter your registered email to receive a password reset link.")
+            st.markdown("### 🔄 Reset Your Password")
+            st.caption("Enter the email address associated with your account.")
             reset_email = st.text_input("Email", key="forgot_password_email")
-
             if st.button("Send Reset Link", key="send_reset_btn"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
-                    st.success("✅ Password reset link sent! Check your inbox.")
-                    st.session_state.show_reset_password = False
+                    st.success("✅ Reset link sent! Check your inbox.")
+                    st.session_state.show_reset_password = False  # Hide form after sending
 
     elif tab_selection == "Register":
         register_section()
-
-
-
-
 
     # This function no longer returns authentication status.
     # The main loop will check st.session_state.authenticated directly.
