@@ -262,7 +262,6 @@ def register_section():
                     st.rerun()
 
 
-
 def login_section():
     """Handles user login and public registration."""
     if "active_login_tab_selection" not in st.session_state:
@@ -299,21 +298,20 @@ def login_section():
                         st.session_state.current_page = "Resume Screener"
                         st.rerun()
 
-        # 🧠 Forgot Password Modal Trigger
-        if st.button("🔑 Forgot Password?"):
-            with st.experimental_dialog("Reset Your Password") as dialog:
-                st.markdown("Enter the email associated with your account, and we'll send you a reset link.")
-                reset_email = st.text_input("Email", key="reset_modal_email")
-                reset_btn = st.button("Send Reset Email", key="reset_modal_button")
-                if reset_btn:
-                    if not reset_email or not is_valid_email(reset_email):
-                        st.error("Please enter a valid email address.")
-                    else:
-                        send_password_reset_email_firebase(reset_email)
-                        dialog.close()
+        # ❓ Forgot Password Link (styled as small text)
+        st.markdown('<p style="font-size: 14px; color: #3498db; cursor: pointer;">🔑 Forgot your password?</p>', unsafe_allow_html=True)
+
+        with st.expander("Reset Password"):
+            reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
+            if st.button("Send Password Reset Email", key="reset_btn"):
+                if not reset_email or not is_valid_email(reset_email):
+                    st.error("Please enter a valid email address.")
+                else:
+                    send_password_reset_email_firebase(reset_email)
 
     elif tab_selection == "Register":
         register_section()
+
 
 
 def logout_page():
