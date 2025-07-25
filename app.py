@@ -1,3 +1,4 @@
+
 import streamlit as st
 import json
 import os
@@ -261,42 +262,87 @@ def register_section():
                     st.session_state.current_page = "welcome_dashboard"
                     st.rerun()
 
+
 def login_section():
     """Handles user login and public registration."""
-    # This section now assumes it's only called when not authenticated.
-    # The st.radio for "Login" vs "Register" is handled here.
+
+    # Initialize session states
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
+    if "show_reset_password" not in st.session_state:
+        st.session_state.show_reset_password = False
 
+    # Radio for Login/Register
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
-        key="login_register_radio", # This key is unique to this section
+        key="login_register_radio",
         index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
     if tab_selection == "Login":
         st.subheader("🔐 HR Login")
         st.info("If you don't have an account, please go to the 'Register' option first.")
+
+        # --- Login Form ---
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
 
-            if submitted:
-                if not username or not password:
-                    st.error("Please enter both username and password.")
+        # --- Clickable Forgot Password Link (styled real button) ---
+        st.markdown("""
+            <style>
+            div[data-testid="stButton"] > button {
+                background: none;
+                border: none;
+                padding: 0;
+                font-size: 14px;
+                color: #3498db;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            div[data-testid="stButton"] > button:hover {
+                color: #1d6fa5;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Real toggle trigger
+        if st.button("Forgot Password?", key="toggle_reset_pw"):
+            st.session_state.show_reset_password = not st.session_state.show_reset_password
+
+        # --- Handle Login Submit ---
+        if submitted:
+            if not username or not password:
+                st.error("Please enter both username and password.")
+            else:
+                result = sign_in_user_firebase(username, password)
+                if result["success"]:
+                    st.success("✅ Login successful!")
+                    st.session_state.authenticated = True
+                    st.session_state.username = result["email"]
+                    st.session_state.user_company = result["company"]
+                    st.session_state.user_uid = result["uid"]
+                    st.session_state.id_token = result["idToken"]
+                    st.session_state.current_page = "Resume Screener"
+                    st.rerun()
+
+        # --- Reset Password Form (conditionally shown) ---
+        if st.session_state.show_reset_password:
+            st.markdown("### 🔄 Reset Your Password")
+            st.caption("Enter the email address associated with your account.")
+            reset_email = st.text_input("Email", key="forgot_password_email")
+            if st.button("Send Reset Link", key="send_reset_btn"):
+                if not reset_email or not is_valid_email(reset_email):
+                    st.error("Please enter a valid email address.")
                 else:
-                    result = sign_in_user_firebase(username, password)
-                    if result["success"]:
-                        st.success("✅ Login successful!")
-                        st.session_state.authenticated = True
-                        st.session_state.username = result["email"]
-                        st.session_state.user_company = result["company"]
-                        st.session_state.user_uid = result["uid"]
-                        st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
-                        st.rerun()
+                    send_password_reset_email_firebase(reset_email)
+                    st.success("✅ Reset link sent! Check your inbox.")
+                    st.info("📧 If you don’t see the email, check your **Spam**, **Junk**, or **Promotions** folder.")
+
+                    st.session_state.show_reset_password = False  # Hide form after sending
+
     elif tab_selection == "Register":
         register_section()
 
