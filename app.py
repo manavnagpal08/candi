@@ -267,6 +267,9 @@ def login_section():
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
 
+    if "show_reset_password" not in st.session_state:
+        st.session_state.show_reset_password = False
+
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
@@ -278,10 +281,17 @@ def login_section():
         st.subheader("🔐 HR Login")
         st.info("If you don't have an account, please go to the 'Register' option first.")
 
+        # --- Login Form ---
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
-            submitted = st.form_submit_button("Login")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                submitted = st.form_submit_button("Login")
+            with col2:
+                forgot_clicked = st.form_submit_button("Forgot?", help="Reset your password")
+                if forgot_clicked:
+                    st.session_state.show_reset_password = True
 
             if submitted:
                 if not username or not password:
@@ -298,19 +308,20 @@ def login_section():
                         st.session_state.current_page = "Resume Screener"
                         st.rerun()
 
-        # 🔐 Forgot password section - placed OUTSIDE the form
-        st.markdown("---")
-        with st.expander("🔑 Forgot Password?"):
-            reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
-            reset_button = st.button("Send Password Reset Email", key="send_reset_button")
-            if reset_button:
+        # --- Inline Reset Password UI ---
+        if st.session_state.show_reset_password:
+            st.markdown("#### 🔑 Reset Password")
+            reset_email = st.text_input("Email", key="reset_email_field")
+            if st.button("📩 Send Reset Link"):
                 if not reset_email or not is_valid_email(reset_email):
                     st.error("Please enter a valid email address.")
                 else:
                     send_password_reset_email_firebase(reset_email)
+                    st.session_state.show_reset_password = False
 
     elif tab_selection == "Register":
         register_section()
+
 
 
     # This function no longer returns authentication status.
