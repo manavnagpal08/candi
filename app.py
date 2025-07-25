@@ -263,34 +263,24 @@ def register_section():
 
 def login_section():
     """Handles user login and public registration."""
-    # This section now assumes it's only called when not authenticated.
-    # The st.radio for "Login" vs "Register" is handled here.
     if "active_login_tab_selection" not in st.session_state:
         st.session_state.active_login_tab_selection = "Login"
 
     tab_selection = st.radio(
         "Select an option:",
         ("Login", "Register"),
-        key="login_register_radio", # This key is unique to this section
+        key="login_register_radio",
         index=0 if st.session_state.active_login_tab_selection == "Login" else 1
     )
 
     if tab_selection == "Login":
         st.subheader("🔐 HR Login")
         st.info("If you don't have an account, please go to the 'Register' option first.")
+
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("Username (Email)", key="username_login")
             password = st.text_input("Password", type="password", key="password_login")
             submitted = st.form_submit_button("Login")
-            st.markdown("---")
-            with st.expander("🔑 Forgot Password?"):
-                reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
-                if st.button("Send Password Reset Email"):
-                    if not reset_email or not is_valid_email(reset_email):
-                        st.error("Please enter a valid email.")
-                    else:
-                        send_password_reset_email_firebase(reset_email)
-
 
             if submitted:
                 if not username or not password:
@@ -304,10 +294,23 @@ def login_section():
                         st.session_state.user_company = result["company"]
                         st.session_state.user_uid = result["uid"]
                         st.session_state.id_token = result["idToken"]
-                        st.session_state.current_page = "Resume Screener" # Redirect to a default authenticated page
+                        st.session_state.current_page = "Resume Screener"
                         st.rerun()
+
+        # 🔐 Forgot password section - placed OUTSIDE the form
+        st.markdown("---")
+        with st.expander("🔑 Forgot Password?"):
+            reset_email = st.text_input("Enter your registered email to reset password", key="forgot_password_email")
+            reset_button = st.button("Send Password Reset Email", key="send_reset_button")
+            if reset_button:
+                if not reset_email or not is_valid_email(reset_email):
+                    st.error("Please enter a valid email address.")
+                else:
+                    send_password_reset_email_firebase(reset_email)
+
     elif tab_selection == "Register":
         register_section()
+
 
     # This function no longer returns authentication status.
     # The main loop will check st.session_state.authenticated directly.
