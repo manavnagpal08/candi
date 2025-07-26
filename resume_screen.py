@@ -3839,5 +3839,3 @@ def smart_feedback(resume_text, job_desc_text):
         feedback = "🔴 Low match. Your resume and the job description don't align well."
 
     return semantic_score, feedback
-
-
