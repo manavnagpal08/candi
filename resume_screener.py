@@ -1516,6 +1516,66 @@ def resume_screener_page():
                 font-weight: 700;
                 color: #333;
             }
+            /* New/Enhanced UI styles */
+            .stContainer {
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 25px;
+                background-color: #ffffff;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            }
+            .stMarkdown h1 {
+                text-align: center;
+                color: #003049;
+                font-family: 'Playfair Display', serif;
+                font-size: 3.5em;
+                margin-bottom: 0.5em;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            }
+            .stMarkdown h3 {
+                color: #2196F3;
+                font-size: 1.8em;
+                text-align: center;
+                margin-top: -10px;
+                margin-bottom: 30px;
+            }
+            .stAlert.st-emotion-cache-1f0646s.e1f1d6z03 { /* Targeting specific alert types for better visuals */
+                background-color: #e3f2fd; /* Light blue for info */
+                border-left: 5px solid #2196F3;
+            }
+            .stAlert.st-emotion-cache-1f0646s.e1f1d6z04 { /* Light green for success */
+                background-color: #e8f5e9;
+                border-left: 5px solid #4CAF50;
+            }
+            .stAlert.st-emotion-cache-1f0646s.e1f1d6z05 { /* Light red for error */
+                background-color: #ffebee;
+                border-left: 5px solid #f44336;
+            }
+            .stAlert.st-emotion-cache-1f0646s.e1f1d6z06 { /* Light yellow for warning */
+                background-color: #fffde7;
+                border-left: 5px solid #ffc107;
+            }
+            .stSelectbox label, .stFileUploader label, .stTextInput label, .stTextArea label {
+                font-weight: 600;
+                color: #333;
+                font-size: 1.05em;
+            }
+            .stDownloadButton button {
+                background-color: #00bcd4; /* Teal for download */
+            }
+            .stDownloadButton button:hover {
+                background-color: #0097a7;
+            }
+            .stExpander > div:first-child { /* Style for expander header */
+                background-color: #f5f5f5;
+                border-radius: 10px;
+                padding: 10px 15px;
+                font-weight: bold;
+                color: #3F51B5;
+            }
+            .stExpander > div:first-child:hover {
+                background-color: #e0e0e0;
+            }
         </style>
     """, unsafe_allow_html=True)
 
@@ -1538,6 +1598,7 @@ def resume_screener_page():
 
     with st.container(border=True):
         st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
+        st.markdown("Choose how you want to provide the Job Description (JD).")
         col1_jd, col2_jd = st.columns([2, 1])
 
         with col1_jd:
@@ -1547,7 +1608,8 @@ def resume_screener_page():
             jd_option_selected = st.selectbox(
                 "📌 **Select a Pre-Loaded Job Role or Upload Your Own Job Description**",
                 jd_options_display,
-                key="jd_option_selector"
+                key="jd_option_selector",
+                help="You can either paste a new job description, upload a file, or select from our pre-loaded examples."
             )
 
             uploaded_jd_file = None
@@ -1564,7 +1626,7 @@ def resume_screener_page():
                 uploaded_jd_file = st.file_uploader(
                     "Upload Job Description (TXT, PDF)",
                     type=["txt", "pdf"],
-                    help="Upload a .txt or .pdf file containing the job description.",
+                    help="Upload a .txt or .pdf file containing the job description. Ensure it's text-selectable.",
                     key="jd_file_uploader"
                 )
                 if uploaded_jd_file:
@@ -1580,11 +1642,11 @@ def resume_screener_page():
                             jd_text = f.read()
                         jd_name_for_results = jd_option_selected
                     except Exception as e:
-                        st.error(f"Error loading selected JD from file '{jd_path}': {e}")
+                        st.error(f"❌ Error loading selected JD from file '{jd_path}': {e}")
                         jd_text = ""
                         jd_name_for_results = "Error Loading JD"
                 else:
-                    st.error(f"Selected JD file not found: {jd_path}")
+                    st.error(f"❌ Selected JD file not found: {jd_path}")
                     jd_text = ""
                     jd_name_for_results = "Error Loading JD"
 
@@ -1608,9 +1670,9 @@ def resume_screener_page():
                     st.pyplot(fig)
                     plt.close(fig)
                 else:
-                    st.info("No significant keywords to display for the Job Description. Please ensure your JD has sufficient content or adjust your SKILL_CATEGORIES list.")
+                    st.info("ℹ️ No significant keywords to display for the Job Description. Please ensure your JD has sufficient content or adjust your SKILL_CATEGORIES list.")
             else:
-                st.info("Please select or upload a Job Description to view its keyword cloud.")
+                st.info("👆 Please select or upload a Job Description to view its keyword cloud.")
 
     with st.container(border=True):
         st.markdown("## 🏢 Target Company Fit (Optional)")
@@ -1623,7 +1685,7 @@ def resume_screener_page():
             key="target_company_selector"
         )
         if target_company_name != "None":
-            st.info(f"A small score boost will be applied if your resume matches skills important to **{target_company_name}**. A detailed company fit assessment will also be provided.")
+            st.info(f"💡 A small score boost will be applied if your resume matches skills important to **{target_company_name}**. A detailed company fit assessment will also be provided.")
         
         with st.expander("📚 View All Company Profiles"):
             st.code(json.dumps(COMPANY_SKILL_PROFILES, indent=2), language='json')
@@ -1643,9 +1705,9 @@ def resume_screener_page():
     with screen_button_col:
         if st.button("🚀 Screen Resume", use_container_width=True):
             if not jd_text.strip():
-                st.error("Please provide a Job Description to proceed with screening.")
+                st.error("⚠️ Please provide a Job Description to proceed with screening.")
             elif not uploaded_resume_file:
-                st.error("Please upload a resume to proceed with screening.")
+                st.error("⚠️ Please upload a resume to proceed with screening.")
             else:
                 with st.spinner("Processing resume and generating insights... This may take a few moments."):
                     try:
@@ -1671,14 +1733,14 @@ def resume_screener_page():
                             target_company_name=target_company_name
                         )
                         st.session_state.results = screening_results
-                        st.success("Analysis complete! See the results below.")
+                        st.success("✅ Analysis complete! See the results below.")
 
                         if st.session_state.results and st.session_state.results['Email'] != 'Not Found' and st.session_state.results['Skill Match'] >= 50:
                             gmail_address = st.secrets.get("GMAIL_ADDRESS")
                             gmail_app_password = st.secrets.get("GMAIL_APP_PASSWORD")
 
                             if gmail_address and gmail_app_password:
-                                st.info("Attempting to automatically send certificate...")
+                                st.info("📧 Attempting to automatically send certificate...")
                                 try:
                                     certificate_html_content = generate_certificate_html(st.session_state.results)
                                 except NameError:
@@ -1697,14 +1759,14 @@ def resume_screener_page():
                                     gmail_app_password=gmail_app_password
                                 )
                             else:
-                                st.warning("Email sending not configured. Certificate was not sent automatically. Please check your Streamlit secrets for GMAIL_ADDRESS and GMAIL_APP_PASSWORD.")
+                                st.warning("⚠️ Email sending not configured. Certificate was not sent automatically. Please check your Streamlit secrets for GMAIL_ADDRESS and GMAIL_APP_PASSWORD.")
                         elif st.session_state.results and st.session_state.results['Email'] == 'Not Found':
-                            st.warning("No email address found in the resume. Certificate could not be sent automatically.")
+                            st.warning("⚠️ No email address found in the resume. Certificate could not be sent automatically.")
                         elif st.session_state.results and st.session_state.results['Skill Match'] < 50:
-                            st.info(f"Candidate score ({st.session_state.results['Skill Match']:.2f}%) is below the 50% threshold for automatic certificate issuance.")
+                            st.info(f"ℹ️ Candidate score ({st.session_state.results['Skill Match']:.2f}%) is below the 50% threshold for automatic certificate issuance.")
 
                     except Exception as e:
-                        st.error(f"An unexpected error occurred during processing: {e}")
+                        st.error(f"❌ An unexpected error occurred during processing: {e}")
                         traceback.print_exc()
                         st.session_state.results = None
 
@@ -1730,7 +1792,7 @@ def resume_screener_page():
             st.markdown(results['Company Fit Assessment'])
 
         with tab3:
-            st.markdown("### Personal Details")
+            st.markdown("### 👤 Personal Details")
             st.write(f"**Email:** {results['Email']}")
             st.write(f"**Phone Number:** {results['Phone Number']}")
             st.write(f"**Location:** {results['Location']}")
@@ -1738,17 +1800,17 @@ def resume_screener_page():
             st.write(f"**Years of Experience:** {results['Years Experience']:.1f}")
             st.write(f"**CGPA (4.0 Scale):** {results['CGPA (4.0 Scale)'] if results['CGPA (4.0 Scale)'] is not None else 'Not Found'}")
 
-            st.markdown("### Education")
+            st.markdown("### 🎓 Education")
             st.write(f"**Education Details:** {results['Education Details']}")
 
-            st.markdown("### Work History")
+            st.markdown("### 💼 Work History")
             if results['Work History'] != "Not Found":
                 for entry in results['Work History'].split('; '):
                     st.markdown(f"- {entry}")
             else:
                 st.write("Not Found")
 
-            st.markdown("### Projects")
+            st.markdown("### 💡 Projects")
             if results['Project Details'] != "Not Found":
                 for entry in results['Project Details'].split('; '):
                     st.markdown(f"- {entry}")
@@ -1778,13 +1840,13 @@ def resume_screener_page():
                     st.markdown("Great job! Your skills align well with the job description.")
 
         with tab5:
-            st.markdown("### Your ScreenerPro Certificate")
+            st.markdown("### 🏆 Your ScreenerPro Certificate")
             st.markdown(f"Your unique Certificate ID: `{results['Certificate ID']}`")
             st.markdown(f"**Rank Achieved:** {results['Certificate Rank']}")
 
             certificate_html_content = generate_certificate_html(results)
 
-            download_col, email_col = st.columns(2)
+            download_col, email_col_manual = st.columns(2) # Renamed email_col to email_col_manual to avoid conflict with manual email expander
             with download_col:
                 st.download_button(
                     label="Download Certificate (PDF)",
@@ -1793,7 +1855,7 @@ def resume_screener_page():
                     mime="application/pdf",
                     use_container_width=True
                 )
-            with email_col:
+            with email_col_manual:
                 with st.expander("Manually Email Certificate"):
                     recipient_email = st.text_input("Enter recipient email address:", value=results['Email'] if results['Email'] != 'Not Found' else '', key="manual_email_input")
                     if st.button("Send Certificate via Email (Manual)", key="send_manual_email_button"):
@@ -1813,12 +1875,13 @@ def resume_screener_page():
                                         gmail_app_password=gmail_app_password
                                     )
                             else:
-                                st.error("Email sending is not configured. Please set GMAIL_ADDRESS and GMAIL_APP_PASSWORD in your Streamlit secrets.")
+                                st.error("❌ Email sending is not configured. Please set GMAIL_ADDRESS and GMAIL_APP_PASSWORD in your Streamlit secrets.")
                         else:
-                            st.error("Please enter a valid recipient email address.")
+                            st.error("❌ Please enter a valid recipient email address.")
 
         st.markdown("---")
-        st.markdown("### Contribute to Leaderboard")
+        st.markdown("### 📈 Contribute to Leaderboard")
+        st.caption("Help us build a public leaderboard of top screening results!")
         leaderboard_col, _ = st.columns([0.3, 0.7])
         with leaderboard_col:
             if st.button("Add My Score to Leaderboard", use_container_width=True):
