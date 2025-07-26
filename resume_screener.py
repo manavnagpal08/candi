@@ -383,6 +383,7 @@ def extract_text_from_file(file_bytes, file_name, file_type):
                 return f"[ERROR] No readable text extracted from PDF. It might be a scanned PDF. Please upload a text-selectable PDF."
 
         except Exception as e:
+            print(f"ERROR: Failed to extract text from PDF for {file_name}: {str(e)}") # Added print for debugging
             return f"[ERROR] Failed to extract text from PDF: {str(e)}. Ensure it's a text-selectable PDF, not a scanned image."
 
     elif "image" in file_type:
@@ -403,10 +404,10 @@ def extract_years_of_experience(resume_text):
         for line in lines:
             if any(keyword in line for keyword in [
                 "education", "b.tech", "btech", "class x", "class xii", "school",
-                "higher secondary", "cgpa", "percentage", "university", "college", "institute"
+                "higher secondary", "cgpa", "percentage", "university", "college", "institute" # Added university, college, institute
             ]):
                 inside_education = True
-            elif inside_education and line.strip() == "": # Exit education block on empty line
+            elif inside_education and line.strip() == "":
                 inside_education = False
             if not inside_education:
                 filtered.append(line)
@@ -1748,9 +1749,9 @@ def resume_screener_page():
         if target_company_name != "None":
             st.info(f"💡 A small score boost will be applied if your resume matches skills important to **{target_company_name}**. A detailed company fit assessment will also be provided.")
         
-        with st.expander("📚 View All Company Profiles"):
-            st.code(json.dumps(COMPANY_SKILL_PROFILES, indent=2), language='json')
-            st.markdown("You can modify the `company_profiles.py` file directly to add or update company profiles.")
+        # Removed the "View All Company Profiles" expander as requested.
+        # If you wish to display company profiles in a different format,
+        # you can add a new section here.
 
     with st.container(border=True):
         st.markdown("## 📥 Upload Resume")
