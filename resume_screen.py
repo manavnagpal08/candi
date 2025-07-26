@@ -22,6 +22,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import pytesseract
 from PIL import Image
+import random # Added for LLM-style summary variability
 
 # --- Global Variables and Configuration ---
 # Set Tesseract path if not in PATH (adjust as needed for your system)
@@ -32,10 +33,9 @@ from PIL import Image
 firebase_config = json.loads(os.environ.get('__firebase_config', '{}'))
 app_id = os.environ.get('__app_id', 'default-app-id')
 
-# --- LLM API Configuration ---
-# API key for Gemini API - leave empty string, Canvas will provide it at runtime
-API_KEY = ""
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
+# Removed LLM API Configuration as it's no longer used for HR summary
+# API_KEY = ""
+# GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
 
 # --- Load Models and Data ---
 @st.cache_resource
@@ -235,12 +235,110 @@ def convert_pdf_to_images(pdf_file):
         st.error(f"Error converting PDF to images for OCR: {e}. Ensure Poppler is installed and in your system's PATH.")
         return []
 
+# Name extraction helper (copied from HR portal app)
+NAME_EXCLUDE_TERMS = {
+    "linkedin", "github", "portfolio", "resume", "cv", "profile", "contact", "email", "phone",
+    "mobile", "number", "tel", "telephone", "address", "website", "site", "social", "media",
+    "url", "link", "blog", "personal", "summary", "about", "objective", "dob", "birth", "age",
+    "nationality", "gender", "location", "city", "country", "pin", "zipcode", "state", "whatsapp",
+    "skype", "telegram", "handle", "id", "details", "connection", "reach", "network", "www",
+    "https", "http", "contactinfo", "connect", "reference", "references","fees","Bangalore, Karnataka",
+    "resume", "cv", "curriculum vitae", "resume of", "cv of", "summary", "about",
+    "objective", "declaration", "personal profile", "profile", "career objective",
+    "introduction", "bio", "statement", "overview",
+
+    # Education & academic
+    "education", "qualifications", "academic", "certification", "certifications", "degree",
+    "school", "college", "university", "diploma", "graduate", "graduation", "passed", "gpa",
+    "cgpa", "marks", "percentage", "year", "pass", "exam", "results", "board",
+
+    # Skills and tools
+    "skills", "technical", "technologies", "tools", "software", "programming",
+    "languages", "frameworks", "libraries", "databases", "methodologies", "platforms",
+    "proficient", "knowledge", "experience", "exposure", "tools used", "framework",
+
+    # Software/product/tool names (block spaCy NER mistakes)
+    "zoom", "slack", "google", "microsoft", "excel", "word", "docs", "teams", "powerpoint",
+    "notion", "jupyter", "linux", "windows", "android", "firebase", "oracle", "git", "github",
+    "bitbucket", "jira", "confluence", "sheets", "trello", "figma", "canva", "sql", "mysql",
+    "postgres", "mongodb", "hadoop", "spark", "kubernetes", "docker", "aws", "azure", "gcp",
+
+    # Job/work section
+    "experience", "internship", "work", "professional", "employment", "company",
+    "role", "designation", "job", "project", "responsibilities", "position",
+    "organization", "industry", "client", "team", "department",
+
+    # Hobbies/extra
+    "interests", "hobbies", "achievements", "awards", "activities", "extra curricular",
+    "certified", "certificates", "participation", "strengths", "weaknesses", "languages known",
+
+    # Location examples
+    "bangalore", "delhi", "mumbai", "chennai", "hyderabad", "pune", "kolkata", "india",
+    "remote", "new york", "california", "london", "tokyo", "berlin", "canada", "germany",
+
+    # Misc
+    "fees", "salary", "expected", "compensation", "passport", "visa", "availability",
+    "notice period", "relocate", "relocation", "travel", "timing", "schedule", "full-time", "part-time",
+
+    # Filler/common false-positive content
+    "available", "required", "requested", "relevant", "coursework", "summary", "hello",
+    "introduction", "dear", "regards", "thanks", "thank you", "please", "objective", "kindly"
+}
+
+def extract_name(text):
+    lines = text.strip().splitlines()
+    if not lines:
+        return None
+
+    PREFIX_CLEANER = re.compile(r"^(name[\s:\-]*|mr\.?|ms\.?|mrs\.?)", re.IGNORECASE)
+
+    potential_names = []
+
+    for line in lines[:10]:
+        original_line = line.strip()
+        if not original_line:
+            continue
+
+        cleaned_line = PREFIX_CLEANER.sub('', original_line).strip()
+        cleaned_line = re.sub(r'[^A-Za-z\s]', '', cleaned_line)
+
+        if any(term in cleaned_line.lower() for term in NAME_EXCLUDE_TERMS):
+            continue
+
+        words = cleaned_line.split()
+
+        if 1 < len(words) <= 4 and all(w.isalpha() for w in words):
+            if all(w.istitle() or w.isupper() for w in words):
+                potential_names.append(cleaned_line)
+
+    if potential_names:
+        return max(potential_names, key=len).title()
+
+    return None
+
+# Job domain classifier (copied from HR portal app)
+def detect_job_domain(jd_title, jd_text):
+    text = (jd_title + " " + jd_text).lower()
+    if any(k in text for k in ["accountant", "finance", "ca", "cpa", "audit", "tax", "financial"]):
+        return "finance"
+    elif any(k in text for k in ["data scientist", "analytics", "ml", "ai", "machine learning", "deep learning", "nlp", "computer vision"]):
+        return "data_science"
+    elif any(k in text for k in ["developer", "engineer", "react", "python", "java", "software", "web", "frontend", "backend", "fullstack"]):
+        return "software"
+    elif any(k in text for k in ["recruiter", "talent acquisition", "hr", "human resources", "people operations", "onboarding"]):
+        return "hr"
+    elif any(k in text for k in ["designer", "photoshop", "figma", "ux", "ui", "illustrator", "graphic"]):
+        return "design"
+    else:
+        return "general"
+
 
 def extract_info(text):
     """
     Extracts various pieces of information from the resume text.
     """
     info = {
+        "Name": "N/A", # Added Name field
         "Years of Experience": 0,
         "Email": "N/A",
         "Phone Number": "N/A",
@@ -252,6 +350,11 @@ def extract_info(text):
         "Certifications": [],
         "CGPA": "N/A"
     }
+
+    # Extract Name
+    name = extract_name(text)
+    if name:
+        info["Name"] = name
 
     # Years of Experience (simple regex, can be improved)
     exp_match = re.search(r'(\d+)\s*years?\s*of\s*experience', text, re.IGNORECASE)
@@ -317,7 +420,7 @@ def extract_info(text):
         info["Education"].append({"degree": degree.strip(), "field": field.strip(), "university": university.strip(), "year": year if year else "N/A"})
 
     # Work History (looks for job titles and companies, dates)
-    work_history_matches = re.findall(r'(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{2})[.\s-]?\d{4}\s*[-–]\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{2})?[.\s-]?\d{4}|present|current)\s*\n\s*(.*?)\s+at\s+([^\n]+)', text, re.IGNORECASE | re.DOTALL)
+    work_history_matches = re.findall(r'(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{2})[.\s-]?\d{4}\s*[-–]\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{2})?[.\s-]?(\d{4}|present|current))\s*\n\s*(.*?)\s+at\s+([^\n]+)', text, re.IGNORECASE | re.DOTALL)
     for match in work_history_matches:
         dates_str, title, company = match
         info["Work History"].append({"title": title.strip(), "company": company.strip(), "dates": dates_str.strip()})
@@ -396,36 +499,7 @@ def generate_keyword_cloud(text):
     else:
         st.info("No significant keywords found to generate a cloud.")
 
-
-def get_llm_response(prompt):
-    """Fetches a response from the Gemini LLM API."""
-    chat_history = []
-    chat_history.append({"role": "user", "parts": [{"text": prompt}]})
-    payload = {"contents": chat_history}
-
-    try:
-        response = requests.post(
-            GEMINI_API_URL,
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(payload)
-        )
-        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
-        result = response.json()
-
-        if result.get("candidates") and len(result["candidates"]) > 0 and \
-           result["candidates"][0].get("content") and \
-           result["candidates"][0]["content"].get("parts") and \
-           len(result["candidates"][0]["content"]["parts"]) > 0:
-            return result["candidates"][0]["content"]["parts"][0]["text"]
-        else:
-            st.error(f"LLM response structure unexpected: {result}")
-            return "Could not generate summary."
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error calling LLM API: {e}")
-        return "Could not generate summary due to API error."
-    except json.JSONDecodeError:
-        st.error("Failed to decode JSON response from LLM API.")
-        return "Could not generate summary due to JSON error."
+# Removed get_llm_response as it's no longer used for HR summary
 
 def normalize_score(score, min_val, max_val, new_min=0, new_max=100):
     """Normalizes a score from an old range to a new range."""
@@ -450,7 +524,7 @@ def calculate_semantic_similarity(jd_text, resume_text):
     similarity = util.cos_sim(jd_embedding, resume_embedding).item()
     return similarity * 100 # Convert to percentage
 
-def calculate_scores(jd_text, resume_text, resume_info, jd_skills, resume_skills, high_priority_skills, medium_priority_skills):
+def calculate_scores(jd_text, resume_text, resume_info, jd_skills, resume_skills): # Removed high_priority_skills, medium_priority_skills
     """
     Calculates various scores for resume screening,
     using logic aligned with the HR portal for main scoring.
@@ -517,52 +591,123 @@ def calculate_scores(jd_text, resume_text, resume_info, jd_skills, resume_skills
 
     return scores
 
-def generate_hr_summary(resume_text, jd_text, resume_info, scores, matched_skills, missing_skills, tone="Professional"):
-    """
-    Generates an LLM-powered HR summary for the candidate.
-    This is the "LLM thing" from the HR portal.
-    """
-    prompt = f"""
-    As an AI HR Assistant, analyze the following Job Description (JD) and Candidate Resume.
-    Generate a comprehensive HR summary for the candidate, focusing on their suitability for the role.
+# New LLM-style HR summary generation function (copied from HR portal app)
+def generate_hr_summary(name, score, experience, matched_skills, missing_skills, cgpa, job_domain, tone="Professional"):
+    summary_parts = []
 
-    **Job Description:**
-    {jd_text}
+    # Map job_domain to a more descriptive role_tag
+    role_tag_map = {
+        "finance": "finance-focused",
+        "data_science": "data science-oriented",
+        "software": "software development-centric",
+        "hr": "human resources-aligned",
+        "design": "design-specialized",
+        "general": "well-rounded"
+    }
+    role_tag = role_tag_map.get(job_domain, "general")
 
-    **Candidate Resume Text:**
-    {resume_text}
+    cgpa_str = f"a CGPA of {cgpa:.2f} on a 4.0 scale" if pd.notna(cgpa) and cgpa != "N/A" else "no specific CGPA mentioned"
 
-    **Candidate Extracted Information:**
-    - Years of Experience: {resume_info.get('Years of Experience', 'N/A')}
-    - Email: {resume_info.get('Email', 'N/A')}
-    - Phone: {resume_info.get('Phone Number', 'N/A')}
-    - Location: {resume_info.get('Location', 'N/A')}
-    - CGPA: {resume_info.get('CGPA', 'N/A')}
-    - Matched Skills: {', '.join(matched_skills) if matched_skills else 'None'}
-    - Missing Skills: {', '.join(missing_skills) if missing_skills else 'None'}
+    # 1. Opening Statement
+    if tone == "Professional":
+        summary_parts.append(
+            f"{name} presents as a {role_tag} candidate with approximately {experience} years of experience and {cgpa_str}."
+        )
+    elif tone == "Friendly":
+        summary_parts.append(
+            f"Meet {name}, a {role_tag} professional with about {experience} years under their belt, and they've achieved {cgpa_str}."
+        )
+    elif tone == "Critical":
+        summary_parts.append(
+            f"Analysis of {name}'s profile reveals {experience} years of experience and {cgpa_str}, with a {role_tag} focus."
+        )
 
-    **Calculated Scores:**
-    - Exact Match Score: {scores.get('Exact Match Score', 'N/A')}%
-    - Semantic Similarity Score: {scores.get('Semantic Similarity Score', 'N/A')}%
-    - Final Match Score: {scores.get('Final Match Score', 'N/A')}%
-    - Experience Score: {scores.get('Experience Score', 'N/A')}%
-    - CGPA Score: {scores.get('CGPA Score', 'N/A')}%
-    - Company Fit Score: {scores.get('Company Fit Score', 'N/A')}% (if applicable)
-    - AI Tag: {scores.get('AI Tag', 'N/A')}
+    # 2. Highlighted Strengths
+    if matched_skills:
+        focus_skills = ', '.join(matched_skills[:5])
+        if tone == "Professional":
+            strength_openers = [
+                f"The candidate demonstrates strong alignment in key technical areas such as: {focus_skills}.",
+                f"Core proficiencies identified include: {focus_skills}.",
+                f"Notable strengths encompass: {focus_skills}."
+            ]
+        elif tone == "Friendly":
+            strength_openers = [
+                f"They're really strong in areas like: {focus_skills}.",
+                f"Their top skills are definitely: {focus_skills}.",
+                f"You'll find them excelling in: {focus_skills}."
+            ]
+        elif tone == "Critical":
+            strength_openers = [
+                f"Some relevant proficiencies include: {focus_skills}.",
+                f"Skills present are: {focus_skills}.",
+                f"Identified capabilities: {focus_skills}."
+            ]
+        summary_parts.append(random.choice(strength_openers))
 
-    **Summary Tone:** {tone}
+    # 3. Score Interpretation
+    if score >= 85:
+        if tone == "Professional":
+            summary_parts.append("This is an exceptional profile with clear alignment to the role requirements. The candidate is highly likely to thrive with minimal onboarding.")
+        elif tone == "Friendly":
+            summary_parts.append("Wow, this candidate is a fantastic match! They're super aligned with what we're looking for and should hit the ground running.")
+        elif tone == "Critical":
+            summary_parts.append("The profile shows strong alignment, indicating a high probability of successful integration into the role.")
+    elif score >= 70:
+        if tone == "Professional":
+            summary_parts.append("This is a strong match with most key requirements met. The candidate is suitable for a technical interview.")
+        elif tone == "Friendly":
+            summary_parts.append("A solid match! They've got most of what we need and are definitely worth a chat.")
+        elif tone == "Critical":
+            summary_parts.append("The candidate meets a majority of the core competencies, warranting further evaluation.")
+    elif score >= 50:
+        if tone == "Professional":
+            summary_parts.append("This profile shows potential but lacks alignment in some critical areas. Further assessment is recommended.")
+        elif tone == "Friendly":
+            summary_parts.append("They've got some good stuff, but there are a few gaps. Might need a closer look or some development.")
+        elif tone == "Critical":
+            summary_parts.append("Identified gaps in key areas suggest a need for more rigorous screening or consideration for alternative roles.")
+    else:
+        if tone == "Professional":
+            summary_parts.append("This candidate may not currently align with the role’s expectations. Consider for future openings or roles with a different skill set.")
+        elif tone == "Friendly":
+            summary_parts.append("Not quite the right fit for this one, but keep them in mind for other opportunities!")
+        elif tone == "Critical":
+            summary_parts.append("The candidate's profile presents significant deviations from the required competencies, rendering them unsuitable for the current vacancy.")
 
-    **Instructions for Summary:**
-    1.  **Overall Assessment:** Start with a concise overall assessment of the candidate's fit for the role.
-    2.  **Strengths:** Detail the candidate's key strengths relevant to the JD, mentioning specific skills, experience, and achievements.
-    3.  **Areas for Improvement/Gaps:** Identify any missing skills, insufficient experience, or other areas where the candidate might not fully align with the JD.
-    4.  **Recommendations:** Provide actionable recommendations for the candidate to improve their profile for similar roles (e.g., courses, project work, specific skill development).
-    5.  **Conclusion:** Conclude with a final thought on their potential.
-    6.  Keep the summary professional, concise, and actionable. Use bullet points where appropriate for readability.
-    """
-    with st.spinner(f"Generating HR Summary ({tone} tone) with AI..."):
-        summary = get_llm_response(prompt)
-    return summary
+    # 4. Areas to Improve
+    if missing_skills:
+        if tone == "Professional":
+            summary_parts.append(
+                f"To increase alignment with this role, the candidate could focus on gaining expertise in: {', '.join(missing_skills[:4])}."
+            )
+        elif tone == "Friendly":
+            summary_parts.append(
+                f"If they brush up on {', '.join(missing_skills[:4])}, they'd be even stronger!"
+            )
+        elif tone == "Critical":
+            summary_parts.append(
+                f"Deficiencies were noted in: {', '.join(missing_skills[:4])}."
+            )
+
+    # 5. Career Fit Tag (Additional Insight)
+    if experience > 10:
+        if tone == "Professional":
+            summary_parts.append("Additional insight: Given their extensive experience, the candidate may be suitable for senior or lead roles beyond the scope of the current opening.")
+        elif tone == "Friendly":
+            summary_parts.append("Just a thought: With all that experience, they might be a great fit for a more senior or leadership position!")
+        elif tone == "Critical":
+            summary_parts.append("Observation: The candidate's experience level suggests potential overqualification for this specific role; consider higher-tier positions.")
+    elif experience < 1 and score >= 60: # Only suggest entry-level if they still scored reasonably well
+        if tone == "Professional":
+            summary_parts.append("Additional insight: This appears to be an early-career candidate, ideal for internships or entry-level roles where foundational skills are valued.")
+        elif tone == "Friendly":
+            summary_parts.append("Heads up: This looks like a fresh face, perfect for an internship or a junior role!")
+        elif tone == "Critical":
+            summary_parts.append("Observation: The candidate's limited experience suggests suitability for entry-level positions only.")
+
+    return " ".join(summary_parts)
+
 
 def generate_certificate(candidate_name, final_score, ai_tag, email, phone, experience, cgpa, matched_skills):
     """Generates a ScreenerPro Certificate as HTML and PDF."""
@@ -796,6 +941,7 @@ st.sidebar.header("Job Description (JD)")
 jd_option = st.sidebar.radio("Choose JD Source:", ("Upload New JD", "Select Pre-loaded JD"))
 
 jd_text = ""
+jd_name_for_results = "" # Added to pass to detect_job_domain
 if jd_option == "Upload New JD":
     uploaded_jd_file = st.sidebar.file_uploader("Upload Job Description (TXT or PDF)", type=["txt", "pdf"])
     if uploaded_jd_file:
@@ -803,6 +949,7 @@ if jd_option == "Upload New JD":
             jd_text = uploaded_jd_file.read().decode("utf-8")
         elif uploaded_jd_file.type == "application/pdf":
             jd_text = extract_text_from_pdf(uploaded_jd_file)
+        jd_name_for_results = uploaded_jd_file.name
         st.sidebar.success("JD uploaded successfully!")
 elif jd_option == "Select Pre-loaded JD":
     jd_files = get_jd_files()
@@ -816,6 +963,7 @@ elif jd_option == "Select Pre-loaded JD":
             elif selected_jd_file.endswith(".pdf"):
                 with open(file_path, 'rb') as f:
                     jd_text = extract_text_from_pdf(io.BytesIO(f.read()))
+            jd_name_for_results = selected_jd_file
             st.sidebar.success(f"JD '{selected_jd_file}' loaded.")
     else:
         st.sidebar.warning("No pre-loaded JDs found in the 'data' directory.")
@@ -833,23 +981,24 @@ st.sidebar.selectbox(
     help="Assess how well your resume aligns with the typical skill sets of a specific company."
 )
 
-st.sidebar.markdown("---")
-st.sidebar.header("Skill Prioritization")
-st.sidebar.info("Select skills you consider highly or medium priority for your assessment. This will influence the keyword matching.")
+# Removed Skill Prioritization section
+# st.sidebar.markdown("---")
+# st.sidebar.header("Skill Prioritization")
+# st.sidebar.info("Select skills you consider highly or medium priority for your assessment. This will influence the keyword matching.")
 
-col_high, col_medium = st.sidebar.columns(2)
-with col_high:
-    high_priority_skills = st.multiselect(
-        "High Priority Skills (3x weight):",
-        options=MASTER_SKILLS,
-        help="Skills that are crucial for the role and should have higher impact on your score."
-    )
-with col_medium:
-    medium_priority_skills = st.multiselect(
-        "Medium Priority Skills (2x weight):",
-        options=MASTER_SKILLS,
-        help="Important skills that should have a moderate impact on your score."
-    )
+# col_high, col_medium = st.sidebar.columns(2)
+# with col_high:
+#     high_priority_skills = st.multiselect(
+#         "High Priority Skills (3x weight):",
+#         options=MASTER_SKILLS,
+#         help="Skills that are crucial for the role and should have higher impact on your score."
+#     )
+# with col_medium:
+#     medium_priority_skills = st.multiselect(
+#         "Medium Priority Skills (2x weight):",
+#         options=MASTER_SKILLS,
+#         help="Important skills that should have a moderate impact on your score."
+#     )
 
 st.sidebar.markdown("---")
 st.sidebar.header("AI Summary Tone")
@@ -877,7 +1026,8 @@ if jd_text and uploaded_resume_file:
         jd_skills = extract_skills(jd_text, MASTER_SKILLS)
         resume_skills = extract_skills(resume_text, MASTER_SKILLS)
 
-        scores = calculate_scores(jd_text, resume_text, resume_info, jd_skills, resume_skills, high_priority_skills, medium_priority_skills)
+        # Updated call to calculate_scores (removed priority skills)
+        scores = calculate_scores(jd_text, resume_text, resume_info, jd_skills, resume_skills)
 
         matched_skills = list(set(jd_skills).intersection(set(resume_skills)))
         missing_skills = list(set(jd_skills) - set(resume_skills))
@@ -896,7 +1046,9 @@ if jd_text and uploaded_resume_file:
         st.write(f"**AI Tag:** {scores['AI Tag']}")
 
         st.subheader("Summary of Extracted Info")
-        st.json({k: v for k, v in resume_info.items() if k not in ["Education", "Work History", "Project Details", "Certifications"]})
+        # Display Name explicitly
+        st.write(f"**Name:** {resume_info.get('Name', 'N/A')}")
+        st.json({k: v for k, v in resume_info.items() if k not in ["Name", "Education", "Work History", "Project Details", "Certifications"]})
 
         st.subheader("Detailed Scores")
         st.info(f"**Exact Match Score:** {scores['Exact Match Score']:.2f}% (Keyword overlap)")
@@ -923,7 +1075,18 @@ if jd_text and uploaded_resume_file:
             st.success("You have all the key skills mentioned in the JD!")
 
         st.subheader("Detailed HR Assessment (AI-Powered)")
-        hr_summary = generate_hr_summary(resume_text, jd_text, resume_info, scores, matched_skills, missing_skills, summary_tone)
+        # Updated call to generate_hr_summary (using the new local function)
+        job_domain = detect_job_domain(jd_name_for_results, jd_text)
+        hr_summary = generate_hr_summary(
+            name=resume_info.get('Name', 'Candidate'),
+            score=scores['Final Match Score'],
+            experience=resume_info.get('Years of Experience', 0),
+            matched_skills=matched_skills,
+            missing_skills=missing_skills,
+            cgpa=resume_info.get('CGPA', 'N/A'),
+            job_domain=job_domain,
+            tone=summary_tone
+        )
         st.markdown(hr_summary)
 
     st.markdown("---")
