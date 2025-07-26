@@ -2240,7 +2240,7 @@ def resume_screener_page():
     with col1_jd:
         job_roles = {"Upload my own": None}
         # Load JDs from the 'data/jds' folder
-        jd_files_from_folder = load_jds_from_folder("data/jds")
+        jd_files_from_folder = load_jds_from_folder("data/")
         job_roles.update(jd_files_from_folder) # Add loaded JDs to options
 
         jd_option = st.selectbox("📌 **Select a Pre-Loaded Job Role or Upload Your Own Job Description**", list(job_roles.keys()))
@@ -2301,28 +2301,7 @@ def resume_screener_page():
             st.info("Please select or upload a Job Description to view its keyword cloud.")
 
 
-    # Filtering Criteria from the previous file
-    st.subheader("2. Set Screening Criteria")
-    min_score_threshold = st.slider(
-        "Minimum Match Score (%) for Qualification:",
-        min_value=0, max_value=100, value=70, step=5,
-        help="Candidates must meet or exceed this score to be considered qualified."
-    )
-    min_experience_threshold = st.slider(
-        "Minimum Years of Experience Required:",
-        min_value=0, max_value=20, value=2, step=1,
-        help="Candidates must have at least this many years of experience."
-    )
-    max_experience = st.slider(
-        "Maximum Years of Experience (Overqualified if above):",
-        min_value=0, max_value=30, value=10, step=1,
-        help="Candidates with experience significantly above this might be considered overqualified."
-    )
-    min_cgpa_threshold = st.slider(
-        "Minimum CGPA (on 4.0 scale):",
-        min_value=0.0, max_value=4.0, value=2.5, step=0.1,
-        help="Candidates must meet or exceed this CGPA. Set to 0.0 to ignore."
-    )
+   
 
 
     # Company Selection
