@@ -210,7 +210,396 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 # Define SKILL_LIST for the new functions
 SKILL_LIST = MASTER_SKILLS
 
-# --- Removed: Company Skill Profiles (as per user request) ---
+# Re-added: Company Skill Profiles (placeholder structure)
+# IMPORTANT: You will need to populate this dictionary with actual skills relevant to each company.
+# Example: "Google": ["Python", "Machine Learning", "TensorFlow", "Distributed Systems"]
+COMPANY_SKILL_PROFILES = {
+    "Google": ["Python", "Machine Learning", "TensorFlow", "Distributed Systems", "Algorithms", "Data Structures", "Cloud Computing", "Go", "Java", "C++"],
+    "Microsoft": ["C#", "Azure", ".NET", "SQL Server", "Cloud Computing", "Power BI", "Machine Learning", "TypeScript", "React", "DevOps"],
+    "Amazon": ["AWS", "Java", "Python", "Distributed Systems", "Microservices", "Cloud Computing", "SQL", "NoSQL", "Leadership", "Problem Solving"],
+    "Meta (Facebook)": ["React", "Python", "JavaScript", "Deep Learning", "PyTorch", "GraphQL", "Mobile Development", "PHP", "C++", "Social Media"],
+    "Apple": ["Swift", "Objective-C", "iOS Development", "macOS Development", "User Experience (UX)", "Product Design", "Hardware Integration", "Privacy", "Security"],
+    "Netflix": ["Python", "AWS", "Microservices", "Data Science", "Machine Learning", "Distributed Systems", "Streaming Technologies", "Recommendation Systems", "Cloud Computing"],
+    "Salesforce": ["Salesforce CRM", "Apex", "Visualforce", "Lightning Web Components", "Cloud Computing", "SaaS", "Customer Relationship Management", "JavaScript", "API Integration"],
+    "IBM": ["Java", "Python", "Cloud Computing", "AI", "Machine Learning", "Data Science", "Blockchain", "Cybersecurity", "Enterprise Software", "Consulting"],
+    "Oracle": ["Java", "SQL", "Oracle Database", "Cloud Computing", "Enterprise Software", "ERP", "CRM", "Data Warehousing", "Middleware"],
+    "Accenture": ["Consulting", "Project Management", "Change Management", "Digital Transformation", "Cloud Computing", "Data Analytics", "Strategy", "Business Process Improvement"],
+    "Infosys": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Enterprise Applications", "Consulting", "Project Management", "Data Analytics", "AI"],
+    "TCS": ["Java", "Python", "Cloud Computing", "DevOps", "Agile", "Digital Transformation", "Enterprise Solutions", "Data Science", "Cybersecurity"],
+    "Wipro": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Infrastructure Management", "Consulting", "Data Analytics", "AI", "Cybersecurity"],
+    "HCLTech": ["Java", "Python", "Cloud Computing", "DevOps", "Digital Transformation", "Product Engineering", "Data Science", "AI", "Cybersecurity"],
+    "Capgemini": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Consulting", "Data Analytics", "AI", "Cybersecurity", "ERP"],
+    "Cognizant": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Data Analytics", "AI", "Cybersecurity", "IT Consulting"],
+    "Tech Mahindra": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Network Services", "Data Analytics", "AI", "Cybersecurity"],
+    "LTIMindtree": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Data Analytics", "AI", "Cybersecurity", "Enterprise Solutions"],
+    "Persistent Systems": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Product Engineering", "Data Analytics", "AI", "Cybersecurity"],
+    "Mindtree": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Data Analytics", "AI", "Cybersecurity", "Enterprise Solutions"],
+    "Zensar Technologies": ["Java", "Python", "Cloud Computing", "Digital Transformation", "Data Analytics", "AI", "Cybersecurity"],
+    "Cyient": ["Engineering Services", "Geospatial", "IoT", "Data Analytics", "Aerospace", "Automotive", "Medical Devices", "Manufacturing"],
+    "L&T Technology Services": ["Engineering Services", "Digital Engineering", "IoT", "AI", "Machine Learning", "Embedded Systems", "Automotive", "Aerospace", "Medical Devices"],
+    "Mphasis": ["Cloud Computing", "Digital Transformation", "AI", "Cognitive Computing", "Cybersecurity", "Banking & Financial Services", "Insurance"],
+    "Hexaware Technologies": ["Cloud Computing", "Digital Transformation", "Automation", "AI", "Machine Learning", "Data Analytics", "Enterprise Solutions"],
+    "Coforge": ["Cloud Computing", "Digital Transformation", "Automation", "AI", "Machine Learning", "Data Analytics", "Financial Services", "Travel & Tourism"],
+    "Birlasoft": ["Enterprise Solutions", "Digital Transformation", "Cloud Computing", "Data Analytics", "AI", "IoT", "Manufacturing", "Life Sciences"],
+    "Sonata Software": ["Digital Transformation", "Cloud Computing", "Data Analytics", "AI", "Retail", "Travel", "CPG", "Manufacturing"],
+    "Firstsource Solutions": ["Customer Experience", "Business Process Management", "Digital Transformation", "Data Analytics", "Healthcare", "Financial Services", "Telecom"],
+    "ExlService Holdings": ["Data Analytics", "AI", "Machine Learning", "Digital Transformation", "Operations Management", "Finance & Accounting", "Healthcare", "Insurance"],
+    "Genpact": ["Digital Transformation", "AI", "Machine Learning", "Data Analytics", "Business Process Management", "Finance & Accounting", "Supply Chain", "Procurement"],
+    "Concentrix": ["Customer Experience", "Digital Transformation", "Business Process Management", "Contact Center", "CX Consulting", "Sales", "Marketing"],
+    "Teleperformance": ["Customer Experience", "Omnichannel Solutions", "Digital Transformation", "Contact Center", "Business Process Outsourcing"],
+    "Conduent": ["Business Process Solutions", "Digital Platforms", "Healthcare", "Transportation", "Government Services", "Commercial Industries"],
+    "Sutherland": ["Digital Transformation", "Customer Experience", "Business Process Transformation", "AI", "Automation", "Healthcare", "Financial Services", "Retail"],
+    "Startek": ["Customer Experience", "Omnichannel Solutions", "Contact Center", "Digital Transformation", "Business Process Outsourcing"],
+    "Transcom": ["Customer Experience", "Contact Center", "Digital Transformation", "Business Process Outsourcing"],
+    "Alorica": ["Customer Experience", "Contact Center", "Digital Transformation", "Business Process Outsourcing"],
+    "TTEC": ["Customer Experience", "Digital Transformation", "Contact Center", "AI", "Automation", "Consulting"],
+    "VXI Global Solutions": ["Customer Experience", "Contact Center", "Digital Transformation", "Business Process Outsourcing"],
+    "Sitel Group": ["Customer Experience", "Contact Center", "Digital Transformation", "Business Process Outsourcing"],
+    "TaskUs": ["Digital Customer Experience", "Content Moderation", "AI Operations", "Gaming", "Fintech", "E-commerce"],
+    "Arise Virtual Solutions": ["Virtual Contact Center", "Customer Service", "Sales", "Technical Support", "Work-from-Home Solutions"],
+    "LiveOps": ["Cloud Contact Center", "Customer Service", "Sales", "Technical Support", "Work-from-Home Solutions"],
+    "Concentrix + Webhelp": ["Customer Experience", "Business Process Management", "Digital Transformation", "Contact Center"],
+    "Modis": ["IT Consulting", "Digital Transformation", "Talent Solutions", "Cloud", "Cybersecurity", "Data & AI"],
+    "TEKsystems": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Insight Global": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Robert Half Technology": ["IT Staffing", "IT Consulting", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Kforce": ["IT Staffing", "IT Consulting", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Apex Systems": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Collabera": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Hays": ["IT Staffing", "IT Recruitment", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Michael Page": ["IT Recruitment", "IT Staffing", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Randstad Technologies": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Adecco": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Kelly Services": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "ManpowerGroup": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "Aerotek": ["IT Staffing", "IT Services", "Digital Transformation", "Cloud", "Cybersecurity", "Data & AI"],
+    "CDW": ["IT Solutions", "Cloud", "Cybersecurity", "Data Center", "Networking", "Managed Services"],
+    "Insight Enterprises": ["IT Solutions", "Cloud", "Cybersecurity", "Data Center", "Networking", "Managed Services"],
+    "Presidio": ["IT Solutions", "Cloud", "Cybersecurity", "Data Center", "Networking", "Managed Services"],
+    "ePlus": ["IT Solutions", "Cloud", "Cybersecurity", "Data Center", "Networking", "Managed Services"],
+    "Optiv": ["Cybersecurity Solutions", "Security Consulting", "Managed Security Services", "Identity & Access Management", "Cloud Security"],
+    "Herjavec Group": ["Cybersecurity Solutions", "Security Consulting", "Managed Security Services", "Identity & Access Management", "Cloud Security"],
+    "Rapid7": ["Vulnerability Management", "Security Operations", "Application Security", "Cloud Security", "Threat Intelligence"],
+    "Tenable": ["Vulnerability Management", "Cyber Exposure", "OT Security", "Cloud Security", "Web Application Security"],
+    "Qualys": ["Vulnerability Management", "Cloud Security", "Web Application Security", "Compliance", "Asset Management"],
+    "CrowdStrike": ["Endpoint Security", "Cloud Security", "Threat Intelligence", "Incident Response", "Managed Detection and Response (MDR)"],
+    "SentinelOne": ["Endpoint Security", "Cloud Security", "Threat Intelligence", "Incident Response", "XDR"],
+    "Palo Alto Networks": ["Network Security", "Cloud Security", "Endpoint Security", "Security Operations", "Threat Prevention"],
+    "Fortinet": ["Network Security", "Cloud Security", "Endpoint Security", "Security Operations", "Threat Prevention"],
+    "Cisco": ["Networking", "Cybersecurity", "Collaboration", "Cloud", "Data Center", "IoT"],
+    "Juniper Networks": ["Networking", "Cloud", "AI-driven Enterprise", "Security", "Automation"],
+    "VMware": ["Virtualization", "Cloud Computing", "Network Virtualization", "Security", "Digital Workspace"],
+    "Citrix": ["Virtualization", "Cloud Computing", "Digital Workspace", "Networking", "Security"],
+    "Red Hat": ["Open Source", "Linux", "Cloud Computing", "Kubernetes", "Automation", "Middleware", "DevOps"],
+    "SUSE": ["Open Source", "Linux", "Kubernetes", "Cloud Computing", "Edge Computing", "Storage"],
+    "Canonical (Ubuntu)": ["Open Source", "Linux", "Cloud Computing", "IoT", "AI/ML", "Containers"],
+    "MongoDB": ["NoSQL Database", "Document Database", "Cloud Database", "Atlas", "Enterprise Advanced"],
+    "Databricks": ["Data Lakehouse", "Spark", "AI/ML", "Data Engineering", "Data Science", "Delta Lake", "MLflow"],
+    "Snowflake": ["Cloud Data Warehouse", "Data Lake", "Data Sharing", "Data Marketplace", "Data Applications"],
+    "Teradata": ["Enterprise Data Warehouse", "Cloud Data Analytics", "Hybrid Cloud", "AI/ML Integration"],
+    "Cloudera": ["Data Cloud", "Data Management", "Data Analytics", "Machine Learning", "Hybrid Cloud", "Open Source"],
+    "Hortonworks": ["Data Platform", "Hadoop", "Spark", "Data Management", "Data Analytics", "Open Source"],
+    "Confluent": ["Kafka", "Event Streaming Platform", "Data in Motion", "Cloud-Native", "Real-Time Data"],
+    "Elastic (Elasticsearch)": ["Search Engine", "Analytics Engine", "Observability", "Security", "Elastic Stack", "Kibana", "Logstash"],
+    "Redis Labs": ["In-Memory Database", "NoSQL", "Caching", "Real-Time Data", "Redis Enterprise"],
+    "Neo4j": ["Graph Database", "Graph Analytics", "Knowledge Graphs", "AI/ML"],
+    "InfluxData (InfluxDB)": ["Time Series Database", "IoT", "Monitoring", "Analytics", "Cloud-Native"],
+    "Timescale (TimescaleDB)": ["Time Series Database", "PostgreSQL Extension", "IoT", "Analytics", "Cloud-Native"],
+    "Vertica": ["Columnar Database", "Analytics Database", "Data Warehousing", "Big Data Analytics"],
+    "ClickHouse": ["Columnar Database", "Analytics Database", "Real-Time Analytics", "Big Data"],
+    "Pinecone": ["Vector Database", "Vector Search", "AI/ML", "Embeddings", "Semantic Search"],
+    "Weaviate": ["Vector Database", "Vector Search", "AI/ML", "Knowledge Graphs", "Semantic Search"],
+    "Milvus": ["Vector Database", "Vector Search", "AI/ML", "Embeddings", "Similarity Search"],
+    "Qdrant": ["Vector Database", "Vector Search", "AI/ML", "Embeddings", "Semantic Search"],
+    "Chroma": ["Vector Database", "Vector Search", "AI/ML", "Embeddings", "Semantic Search"],
+    "Faiss": ["Similarity Search", "Vector Search", "Embeddings", "AI/ML"],
+    "Annoy": ["Similarity Search", "Vector Search", "Embeddings", "AI/ML"],
+    "Hnswlib": ["Similarity Search", "Vector Search", "Embeddings", "AI/ML"],
+    "Scikit-learn": ["Machine Learning Library", "Python", "Classification", "Regression", "Clustering"],
+    "TensorFlow": ["Deep Learning Framework", "AI/ML", "Neural Networks", "Google"],
+    "PyTorch": ["Deep Learning Framework", "AI/ML", "Neural Networks", "Facebook AI"],
+    "Keras": ["Deep Learning API", "TensorFlow", "Neural Networks", "Rapid Prototyping"],
+    "XGBoost": ["Gradient Boosting", "Machine Learning", "Ensemble Methods", "Classification", "Regression"],
+    "LightGBM": ["Gradient Boosting", "Machine Learning", "Ensemble Methods", "Classification", "Regression"],
+    "CatBoost": ["Gradient Boosting", "Machine Learning", "Ensemble Methods", "Classification", "Regression"],
+    "Statsmodels": ["Statistical Modeling", "Econometrics", "Python", "Statistical Tests"],
+    "NumPy": ["Numerical Computing", "Python", "Arrays", "Matrices"],
+    "Pandas": ["Data Manipulation", "Data Analysis", "Python", "DataFrames"],
+    "Matplotlib": ["Data Visualization", "Python", "Plotting"],
+    "Seaborn": ["Statistical Data Visualization", "Python", "Matplotlib"],
+    "Plotly": ["Interactive Data Visualization", "Web-based", "Dashboards"],
+    "Bokeh": ["Interactive Data Visualization", "Web-based", "Python"],
+    "Dash": ["Web Application Framework", "Python", "Plotly"],
+    "Flask": ["Web Framework", "Python", "Microframework"],
+    "Django": ["Web Framework", "Python", "Full-stack"],
+    "FastAPI": ["Web Framework", "Python", "High Performance", "API Development"],
+    "Spring Boot": ["Java Framework", "Microservices", "Web Applications"],
+    ".NET Core": ["Cross-platform Framework", "C#", "Web Applications", "APIs"],
+    "Node.js": ["JavaScript Runtime", "Backend Development", "Server-side"],
+    "Express.js": ["Node.js Web Framework", "Backend Development", "APIs"],
+    "React": ["JavaScript Library", "Frontend Development", "UI Components"],
+    "Angular": ["JavaScript Framework", "Frontend Development", "Single-page Applications"],
+    "Vue.js": ["JavaScript Framework", "Frontend Development", "Progressive Web Apps"],
+    "Svelte": ["JavaScript Framework", "Frontend Development", "Component Compiler"],
+    "jQuery": ["JavaScript Library", "DOM Manipulation", "Event Handling"],
+    "Bootstrap": ["CSS Framework", "Responsive Design", "UI Components"],
+    "Tailwind CSS": ["CSS Framework", "Utility-first", "Rapid UI Development"],
+    "Sass": ["CSS Preprocessor", "CSS Extensions"],
+    "Less": ["CSS Preprocessor", "CSS Extensions"],
+    "Webpack": ["Module Bundler", "JavaScript Applications"],
+    "Babel": ["JavaScript Compiler", "Transpiler"],
+    "npm": ["Node Package Manager", "JavaScript Packages"],
+    "Yarn": ["Package Manager", "JavaScript Packages"],
+    "Ansible": ["Automation Engine", "IT Automation", "Configuration Management"],
+    "Terraform": ["Infrastructure as Code", "Cloud Provisioning", "Multi-cloud"],
+    "Jenkins": ["CI/CD", "Automation Server", "Build Automation"],
+    "GitLab CI/CD": ["CI/CD", "GitLab Integration", "DevOps Platform"],
+    "GitHub Actions": ["CI/CD", "GitHub Integration", "Workflow Automation"],
+    "AWS CodeBuild": ["CI/CD", "Build Service", "AWS"],
+    "AWS CodePipeline": ["CI/CD", "Release Automation", "AWS"],
+    "AWS CodeDeploy": ["Deployment Service", "Automated Deployments", "AWS"],
+    "AWS Lambda": ["Serverless Computing", "Function as a Service", "AWS"],
+    "Azure Functions": ["Serverless Computing", "Function as a Service", "Azure"],
+    "Google Cloud Functions": ["Serverless Computing", "Function as a Service", "GCP"],
+    "Serverless Framework": ["Serverless Applications", "Deployment Tool"],
+    "Microservices": ["Software Architecture", "Distributed Systems"],
+    "API Gateway": ["API Management", "API Security", "Traffic Management"],
+    "Service Mesh": ["Microservices Communication", "Traffic Management", "Observability"],
+    "Istio": ["Service Mesh", "Kubernetes", "Traffic Management"],
+    "Linkerd": ["Service Mesh", "Kubernetes", "Traffic Management"],
+    "gRPC": ["Remote Procedure Call", "High Performance", "Microservices"],
+    "RESTful APIs": ["API Design", "Web Services"],
+    "SOAP": ["Web Services Protocol", "XML-based"],
+    "Message Queues": ["Asynchronous Communication", "Decoupling Services"],
+    "RabbitMQ": ["Message Broker", "AMQP"],
+    "ActiveMQ": ["Message Broker", "JMS"],
+    "Kafka": ["Distributed Streaming Platform", "Event Streaming"],
+    "Amazon SQS": ["Message Queuing Service", "AWS"],
+    "Amazon SNS": ["Notification Service", "AWS"],
+    "Google Cloud Pub/Sub": ["Messaging Service", "GCP"],
+    "Version Control": ["Source Code Management", "Collaboration"],
+    "SVN": ["Version Control System", "Centralized"],
+    "Perforce": ["Version Control System", "Enterprise"],
+    "Trello": ["Project Management Tool", "Kanban Board"],
+    "Asana": ["Project Management Tool", "Task Management"],
+    "Monday.com": ["Work OS", "Project Management", "Team Collaboration"],
+    "Smartsheet": ["Work Management", "Collaboration", "Project Management"],
+    "MS Project": ["Project Management Software", "Gantt Charts"],
+    "Primavera P6": ["Project Management Software", "Enterprise Project Portfolio Management"],
+    "Zendesk": ["Customer Service Software", "Ticketing System"],
+    "Freshdesk": ["Customer Service Software", "Ticketing System"],
+    "ITIL": ["IT Service Management", "Framework"],
+    "COBIT": ["IT Governance", "Framework"],
+    "PRINCE2": ["Project Management Methodology"],
+    "PMP": ["Project Management Professional", "Certification"],
+    "CSM": ["Certified ScrumMaster", "Certification"],
+    "Lean Six Sigma": ["Process Improvement Methodology"],
+    "CFA": ["Chartered Financial Analyst", "Certification"],
+    "CPA": ["Certified Public Accountant", "Certification"],
+    "SHRM-CP": ["SHRM Certified Professional", "HR Certification"],
+    "PHR": ["Professional in Human Resources", "HR Certification"],
+    "CEH": ["Certified Ethical Hacker", "Cybersecurity Certification"],
+    "OSCP": ["Offensive Security Certified Professional", "Cybersecurity Certification"],
+    "CCNA": ["Cisco Certified Network Associate", "Networking Certification"],
+    "CISSP": ["Certified Information Systems Security Professional", "Cybersecurity Certification"],
+    "CISM": ["Certified Information Security Manager", "Cybersecurity Certification"],
+    "CompTIA Security+": ["Cybersecurity Certification"],
+    "CompTIA Network+": ["Networking Certification"],
+    "CompTIA A+": ["IT Support Certification"],
+    "CompTIA Linux+": ["Linux Certification"],
+    "Certified Solutions Architect": ["AWS Certification"],
+    "Certified Developer": ["AWS Certification"],
+    "Certified SysOps Administrator": ["AWS Certification"],
+    "Specialty Certification": ["AWS Certification"],
+    "Professional Certification": ["AWS Certification"],
+    "Azure AZ-900": ["Azure Fundamentals"],
+    "Azure AZ-104": ["Azure Administrator Associate"],
+    "Azure AZ-204": ["Azure Developer Associate"],
+    "Azure AZ-303": ["Azure Architect Technologies (Retired)"],
+    "Azure AZ-304": ["Azure Architect Design (Retired)"],
+    "Azure AZ-400": ["Azure DevOps Engineer Expert"],
+    "Azure AZ-500": ["Azure Security Engineer Associate"],
+    "Azure AZ-700": ["Azure Network Engineer Associate"],
+    "Azure AZ-800": ["Windows Server Hybrid Administrator Associate"],
+    "Azure AZ-801": ["Windows Server Hybrid Administrator Associate"],
+    "Azure DP-900": ["Azure Data Fundamentals"],
+    "Azure DP-100": ["Azure Data Scientist Associate"],
+    "Azure DP-203": ["Azure Data Engineer Associate"],
+    "Azure AI-900": ["Azure AI Fundamentals"],
+    "Azure AI-102": ["Azure AI Engineer Associate"],
+    "Azure DA-100": ["Data Analyst Associate (Retired)"],
+    "Azure PL-900": ["Power Platform Fundamentals"],
+    "Azure PL-100": ["Power Platform App Maker Associate"],
+    "Azure PL-200": ["Power Platform Functional Consultant Associate"],
+    "Azure PL-300": ["Power BI Data Analyst Associate"],
+    "Azure PL-400": ["Power Platform Developer Associate"],
+    "Azure PL-500": ["Power Automate RPA Developer Associate"],
+    "Azure MS-900": ["Microsoft 365 Fundamentals"],
+    "Azure MS-100": ["Microsoft 365 Identity and Services (Retired)"],
+    "Azure MS-101": ["Microsoft 365 Mobility and Security (Retired)"],
+    "Azure MS-203": ["Microsoft 365 Messaging Administrator Associate"],
+    "Azure MS-500": ["Microsoft 365 Security Administrator Associate"],
+    "Azure MS-700": ["Microsoft Teams Administrator Associate"],
+    "Azure MS-720": ["Microsoft Teams Voice Engineer Expert"],
+    "Azure MS-740": ["Microsoft 365 Certified: Troubleshooting Microsoft Teams"],
+    "Azure MS-600": ["Microsoft 365 Certified: Developer Associate"],
+    "Azure SC-900": ["Microsoft Security, Compliance, and Identity Fundamentals"],
+    "Azure SC-200": ["Microsoft Security Operations Analyst Associate"],
+    "Azure SC-300": ["Microsoft Identity and Access Administrator Associate"],
+    "Azure SC-400": ["Microsoft Information Protection Administrator Associate"],
+    "Azure MD-100": ["Windows Client (Retired)"],
+    "Azure MD-101": ["Managing Modern Desktops (Retired)"],
+    "Azure MB-200": ["Microsoft Dynamics 365 Sales Functional Consultant Associate (Retired)"],
+    "Azure MB-210": ["Microsoft Dynamics 365 Sales Functional Consultant Associate"],
+    "Azure MB-220": ["Microsoft Dynamics 365 Marketing Functional Consultant Associate"],
+    "Azure MB-230": ["Microsoft Dynamics 365 Customer Service Functional Consultant Associate"],
+    "Azure MB-240": ["Microsoft Dynamics 365 Field Service Functional Consultant Associate"],
+    "Azure MB-260": ["Microsoft Dynamics 365 Customer Data Platform Specialist"],
+    "Azure MB-300": ["Microsoft Dynamics 365 Finance and Operations Apps Developer Associate (Retired)"],
+    "Azure MB-310": ["Microsoft Dynamics 365 Finance Functional Consultant Associate"],
+    "Azure MB-320": ["Microsoft Dynamics 365 Supply Chain Management, Manufacturing Functional Consultant Associate"],
+    "Azure MB-330": ["Microsoft Dynamics 365 Supply Chain Management Functional Consultant Associate"],
+    "Azure MB-340": ["Microsoft Dynamics 365 Commerce Functional Consultant Associate"],
+    "Azure MB-400": ["Microsoft Dynamics 365 for Finance and Operations, Supply Chain Management Developer Associate (Retired)"],
+    "Azure MB-500": ["Microsoft Dynamics 365: Finance and Operations Apps Developer Associate"],
+    "Azure MB-600": ["Microsoft Dynamics 365 + Power Platform Solution Architect Expert"],
+    "Azure MB-700": ["Microsoft Dynamics 365: Finance and Operations Apps Solution Architect Expert (Retired)"],
+    "Azure MB-800": ["Microsoft Dynamics 365 Business Central Functional Consultant Associate"],
+    "Azure MB-910": ["Microsoft Dynamics 365 Fundamentals (CRM)"],
+    "Azure MB-920": ["Microsoft Dynamics 365 Fundamentals (ERP)"],
+    "GCP ACE": ["Associate Cloud Engineer"],
+    "GCP PCA": ["Professional Cloud Architect"],
+    "GCP PDE": ["Professional Data Engineer"],
+    "GCP PSE": ["Professional Security Engineer"],
+    "GCP PML": ["Professional Machine Learning Engineer"],
+    "GCP PSA": ["Professional Cloud Developer"],
+    "GCP PCD": ["Professional Cloud DevOps Engineer"],
+    "GCP PCN": ["Professional Cloud Network Engineer"],
+    "GCP PSD": ["Professional Cloud Database Engineer"],
+    "GCP PDA": ["Professional Cloud Data Architect"],
+    "GCP PCI": ["Professional Cloud IoT Developer"],
+    "GCP PWS": ["Professional Cloud Workload Migration Specialist"],
+    "GCP PWA": ["Professional Cloud Application Developer"],
+    "GCP PME": ["Professional Cloud Migration Engineer"],
+    "GCP PMC": ["Professional Cloud Security Engineer"],
+    "GCP PMD": ["Professional Cloud DevOps Engineer"],
+    "GCP PMA": ["Professional Cloud Architect"],
+    "GCP PMG": ["Professional Cloud Network Engineer"],
+    "RHCSA": ["Red Hat Certified System Administrator"],
+    "RHCE": ["Red Hat Certified Engineer"],
+    "VCP-DCV": ["VMware Certified Professional - Data Center Virtualization"],
+    "VCP-NV": ["VMware Certified Professional - Network Virtualization"],
+    "VCP-DTM": ["VMware Certified Professional - Desktop and Mobility"],
+    "VCP-CMA": ["VMware Certified Professional - Cloud Management and Automation"],
+    "VCP-SEC": ["VMware Certified Professional - Security"],
+    "VCP-DW": ["VMware Certified Professional - Digital Workspace"],
+    "VCP-Cloud": ["VMware Certified Professional - Cloud"],
+    "VCP-Desktop": ["VMware Certified Professional - Desktop"],
+    "VCP-Mobility": ["VMware Certified Professional - Mobility"],
+    "VCP-Network": ["VMware Certified Professional - Network"],
+    "VCP-Security": ["VMware Certified Professional - Security"],
+    "VCP-Cloud Management": ["VMware Certified Professional - Cloud Management"],
+    "VCP-Automation": ["VMware Certified Professional - Automation"],
+    "VCP-Digital Workspace": ["VMware Certified Professional - Digital Workspace"],
+    "VCP-NSX": ["VMware Certified Professional - NSX"],
+    "VCP-VMC on AWS": ["VMware Certified Professional - VMC on AWS"],
+    "VCP-Tanzu": ["VMware Certified Professional - Tanzu"],
+    "VCP-Carbon Black": ["VMware Certified Professional - Carbon Black"],
+    "VCP-Workspace ONE": ["VMware Certified Professional - Workspace ONE"],
+    "VCP-Horizon": ["VMware Certified Professional - Horizon"],
+    "VCP-vSAN": ["VMware Certified Professional - vSAN"],
+    "VCP-vSphere": ["VMware Certified Professional - vSphere"],
+    "VCP-vCloud": ["VMware Certified Professional - vCloud"],
+    "VCP-vRealize": ["VMware Certified Professional - vRealize"],
+    "VCP-vRealize Automation": ["VMware Certified Professional - vRealize Automation"],
+    "VCP-vRealize Operations": ["VMware Certified Professional - vRealize Operations"],
+    "VCP-vRealize Log Insight": ["VMware Certified Professional - vRealize Log Insight"],
+    "VCP-vRealize Network Insight": ["VMware Certified Professional - vRealize Network Insight"],
+    "VCP-vRealize Suite": ["VMware Certified Professional - vRealize Suite"],
+    "VCP-vRealize Cloud Management": ["VMware Certified Professional - vRealize Cloud Management"],
+    "VCP-vRealize Automation Specialist": ["VMware Certified Professional - vRealize Automation Specialist"],
+    "VCP-vRealize Operations Specialist": ["VMware Certified Professional - vRealize Operations Specialist"],
+    "VCP-vRealize Log Insight Specialist": ["VMware Certified Professional - vRealize Log Insight Specialist"],
+    "VCP-vRealize Network Insight Specialist": ["VMware Certified Professional - vRealize Network Insight Specialist"],
+    "VCP-vRealize Suite Specialist": ["VMware Certified Professional - vRealize Suite Specialist"],
+    "VCP-vRealize Cloud Management Specialist": ["VMware Certified Professional - vRealize Cloud Management Specialist"],
+    "VCP-Cloud Native": ["VMware Certified Professional - Cloud Native"],
+    "VCP-Cloud Native Application Developer": ["VMware Certified Professional - Cloud Native Application Developer"],
+    "VCP-Cloud Native Platform Operator": ["VMware Certified Professional - Cloud Native Platform Operator"],
+    "VCP-Cloud Native Security": ["VMware Certified Professional - Cloud Native Security"],
+    "VCP-Cloud Native Storage": ["VMware Certified Professional - Cloud Native Storage"],
+    "VCP-Cloud Native Networking": ["VMware Certified Professional - Cloud Native Networking"],
+    "VCP-Cloud Native Operations": ["VMware Certified Professional - Cloud Native Operations"],
+    "VCP-Cloud Native Automation": ["VMware Certified Professional - Cloud Native Automation"],
+    "VCP-Cloud Native Observability": ["VMware Certified Professional - Cloud Native Observability"],
+    "VCP-Cloud Native Data Management": ["VMware Certified Professional - Cloud Native Data Management"],
+    "VCP-Cloud Native AI/ML": ["VMware Certified Professional - Cloud Native AI/ML"],
+    "VCP-Cloud Native DevOps": ["VMware Certified Professional - Cloud Native DevOps"],
+    "VCP-Cloud Native Microservices": ["VMware Certified Professional - Cloud Native Microservices"],
+    "VCP-Cloud Native Serverless": ["VMware Certified Professional - Cloud Native Serverless"],
+    "VCP-Cloud Native Edge": ["VMware Certified Professional - Cloud Native Edge"],
+    "VCP-Cloud Native IoT": ["VMware Certified Professional - Cloud Native IoT"],
+    "VCP-Cloud Native Blockchain": ["VMware Certified Professional - Cloud Native Blockchain"],
+    "VCP-Cloud Native Quantum Computing": ["VMware Certified Professional - Cloud Native Quantum Computing"],
+    "VCP-Cloud Native Robotics": ["VMware Certified Professional - Cloud Native Robotics"],
+    "VCP-Cloud Native AR/VR": ["VMware Certified Professional - Cloud Native AR/VR"],
+    "VCP-Cloud Native Gaming": ["VMware Certified Professional - Cloud Native Gaming"],
+    "VCP-Cloud Native FinTech": ["VMware Certified Professional - Cloud Native FinTech"],
+    "VCP-Cloud Native HealthTech": ["VMware Certified Professional - Cloud Native HealthTech"],
+    "VCP-Cloud Native EduTech": ["VMware Certified Professional - Cloud Native EduTech"],
+    "VCP-Cloud Native AgriTech": ["VMware Certified Professional - Cloud Native AgriTech"],
+    "VCP-Cloud Native Smart City": ["VMware Certified Professional - Cloud Native Smart City"],
+    "VCP-Cloud Native Smart Home": ["VMware Certified Professional - Cloud Native Smart Home"],
+    "VCP-Cloud Native Smart Manufacturing": ["VMware Certified Professional - Cloud Native Smart Manufacturing"],
+    "VCP-Cloud Native Smart Retail": ["VMware Certified Professional - Cloud Native Smart Retail"],
+    "VCP-Cloud Native Smart Logistics": ["VMware Certified Professional - Cloud Native Smart Logistics"],
+    "VCP-Cloud Native Smart Transportation": ["VMware Certified Professional - Cloud Native Smart Transportation"],
+    "VCP-Cloud Native Smart Energy": ["VMware Certified Professional - Cloud Native Smart Energy"],
+    "VCP-Cloud Native Smart Utilities": ["VMware Certified Professional - Cloud Native Smart Utilities"],
+    "VCP-Cloud Native Smart Environment": ["VMware Certified Professional - Cloud Native Smart Environment"],
+    "VCP-Cloud Native Smart Water": ["VMware Certified Professional - Cloud Native Smart Water"],
+    "VCP-Cloud Native Smart Waste": ["VMware Certified Professional - Cloud Native Waste"],
+    "VCP-Cloud Native Smart Agriculture": ["VMware Certified Professional - Cloud Native Agriculture"],
+    "VCP-Cloud Native Smart Healthcare": ["VMware Certified Professional - Cloud Native Healthcare"],
+    "VCP-Cloud Native Smart Education": ["VMware Certified Professional - Cloud Native Education"],
+    "VCP-Cloud Native Smart Finance": ["VMware Certified Professional - Cloud Native Finance"],
+    "VCP-Cloud Native Smart Government": ["VMware Certified Professional - Cloud Native Government"],
+    "VCP-Cloud Native Smart City Infrastructure": ["VMware Certified Professional - Cloud Native Smart City Infrastructure"],
+    "VCP-Cloud Native Smart City Services": ["VMware Certified Professional - Cloud Native Smart City Services"],
+    "VCP-Cloud Native Smart City Mobility": ["VMware Certified Professional - Cloud Native Smart City Mobility"],
+    "VCP-Cloud Native Smart City Environment": ["VMware Certified Professional - Cloud Native Smart City Environment"],
+    "VCP-Cloud Native Smart City Governance": ["VMware Certified Professional - Cloud Native Smart City Governance"],
+    "VCP-Cloud Native Smart City Security": ["VMware Certified Professional - Cloud Native Smart City Security"],
+    "VCP-Cloud Native Smart City Data": ["VMware Certified Professional - Cloud Native Smart City Data"],
+    "VCP-Cloud Native Smart City AI/ML": ["VMware Certified Professional - Cloud Native Smart City AI/ML"],
+    "VCP-Cloud Native Smart City IoT": ["VMware Certified Professional - Cloud Native Smart City IoT"],
+    "VCP-Cloud Native Smart City Blockchain": ["VMware Certified Professional - Cloud Native Smart City Blockchain"],
+    "VCP-Cloud Native Smart City Quantum Computing": ["VMware Certified Professional - Cloud Native Smart City Quantum Computing"],
+    "VCP-Cloud Native Smart City Robotics": ["VMware Certified Professional - Cloud Native Smart City Robotics"],
+    "VCP-Cloud Native Smart City AR/VR": ["VMware Certified Professional - Cloud Native Smart City AR/VR"],
+    "VCP-Cloud Native Smart City Gaming": ["VMware Certified Professional - Cloud Native Smart City Gaming"],
+    "VCP-Cloud Native Smart City FinTech": ["VMware Certified Professional - Cloud Native Smart City FinTech"],
+    "VCP-Cloud Native Smart City HealthTech": ["VMware Certified Professional - Cloud Native Smart City HealthTech"],
+    "VCP-Cloud Native Smart City EduTech": ["VMware Certified Professional - Cloud Native Smart City EduTech"],
+    "VCP-Cloud Native Smart City AgriTech": ["VMware Certified Professional - Cloud Native Smart City AgriTech"],
+    "VCP-Cloud Native Smart City Smart Home": ["VMware Certified Professional - Cloud Native Smart City Smart Home"],
+    "VCP-Cloud Native Smart City Smart Manufacturing": ["VMware Certified Professional - Cloud Native Smart City Smart Manufacturing"],
+    "VCP-Cloud Native Smart City Smart Retail": ["VMware Certified Professional - Cloud Native Smart City Smart Retail"],
+    "VCP-Cloud Native Smart City Smart Logistics": ["VMware Certified Professional - Cloud Native Smart City Smart Logistics"],
+    "VCP-Cloud Native Smart City Smart Transportation": ["VMware Certified Professional - Cloud Native Smart City Smart Transportation"],
+    "VCP-Cloud Native Smart City Smart Energy": ["VMware Certified Professional - Cloud Native Smart City Smart Energy"],
+    "VCP-Cloud Native Smart City Smart Utilities": ["VMware Certified Professional - Cloud Native Smart City Smart Utilities"],
+    "VCP-Cloud Native Smart City Smart Environment": ["VMware Certified Professional - Cloud Native Smart City Smart Environment"],
+    "VCP-Cloud Native Smart City Smart Water": ["VMware Certified Professional - Cloud Native Smart City Smart Water"],
+    "VCP-Cloud Native Smart City Smart Waste": ["VMware Certified Professional - Cloud Native Smart City Waste"],
+    "VCP-Cloud Native Smart City Smart Agriculture": ["VMware Certified Professional - Cloud Native Smart City Agriculture"],
+    "VCP-Cloud Native Smart City Smart Healthcare": ["VMware Certified Professional - Cloud Native Smart City Healthcare"],
+    "VCP-Cloud Native Smart City Smart Education": ["VMware Certified Professional - Cloud Native Smart City Education"],
+    "VCP-Cloud Native Smart City Smart Finance": ["VMware Certified Professional - Cloud Native Smart City Finance"],
+    "VCP-Cloud Native Smart City Smart Government": ["VMware Certified Professional - Cloud Native Smart City Government"]
+}
+STOP_WORDS = NLTK_STOP_WORDS.union(CUSTOM_STOP_WORDS)
+
 SKILL_CATEGORIES = {
     "Programming Languages": ["Python", "Java", "JavaScript", "C++", "C#", "Go", "Ruby", "PHP", "Swift", "Kotlin", "TypeScript", "R", "Bash Scripting", "Shell Scripting"],
     "Web Technologies": ["HTML5", "CSS3", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", "Spring Boot", "Express.js", "WebSockets"],
@@ -248,1392 +637,8 @@ SKILL_CATEGORIES = {
 
 MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
 
-# --- NEW: Company Skill Profiles (Expanded for Demonstration) ---
-# This dictionary maps company names to a list of keywords/phrases
-# that represent their typical tech stack, industry focus, or values.
-# In a real-world scenario, this would be a much larger, dynamically updated database.
-COMPANY_SKILL_PROFILES = {
-        "Google": {
-        "description": "A global technology company focusing on search, cloud computing, artificial intelligence, and hardware.",
-        "keywords": ["Google Cloud Platform", "GCP", "Kubernetes", "TensorFlow", "Python", "Go", "Machine Learning", "BigQuery", "Data Science", "AI", "Distributed Systems", "Algorithms", "Scale", "Innovation", "Android", "Chrome", "Deep Learning", "Search Engine Optimization", "AdTech", "Material Design", "Wearables", "Autonomous Vehicles (Waymo)", "Robotics"]
-    },
-    "Microsoft": {
-        "description": "A multinational technology corporation producing computer software, consumer electronics, personal computers, and related services.",
-        "keywords": ["Azure", "C#", ".NET", "SQL Server", "Microsoft 365", "Dynamics 365", "Power BI", "Cloud Computing", "Enterprise Software", "Windows", "AI", "DevOps", "Cybersecurity", "TypeScript", "Gaming (Xbox)", "Active Directory", "SharePoint", "Visual Studio", "Low-Code (Power Apps)", "Mixed Reality (HoloLens)", "Quantum Computing"]
-    },
-    "Amazon": {
-        "description": "An American multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
-        "keywords": ["AWS", "Cloud Computing", "Serverless", "DynamoDB", "S3", "Lambda", "EC2", "Microservices", "Scale", "E-commerce", "Logistics", "Machine Learning", "Alexa", "Data Engineering", "Supply Chain", "Retail Tech", "Fulfillment", "Prime Video", "Kindle", "Robotics (Warehouse)", "Natural Language Processing (NLP)", "Computer Vision"]
-    },
-    "Meta (Facebook)": {
-        "description": "A technology conglomerate focusing on social media, virtual reality, and artificial intelligence.",
-        "keywords": ["React", "PyTorch", "GraphQL", "AI", "Machine Learning", "Virtual Reality (VR)", "Augmented Reality (AR)", "Social Media", "Data Science", "Python", "PHP", "Distributed Systems", "Mobile Development", "Computer Vision", "Privacy", "Content Moderation", "Recommendation Engines", "AdTech", "Horizon Worlds", "Ray-Ban Meta Smart Glasses"]
-    },
-    "Apple": {
-        "description": "A multinational technology company focusing on consumer electronics, software, and online services.",
-        "keywords": ["iOS", "Swift", "Objective-C", "macOS", "Xcode", "Mobile Development", "Hardware Engineering", "User Experience (UX)", "Design Thinking", "Privacy", "Security", "AI (Siri)", "Cloud (iCloud)", "WatchOS", "iPadOS", "tvOS", "Apple Silicon", "HealthKit", "ARKit", "Apple Pay", "App Store", "Services Revenue"]
-    },
-    "Netflix": {
-        "description": "A streaming service and production company.",
-        "keywords": ["AWS", "Microservices", "Distributed Systems", "Java", "Python", "Data Science", "Machine Learning", "Recommendation Systems", "Streaming", "Cloud Native", "DevOps", "Big Data", "User Experience (UX)", "Content Delivery Networks (CDN)", "Video Encoding", "Personalization", "A/B Testing", "Chaos Engineering"]
-    },
-    "Salesforce": {
-        "description": "A cloud-based software company providing customer relationship management (CRM) service.",
-        "keywords": ["Salesforce", "CRM", "Apex", "Lightning Web Components", "Cloud Computing", "SaaS", "Enterprise Software", "Customer Success", "Data Analytics", "Integration (MuleSoft)", "Platform Development", "Marketing Cloud", "Service Cloud", "Einstein AI", "Tableau", "Slack"]
-    },
-    "Generic Tech Startup": {
-        "description": "A fast-paced, innovative technology company, often focused on new technologies and agile development.",
-        "keywords": ["Agile", "Scrum", "Fast-paced", "Innovation", "MVP", "Growth Hacking", "Fullstack Development", "React", "Node.js", "Python", "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Problem Solving", "Adaptability", "Entrepreneurship", "Cross-functional Teams", "Product-led Growth", "Seed Funding", "Series A/B"]
-    },
-    "IBM": {
-        "description": "An American multinational technology and consulting company, specializing in computer hardware, middleware, and software.",
-        "keywords": ["Cloud Computing (IBM Cloud)", "AI (Watson)", "Enterprise Solutions", "Blockchain", "Quantum Computing", "Consulting", "Hybrid Cloud", "Data Analytics", "Java", "Linux", "Mainframe", "Cybersecurity", "Red Hat", "OpenShift", "Automation (RPA)", "IT Services", "Storage Solutions", "Server Technologies"]
-    },
-    "Oracle": {
-        "description": "A multinational computer technology corporation best known for its database software and cloud engineered systems.",
-        "keywords": ["Oracle Database", "SQL", "Cloud Infrastructure (OCI)", "ERP (Fusion Applications)", "CRM", "Java", "Enterprise Software", "SaaS", "Data Warehousing", "Middleware", "Cloud Applications", "NetSuite", "Peoplesoft", "Supply Chain Management"]
-    },
-    "Cisco": {
-        "description": "An American multinational digital communications technology conglomerate corporation that develops, manufactures, and sells networking hardware, software, telecommunications equipment, and other high-technology services and products.",
-        "keywords": ["Networking", "Cybersecurity (Talos, Duo, Meraki)", "Routers", "Switches", "Collaboration Tools (Webex)", "Cloud Networking", "IoT", "Enterprise Security", "SD-WAN", "Python (for automation)", "Network Automation", "Data Center Networking", "Voice over IP (VoIP)", "Firewalls"]
-    },
-    "Adobe": {
-        "description": "An American multinational computer software company that has historically focused upon the creation of multimedia and creativity software products.",
-        "keywords": ["Creative Cloud", "Photoshop", "Illustrator", "Premiere Pro", "Experience Cloud", "Digital Marketing", "SaaS", "Cloud Computing", "User Interface (UI)", "User Experience (UX)", "Web Development", "Content Management", "Analytics (Adobe Analytics)", "Targeting", "Audience Management", "AI (Sensei)", "Video Editing", "Graphic Design"]
-    },
-    "SAP": {
-        "description": "A German multinational software corporation that makes enterprise software to manage business operations and customer relations.",
-        "keywords": ["ERP (SAP S/4HANA)", "CRM", "Cloud Computing", "Business Intelligence (SAP BW/4HANA)", "Supply Chain Management", "Procurement", "Financial Software", "ABAP", "Enterprise Solutions", "SaaS", "SAP Fiori", "Data Warehousing", "SAP Concur", "Ariba"]
-    },
-    "Intel": {
-        "description": "An American multinational corporation and technology company that is the world's largest semiconductor chip manufacturer by revenue.",
-        "keywords": ["Semiconductors", "Processors (CPUs)", "Microarchitecture", "Hardware Engineering", "Chip Design", "Manufacturing", "IoT", "AI Accelerators", "Cloud Computing Infrastructure", "Embedded Systems", "Security (McAfee)", "FPGA", "Xeon", "Core", "Ecosystem Development"]
-    },
-    "NVIDIA": {
-        "description": "A global technology company that designs graphics processing units (GPUs) for the gaming, professional visualization, data center, and automotive markets.",
-        "keywords": ["GPU", "AI", "Deep Learning", "Machine Learning", "CUDA", "Computer Graphics", "High-Performance Computing (HPC)", "Gaming", "Autonomous Vehicles", "Data Center", "TensorFlow", "PyTorch", "Robotics (Isaac)", "Virtual Reality", "Ray Tracing", "Simulation (Omniverse)"]
-    },
-    "Tesla": {
-        "description": "An American multinational automotive and clean energy company.",
-        "keywords": ["Electric Vehicles (EV)", "Battery Technology", "AI", "Autonomous Driving", "Robotics", "Software Engineering (Automotive)", "Manufacturing", "Energy Storage", "Machine Learning (Computer Vision)", "Embedded Systems", "Gigafactory", "Powerwall", "Supercharger Network"]
-    },
-    "SpaceX": {
-        "description": "An American spacecraft manufacturer, launch service provider, and satellite communications company.",
-        "keywords": ["Aerospace Engineering", "Rocketry", "Satellite Communications (Starlink)", "Propulsion", "Manufacturing", "Software Engineering (Aerospace)", "Embedded Systems", "Guidance, Navigation, and Control (GNC)", "Reusable Rockets", "Space Exploration", "Avionics", "Ground Systems"]
-    },
-    "Zoom": {
-        "description": "A communications technology company providing video telephony and online chat services.",
-        "keywords": ["Video Conferencing", "Real-time Communication", "Cloud Infrastructure", "Scalability", "Audio/Video Processing", "Network Protocols", "Security", "SaaS", "Collaboration Tools", "Web Development (WebRTC)", "API Integration", "User Interface (UI)"]
-    },
-    "ServiceNow": {
-        "description": "An American software company that develops a cloud computing platform to help companies manage digital workflows for enterprise operations.",
-        "keywords": ["ITSM", "HRSD", "CSM", "Workflow Automation", "Cloud Platform", "Enterprise Software", "SaaS", "Low-code/No-code", "Integration", "Digital Transformation", "Platform Development (Now Platform)", "Service Management", "Operations Management", "Security Operations"]
-    },
-    "Workday": {
-        "description": "An American on-demand (cloud-based) financial management and human capital management software vendor.",
-        "keywords": ["HCM (Human Capital Management)", "Financial Management", "SaaS", "Cloud Computing", "Enterprise Software", "Data Analytics", "HRIS", "Payroll", "Talent Management", "Reporting", "Adaptive Planning", "Recruiting", "Benefits Administration"]
-    },
-    "T-Mobile (US)": {
-        "description": "A major American wireless network operator.",
-        "keywords": ["Telecommunications", "5G", "Wireless Networks", "Mobile Technology", "Network Engineering", "Customer Experience", "IoT Connectivity", "VoIP", "Fiber Optics", "Cloud Native (Telecom)", "Billing Systems"]
-    },
-    "Verizon": {
-        "description": "An American multinational telecommunications conglomerate and a wireless network operator.",
-        "keywords": ["Telecommunications", "5G", "Wireless Networks", "Fiber Optic Networks", "IoT", "Enterprise Solutions", "Network Security", "Cloud Services", "Edge Computing", "Media & Entertainment (Verizon Media)", "Digital Marketing"]
-    },
-    "AT&T": {
-        "description": "An American multinational telecommunications holding company.",
-        "keywords": ["Telecommunications", "5G", "Fiber Optics", "Wireless Services", "Broadband", "Network Infrastructure", "Cybersecurity", "Entertainment (Warner Bros. Discovery)", "IoT Solutions", "Enterprise Connectivity"]
-    },
-    "Qualcomm": {
-        "description": "A global semiconductor company that designs and markets wireless telecommunications products and services.",
-        "keywords": ["Semiconductors", "Mobile Processors (Snapdragon)", "5G Technology", "Wireless Communication", "IoT", "Automotive (ADAS)", "Chip Design", "Embedded Systems", "AI Processors", "RF Front End", "Modems"]
-    },
-    "Broadcom": {
-        "description": "A global infrastructure technology company designing, developing, and supplying a broad range of semiconductor and infrastructure software solutions.",
-        "keywords": ["Semiconductors", "Networking Hardware", "Storage Solutions", "Broadband Communication", "Enterprise Software", "Cybersecurity (Symantec)", "Mainframe Software (CA Technologies)", "Fiber Optics", "Wireless Connectivity"]
-    },
-    "VMware (now Broadcom subsidiary)": {
-        "description": "A cloud computing and virtualization technology company, now part of Broadcom.",
-        "keywords": ["Virtualization", "Cloud Computing", "Data Center", "SDDC (Software-Defined Data Center)", "Network Virtualization (NSX)", "Storage Virtualization (vSAN)", "Hybrid Cloud", "Multi-Cloud", "Containerization (Tanzu)", "Kubernetes", "VMs (Virtual Machines)", "VDI (Virtual Desktop Infrastructure)"]
-    },
-    "Palo Alto Networks": {
-        "description": "A global cybersecurity leader providing enterprise security solutions.",
-        "keywords": ["Cybersecurity", "Network Security", "Cloud Security", "Endpoint Security", "Firewalls", "Threat Detection", "Incident Response", "AI in Security", "Machine Learning in Security", "Zero Trust", "Security Operations (SecOps)", "SaaS Security"]
-    },
-    "CrowdStrike": {
-        "description": "A cybersecurity technology company focused on endpoint protection.",
-        "keywords": ["Cybersecurity", "Endpoint Detection and Response (EDR)", "Cloud Security", "Threat Intelligence", "Incident Response", "AI in Security", "Machine Learning", "XDR (Extended Detection and Response)", "Security Analytics", "Cloud Native Security"]
-    },
-    "Snowflake": {
-        "description": "A cloud-based data warehousing company offering a data cloud platform.",
-        "keywords": ["Data Warehousing", "Cloud Data Platform", "SQL", "Big Data", "Data Lakes", "Data Sharing", "Data Governance", "Analytics", "Machine Learning (Data)", "Snowflake Native Apps", "Data Engineering", "Performance Optimization"]
-    },
-    "Databricks": {
-        "description": "A company providing a cloud-based data lakehouse platform for data science and AI.",
-        "keywords": ["Data Lakehouse", "Spark", "Data Science", "Machine Learning", "AI", "Big Data", "Data Engineering", "Delta Lake", "MLflow", "Lakehouse Architecture", "Python", "Scala", "SQL", "Data Bricks Runtime"]
-    },
-    "ServiceNow": {
-        "description": "An American software company that develops a cloud computing platform to help companies manage digital workflows for enterprise operations.",
-        "keywords": ["ITSM", "HRSD", "CSM", "Workflow Automation", "Cloud Platform", "Enterprise Software", "SaaS", "Low-code/No-code", "Integration", "Digital Transformation", "Platform Development (Now Platform)", "Service Management", "Operations Management", "Security Operations"]
-    },
-    "Okta": {
-        "description": "A leading independent provider of identity for the enterprise.",
-        "keywords": ["Identity and Access Management (IAM)", "Single Sign-On (SSO)", "Multi-Factor Authentication (MFA)", "Cloud Security", "API Security", "Enterprise Security", "Zero Trust", "AuthN/AuthZ"]
-    },
-    "Zscaler": {
-        "description": "A cloud security company offering a cloud-native security platform.",
-        "keywords": ["Cloud Security", "Zero Trust Network Access (ZTNA)", "SASE (Secure Access Service Edge)", "Network Security", "Cybersecurity", "Secure Web Gateway (SWG)", "Cloud Firewall", "Proxy Services"]
-    },
-    "Twilio": {
-        "description": "A cloud communications platform as a service (CPaaS) company.",
-        "keywords": ["CPaaS", "APIs", "Cloud Communications", "SMS", "Voice", "Video", "Email", "Customer Engagement", "Programmable Communications", "Twilio Segment (CDP)", "Twilio Flex (Contact Center)"]
-    },
-    "Shopify": {
-        "description": "A leading e-commerce platform for online stores and retail point-of-sale systems.",
-        "keywords": ["E-commerce", "SaaS", "Online Retail", "Shopify Plus", "Payment Gateways", "Logistics", "Inventory Management", "Marketing Automation", "Web Development", "Ruby on Rails", "React", "Store Management"]
-    },
-    "Square (Block, Inc.)": {
-        "description": "A financial services and mobile payment company.",
-        "keywords": ["FinTech", "Mobile Payments", "Payment Processing", "Point-of-Sale (POS)", "SME Solutions", "Cash App", "Bitcoin (Square Crypto)", "Business Banking", "Hardware (Readers)", "Blockchain"]
-    },
-    "Stripe": {
-        "description": "A financial technology company offering payment processing software and APIs.",
-        "keywords": ["FinTech", "Payment Gateway", "API", "Online Payments", "SaaS", "Billing", "Fraud Prevention", "Global Payments", "Developer Tools", "Financial Infrastructure", "Stripe Connect"]
-    },
-    "DocuSign": {
-        "description": "A company providing electronic signature technology and digital transaction management services.",
-        "keywords": ["Electronic Signature", "Digital Transformation", "SaaS", "Workflow Automation", "Document Management", "Legal Tech", "Compliance", "Cloud Security", "API Integration"]
-    },
-    "Coupa Software": {
-        "description": "A business spend management (BSM) software company.",
-        "keywords": ["Procurement Software", "Spend Management", "SaaS", "Cloud Computing", "Supply Chain Management", "Financial Software", "Contract Management", "Expense Management"]
-    },
-    "Workday": {
-        "description": "An American on-demand (cloud-based) financial management and human capital management software vendor.",
-        "keywords": ["HCM", "Financial Management", "SaaS", "Cloud Computing", "Enterprise Software", "Data Analytics", "HRIS", "Payroll", "Talent Management", "Reporting"]
-    },
-    "Zendesk": {
-        "description": "A customer service software company building products designed to improve customer relationships.",
-        "keywords": ["Customer Service", "CRM", "SaaS", "Help Desk Software", "Ticketing System", "Customer Support", "Chatbot", "Knowledge Base", "Customer Experience (CX)", "Analytics"]
-    },
-    "Splunk": {
-        "description": "A software company that produces software for searching, monitoring, and analyzing machine-generated big data.",
-        "keywords": ["Big Data", "Data Analytics", "Machine Data", "SIEM (Security Information and Event Management)", "IT Operations", "Cybersecurity", "Observability", "Monitoring", "Log Management", "Search Technology", "Dashboards"]
-    },
-    "Datadog": {
-        "description": "A monitoring and analytics platform for developers, IT operations teams and business users.",
-        "keywords": ["Monitoring", "Observability", "Cloud Monitoring", "Application Performance Monitoring (APM)", "Log Management", "Infrastructure Monitoring", "Security Monitoring", "DevOps", "Kubernetes Monitoring", "Cloud Native"]
-    },
-    "PwC": {
-        "description": "A multinational professional services network, providing audit, assurance, consulting, and tax services.",
-        "keywords": ["Consulting", "Digital Transformation", "Cybersecurity Consulting", "Cloud Strategy", "Data Analytics Consulting", "Enterprise Architecture", "Technology Advisory", "ERP Implementation", "Financial Consulting", "Management Consulting"]
-    },
-    "Deloitte": {
-        "description": "One of the 'Big Four' accounting organizations and the largest professional services network by revenue and number of professionals.",
-        "keywords": ["Consulting", "IT Consulting", "Digital Transformation", "Cybersecurity Consulting", "Cloud Strategy", "Data Science Consulting", "AI Strategy", "Enterprise Solutions", "Risk Advisory", "Strategy Consulting"]
-    },
-    "EY (Ernst & Young)": {
-        "description": "A multinational professional services firm, one of the 'Big Four' accounting firms.",
-        "keywords": ["Consulting", "Technology Consulting", "Digital Transformation", "Cybersecurity", "Data Analytics", "Cloud Services", "AI & Automation", "Strategy & Transactions", "Advisory Services"]
-    },
-    "KPMG": {
-        "description": "A multinational professional services network, and one of the 'Big Four' accounting organizations.",
-        "keywords": ["Consulting", "Digital Transformation", "Cybersecurity", "Cloud Advisory", "Data & Analytics", "Emerging Technologies", "Risk Consulting", "Financial Services Consulting", "Technology Implementation"]
-    },
-    # Indian Companies - IT Services & Consulting
-    "Tata Consultancy Services (TCS)": {
-        "description": "A leading global IT services, consulting, and business solutions organization and part of the Tata Group.",
-        "keywords": ["IT Services", "Consulting", "Digital Transformation", "Cloud Computing", "AI", "Machine Learning", "Data Analytics", "Enterprise Solutions", "Cybersecurity", "IoT", "Agile", "DevOps", "Java", "Python", "SAP", "Oracle", "Automation", "Blockchain", "Financial Services", "Manufacturing", "Cognitive Business Operations", "Assurance Services", "Engineering & Industrial Services"]
-    },
-    "Infosys": {
-        "description": "A global leader in next-generation digital services and consulting.",
-        "keywords": ["Digital Transformation", "Cloud Services", "AI", "Machine Learning", "Data Analytics", "Cybersecurity", "IoT", "Automation", "Enterprise Applications", "SAP", "Oracle", "Java", "Python", "Big Data", "DevOps", "Blockchain", "Consulting", "Digital Experience", "Legacy Modernization", "Finacle (Banking Software)"]
-    },
-    "Wipro": {
-        "description": "A global information technology, consulting, and business process services company.",
-        "keywords": ["IT Services", "Consulting", "Digital Transformation", "Cloud Computing", "AI", "Machine Learning", "Data Science", "Cybersecurity", "IoT", "Automation", "DevOps", "SAP", "Oracle", "Java", "Python", "Analytics", "Blockchain", "Industry Solutions", "Application Development & Management", "Infrastructure Services"]
-    },
-    "HCLTech": {
-        "description": "A global technology company that helps enterprises reimagine their businesses for the digital age.",
-        "keywords": ["Digital Engineering", "Cloud Adoption", "IoT Solutions", "Automation", "Security", "Analytics", "Digital Transformation", "AI", "Machine Learning", "Cybersecurity", "Fullstack Development", "Cloud Native", "DevOps", "Enterprise Applications", "Product Engineering", "Infrastructure Modernization"]
-    },
-    "Tech Mahindra": {
-        "description": "An Indian multinational information technology services and consulting company.",
-        "keywords": ["Digital Transformation", "Cloud Services", "AI", "Machine Learning", "Cybersecurity", "Network Services", "Business Process Services", "Enterprise Applications", "Engineering Services", "Blockchain", "5G", "IoT", "Robotics", "Telecommunications", "CRM Services", "Data Analytics"]
-    },
-    "LTIMindtree": {
-        "description": "An Indian multinational information technology services and consulting company, formed by the merger of L&T Infotech and Mindtree.",
-        "keywords": ["IT Services", "Digital Transformation", "Cloud Computing", "Data & Analytics", "Generative AI", "Application Development", "Cybersecurity", "Enterprise Solutions", "IoT", "DevOps", "Agile", "Consulting", "Product Engineering", "Customer Experience (CX)", "SAP", "Oracle"]
-    },
-    "Cognizant": {
-        "description": "A global information technology services and consulting company with a significant presence in India.",
-        "keywords": ["IT Consulting", "Digital Strategy", "Cloud Solutions", "AI", "Machine Learning", "Data Analytics", "Cybersecurity", "Application Development", "Business Process Services", "Industry Solutions", "DevOps", "Agile", "Digital Engineering", "Enterprise Transformation"]
-    },
-    "Capgemini (India Operations)": {
-        "description": "A global leader in consulting, technology services, and digital transformation, with strong operations in India.",
-        "keywords": ["Consulting", "IT Services", "Digital Transformation", "Cloud Computing", "AI", "Data Analytics", "Cybersecurity", "Application Services", "DevOps", "Agile", "SAP", "Oracle", "Industry Expertise", "Intelligent Automation", "Customer Experience"]
-    },
-    "Persistent Systems": {
-        "description": "A global services company that provides software product development and technology services.",
-        "keywords": ["Product Engineering", "Digital Engineering", "Cloud Native", "Data & AI", "Enterprise Modernization", "Software Development", "Agile", "DevOps", "Banking & Financial Services (BFS)", "Healthcare Tech", "Life Sciences", "IoT Solutions"]
-    },
-    "Mphasis": {
-        "description": "A global information technology solutions provider specializing in cloud and cognitive services.",
-        "keywords": ["Cloud Transformation", "AI", "Cognitive Technologies", "Digital Transformation", "DevOps", "Automation", "Cybersecurity", "Data Analytics", "IT Services", "Blockchain", "Application Modernization", "Financial Services Tech"]
-    },
-    "Coforge (formerly NIIT Technologies)": {
-        "description": "A global IT solutions organization enabling businesses to transform with digital technologies.",
-        "keywords": ["Digital Transformation", "Cloud Services", "AI", "Machine Learning", "Data Analytics", "Enterprise Solutions", "Automation", "Cybersecurity", "Application Development", "Microservices", "API Management", "Travel Tech", "Financial Services"]
-    },
-    # Indian Companies - Startups & Product Companies
-    "Reliance Jio Platforms": {
-        "description": "A technology company providing digital services, including mobile connectivity, broadband, and various digital platforms.",
-        "keywords": ["5G", "Telecommunications", "Digital Services", "Cloud Platforms", "AI", "IoT", "Big Data", "Mobile Technology", "Fixed Wireless Access (FWA)", "E-commerce (JioMart)", "FinTech (JioMoney)", "Content Streaming (JioCinema)", "Fiber Optics", "Digital Payments", "Edge Computing"]
-    },
-    "Flipkart": {
-        "description": "An Indian e-commerce company, a subsidiary of Walmart, offering a wide range of products.",
-        "keywords": ["E-commerce", "Supply Chain", "Logistics", "Retail Technology", "Mobile Development", "Android", "iOS", "Data Science", "Machine Learning (Recommendations)", "Cloud Infrastructure (AWS, GCP)", "Microservices", "Payments", "Fraud Detection", "Personalization", "Big Data", "Customer Experience"]
-    },
-    "Zomato": {
-        "description": "An Indian multinational restaurant aggregator and food delivery company.",
-        "keywords": ["Food Delivery", "Restaurant Technology", "Logistics", "Mobile Development", "Data Analytics", "Machine Learning (Recommendation Systems)", "Cloud Infrastructure (AWS)", "Geolocation", "Payment Gateways", "User Experience (UX)", "Growth Hacking", "Hyperlocal", "Mapping", "Real-time Systems"]
-    },
-    "Swiggy": {
-        "description": "An Indian online food ordering and delivery platform.",
-        "keywords": ["Food Delivery", "Quick Commerce (Instamart)", "Logistics Optimization", "Mobile Development", "Data Science", "Machine Learning", "Real-time Systems", "Cloud Platforms (AWS)", "Geolocation", "Payments", "User Experience (UX)", "Route Optimization", "Demand Forecasting"]
-    },
-    "Paytm": {
-        "description": "An Indian multinational financial technology company specializing in digital payment systems, e-commerce, and financial services.",
-        "keywords": ["FinTech", "Digital Payments", "Mobile Wallets", "UPI", "E-commerce", "Financial Services", "Blockchain", "Cybersecurity", "Data Analytics", "Fraud Detection", "Cloud Computing", "Microservices", "Scalability", "Security", "Investment Tech", "Lending", "Insurance Tech"]
-    },
-    "Ola": {
-        "description": "An Indian multinational ridesharing company offering transportation, food delivery, and financial services.",
-        "keywords": ["Ridesharing", "Mobility Solutions", "Electric Vehicles (EV)", "Logistics", "Geolocation", "Mobile Development", "Data Science", "Machine Learning (Pricing, Routing)", "Cloud Platforms (AWS)", "Payment Systems", "User Experience", "Fleet Management", "Mapping", "Autonomous Driving (early stages)"]
-    },
-    "BYJU'S": {
-        "description": "An Indian multinational educational technology company, providing online tutoring and learning programs.",
-        "keywords": ["EdTech", "Online Learning", "Content Creation (Video, Animation)", "Mobile App Development", "AI (Personalized Learning)", "Machine Learning", "Data Analytics (Student Progress)", "Curriculum Development", "User Experience", "Subscription Models", "Gamification", "Adaptive Learning", "K-12 Education"]
-    },
-    "CRED": {
-        "description": "A members-only credit card bill payment platform that rewards its members for clearing their credit card bills on time.",
-        "keywords": ["FinTech", "Credit Scoring", "Payments", "Data Analytics", "User Experience (UX)", "Mobile App Development", "Security", "Wealth Management (early stages)", "Loyalty Programs", "Personal Finance"]
-    },
-    "Razorpay": {
-        "description": "A leading Indian fintech company that provides payment solutions for businesses of all sizes.",
-        "keywords": ["FinTech", "Payment Gateway", "API", "Online Payments", "UPI", "Payment Processing", "SME Solutions", "Banking Tech", "Neo-banking", "Payroll Management", "Fraud Detection", "Data Analytics", "Scalability"]
-    },
-    "PhonePe": {
-        "description": "An Indian digital payments and financial services company, a subsidiary of Flipkart.",
-        "keywords": ["FinTech", "Digital Payments", "UPI", "Mobile Wallets", "Financial Services", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Geolocation", "Security", "Data Analytics", "Scalability"]
-    },
-    "Meesho": {
-        "description": "An Indian social commerce platform enabling small businesses and individuals to start online businesses without investment.",
-        "keywords": ["E-commerce", "Social Commerce", "Reselling", "Logistics", "Supply Chain", "Mobile Development", "Data Science", "Machine Learning (Recommendations)", "Payments", "User Acquisition", "Growth Hacking", "Tier 2/3 Markets"]
-    },
-    "Dream11": {
-        "description": "An Indian fantasy sports platform.",
-        "keywords": ["Gaming Tech", "Fantasy Sports", "Mobile Gaming", "Data Analytics", "User Engagement", "Real-time Systems", "Scalability", "Backend Development", "Payments Integration", "Sports Analytics"]
-    },
-    "BYJU'S": {
-        "description": "An Indian multinational educational technology company, providing online tutoring and learning programs.",
-        "keywords": ["EdTech", "Online Learning", "Content Creation", "Mobile App Development", "AI (Personalized Learning)", "Machine Learning", "Data Analytics", "Curriculum Development", "User Experience", "Subscription Models"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "PolicyBazaar": {
-        "description": "An Indian online insurance aggregator and financial services company.",
-        "keywords": ["FinTech", "Insurance Tech (InsurTech)", "Online Aggregator", "Digital Marketing", "Lead Generation", "Data Analytics", "AI (Recommendations)", "Customer Service Tech", "Web Development", "Mobile App Development"]
-    },
-    "Nykaa": {
-        "description": "An Indian e-commerce company for beauty, wellness, and fashion products.",
-        "keywords": ["E-commerce", "Retail Tech", "Beauty & Fashion Tech", "Online Shopping", "Logistics", "Inventory Management", "Digital Marketing", "Personalization", "Mobile App Development", "Customer Experience (CX)"]
-    },
-    "Udaan": {
-        "description": "An Indian B2B e-commerce platform for small and medium businesses.",
-        "keywords": ["B2B E-commerce", "Supply Chain", "Logistics", "FinTech (Lending)", "Wholesale Trade", "Marketplace", "Data Analytics", "Mobile Platform", "Small Business Solutions", "Procurement"]
-    },
-    "BrowserStack": {
-        "description": "A cloud web and mobile testing platform.",
-        "keywords": ["Testing Automation", "Cloud Testing", "Browser Compatibility", "Mobile Testing", "SaaS", "DevOps Tools", "Continuous Integration/Continuous Delivery (CI/CD)", "Quality Assurance (QA)", "Selenium", "Appium"]
-    },
-    "Freshworks": {
-        "description": "A global software company providing SaaS customer engagement solutions.",
-        "keywords": ["SaaS", "CRM", "Help Desk Software", "Customer Service", "ITSM", "Sales Automation", "Marketing Automation", "AI Chatbots", "Customer Engagement", "Cloud Computing"]
-    },
-    "Druva": {
-        "description": "A cloud data protection and management company.",
-        "keywords": ["Cloud Data Protection", "Data Backup", "Disaster Recovery", "Data Governance", "Cybersecurity", "SaaS", "Cloud Computing", "Data Resilience", "Compliance", "Security Automation"]
-    },
-    "Postman": {
-        "description": "A leading API development and testing platform.",
-        "keywords": ["API Development", "API Testing", "Developer Tools", "Collaboration Tools", "API Management", "RESTful APIs", "GraphQL", "Microservices", "DevOps", "Software Development Lifecycle (SDLC)"]
-    },
-    "Amagi": {
-        "description": "A global leader in cloud-based SaaS technology for broadcast and streaming TV.",
-        "keywords": ["Cloud TV", "Broadcast Technology", "Streaming Media", "SaaS", "Video On Demand (VOD)", "Live Streaming", "Content Delivery Networks (CDN)", "Ad Insertion", "Media Technology", "AWS", "GCP"]
-    },
-    "Chargebee": {
-        "description": "A subscription billing and revenue management platform for SaaS and subscription businesses.",
-        "keywords": ["SaaS", "Subscription Management", "Billing Software", "Revenue Operations", "Payment Gateways", "FinTech", "Recurring Revenue", "Stripe", "Zuora", "Financial Analytics"]
-    },
-    "CleverTap": {
-        "description": "A leading customer engagement and retention platform for mobile apps.",
-        "keywords": ["Mobile Marketing", "Customer Engagement", "Retention Marketing", "Personalization", "Data Analytics", "AI (Marketing)", "Machine Learning", "Push Notifications", "In-App Messaging", "Customer Data Platform (CDP)"]
-    },
-    "Unacademy": {
-        "description": "An Indian online education technology company.",
-        "keywords": ["EdTech", "Online Learning", "Live Classes", "Test Preparation", "Content Creation", "Mobile App Development", "Data Analytics (Learning)", "Personalized Learning"]
-    },
-    "Vedantu": {
-        "description": "An Indian online tutoring platform providing live interactive classes.",
-        "keywords": ["EdTech", "Online Tutoring", "Live Classes", "Personalized Learning", "Mobile App Development", "Learning Management Systems (LMS)", "AI (Learning Analytics)", "Gamification"]
-    },
-    "Urban Company": {
-        "description": "An Indian at-home services platform.",
-        "keywords": ["On-demand Services", "Hyperlocal", "Mobile App Development", "Logistics", "Geolocation", "Service Marketplace", "User Experience (UX)", "Payment Systems"]
-    },
-    "MakeMyTrip": {
-        "description": "An Indian online travel company providing travel services and products.",
-        "keywords": ["Travel Tech", "Online Travel Agency (OTA)", "Flight Booking", "Hotel Booking", "Holiday Packages", "Mobile App Development", "E-commerce", "Payment Gateways", "Recommendation Systems"]
-    },
-    "Bykea": { # Pakistani but similar market dynamics
-        "description": "A Pakistani on-demand ride-hailing, logistics, and payments company.",
-        "keywords": ["Ridesharing", "Logistics", "FinTech (Payments)", "On-demand Services", "Hyperlocal", "Mobile App Development", "Geolocation", "Last-Mile Delivery"]
-    },
-    # Global Companies - Other sectors
-    "Salesforce": {
-        "description": "A cloud-based software company providing customer relationship management (CRM) service.",
-        "keywords": ["Salesforce", "CRM", "Apex", "Lightning Web Components", "Cloud Computing", "SaaS", "Enterprise Software", "Customer Success", "Data Analytics", "Integration", "Platform Development"]
-    },
-    "Intuit": {
-        "description": "A global technology platform that helps consumers and small businesses prosper with financial management solutions.",
-        "keywords": ["FinTech", "Accounting Software (QuickBooks)", "Tax Software (TurboTax)", "Personal Finance (Mint)", "Small Business Solutions", "SaaS", "Data Analytics", "AI in Finance", "Cloud Accounting", "Payroll", "Payment Processing"]
-    },
-    "SAP": {
-        "description": "A German multinational software corporation that makes enterprise software to manage business operations and customer relations.",
-        "keywords": ["ERP", "CRM", "S/4HANA", "Cloud Computing", "Business Intelligence", "Supply Chain Management", "Procurement", "Financial Software", "ABAP", "Enterprise Solutions", "SaaS"]
-    },
-    "Siemens AG": {
-        "description": "A global technology powerhouse focusing on industry, infrastructure, transport, and healthcare.",
-        "keywords": ["Industrial IoT", "Automation", "Digital Twin", "Smart Infrastructure", "Mobility Solutions", "Healthcare Technology", "Software Engineering (Industrial)", "AI in Manufacturing", "Edge Computing", "Cybersecurity (Industrial)"]
-    },
-    "GE Digital": {
-        "description": "A subsidiary of General Electric, focusing on industrial IoT software and services.",
-        "keywords": ["Industrial IoT", "Asset Performance Management (APM)", "Digital Twin", "Data Analytics (Industrial)", "Cloud Platforms", "Cybersecurity (OT/IT)", "Predictive Maintenance", "Operational Technology (OT)"]
-    },
-    "ABB": {
-        "description": "A leading global technology company that energizes the transformation of society and industry to achieve a more productive, sustainable future.",
-        "keywords": ["Industrial Automation", "Robotics", "Power Grids", "Electrification", "Motion Control", "IoT", "Digital Transformation (Industry)", "Control Systems", "Sustainable Technologies"]
-    },
-    "Honeywell": {
-        "description": "A diversified technology and manufacturing company with segments in aerospace, building technologies, performance materials, and safety and productivity solutions.",
-        "keywords": ["Industrial IoT", "Automation", "Aerospace Systems", "Building Management Systems", "Supply Chain Software", "Cybersecurity (Industrial)", "Control Systems", "Sensing Technologies", "Connected Solutions"]
-    },
-    "Schneider Electric": {
-        "description": "A global specialist in energy management and automation.",
-        "keywords": ["Energy Management", "Industrial Automation", "IoT", "Smart Buildings", "Data Center Solutions", "Renewable Energy", "Digital Transformation (Energy)", "Edge Computing", "Power Management", "Sustainability Tech"]
-    },
-    "Qualtrics": {
-        "description": "An experience management company, helping organizations manage customer, employee, product, and brand experiences.",
-        "keywords": ["Experience Management (XM)", "Customer Experience (CX)", "Employee Experience (EX)", "Survey Software", "Data Analytics", "Sentiment Analysis", "AI in CX", "Feedback Management", "SaaS"]
-    },
-    "ServiceNow": {
-        "description": "An American software company that develops a cloud computing platform to help companies manage digital workflows for enterprise operations.",
-        "keywords": ["ITSM", "HRSD", "CSM", "Workflow Automation", "Cloud Platform", "Enterprise Software", "SaaS", "Low-code/No-code", "Integration", "Digital Transformation", "Platform Development"]
-    },
-    "Workday": {
-        "description": "An American on-demand (cloud-based) financial management and human capital management software vendor.",
-        "keywords": ["HCM", "Financial Management", "SaaS", "Cloud Computing", "Enterprise Software", "Data Analytics", "HRIS", "Payroll", "Talent Management", "Reporting"]
-    },
-    "ZoomInfo": {
-        "description": "A leading go-to-market intelligence platform for sales and marketing teams.",
-        "keywords": ["Go-to-Market (GTM)", "Sales Intelligence", "Marketing Intelligence", "Lead Generation", "Data Analytics", "CRM Integration", "SaaS", "B2B Data", "Predictive Analytics"]
-    },
-    "Asana": {
-        "description": "A web and mobile application designed to help teams organize, track, and manage their work.",
-        "keywords": ["Project Management", "Work Management", "Collaboration Tools", "SaaS", "Agile Project Management", "Workflow Automation", "Task Management", "Team Productivity"]
-    },
-    "Atlassian": {
-        "description": "A software company that develops products for software developers, project managers, and other software development teams.",
-        "keywords": ["Jira", "Confluence", "Trello", "Bitbucket", "DevOps Tools", "Project Management", "Team Collaboration", "Agile Software Development", "SaaS", "Cloud Tools", "Enterprise Software"]
-    },
-    "HubSpot": {
-        "description": "A developer and marketer of software products for inbound marketing, sales, and customer service.",
-        "keywords": ["CRM", "Marketing Automation", "Sales Software", "Customer Service Software", "SaaS", "Inbound Marketing", "Content Management System (CMS)", "Website Builder", "Email Marketing", "Analytics"]
-    },
-    "Stripe": {
-        "description": "A financial technology company offering payment processing software and APIs.",
-        "keywords": ["FinTech", "Payment Gateway", "API", "Online Payments", "SaaS", "Billing", "Fraud Prevention", "Global Payments", "Developer Tools", "Financial Infrastructure"]
-    },
-    "Adyen": {
-        "description": "A global payment company providing payment solutions for businesses.",
-        "keywords": ["FinTech", "Payment Processing", "Online Payments", "Point-of-Sale (POS)", "Global Payments", "Fraud Prevention", "Payment Gateway", "API", "Merchant Services"]
-    },
-    "Fiserv": {
-        "description": "A global provider of financial services technology solutions.",
-        "keywords": ["FinTech", "Payment Processing", "Core Banking", "Digital Banking", "Financial Technology", "Enterprise Software", "Risk Management (Financial)", "Data Analytics (Financial)"]
-    },
-    "Fidelity National Information Services (FIS)": {
-        "description": "A global leader in financial services technology, specializing in payment processing and banking solutions.",
-        "keywords": ["FinTech", "Payment Processing", "Banking Technology", "Capital Markets Solutions", "Enterprise Payments", "Fraud & Risk Management", "Wealth Management Tech", "Blockchain (Financial)"]
-    },
-    "Illumina": {
-        "description": "A company that develops, manufactures, and markets integrated systems for large-scale analysis of genetic variation and function.",
-        "keywords": ["Bioinformatics", "Genomics", "Life Sciences", "Data Analysis (Genomics)", "Sequencing Technology", "Biotech", "Research & Development", "Machine Learning (Genetics)"]
-    },
-    "Moderna": {
-        "description": "A biotechnology company focused on drug discovery, drug development, and vaccine technologies based on messenger RNA (mRNA).",
-        "keywords": ["Biotechnology", "mRNA Technology", "Drug Discovery", "Vaccine Development", "Genomics", "Bioinformatics", "Clinical Trials", "Research & Development", "Life Sciences"]
-    },
-    "Guardant Health": {
-        "description": "A precision oncology company focused on developing and commercializing proprietary blood tests for cancer.",
-        "keywords": ["Biotech", "Healthcare Tech", "Precision Oncology", "Liquid Biopsy", "Genomics", "Data Analytics (Healthcare)", "Machine Learning (Diagnostics)", "Medical Devices", "Molecular Diagnostics"]
-    },
-    "Intuitive Surgical": {
-        "description": "A company that develops, manufactures, and markets robotic products designed to improve clinical outcomes of patients through minimally invasive surgery.",
-        "keywords": ["Robotics (Surgical)", "Medical Devices", "Healthcare Tech", "Minimally Invasive Surgery", "Computer Vision (Medical)", "Haptics", "AI in Healthcare", "Embedded Systems", "Hardware Engineering (Medical)"]
-    },
-    "GE Healthcare": {
-        "description": "A leading global medical technology, pharmaceutical diagnostics, and digital solutions innovator.",
-        "keywords": ["Healthcare Technology", "Medical Imaging", "AI in Healthcare", "Data Analytics (Healthcare)", "Digital Health", "Precision Health", "Healthcare IT", "Patient Monitoring", "Diagnostic Equipment"]
-    },
-    "Siemens Healthineers": {
-        "description": "A leading medical technology company and independent listed company of Siemens AG, offering products and services for diagnostic and therapeutic purposes.",
-        "keywords": ["Healthcare Technology", "Medical Imaging", "Laboratory Diagnostics", "AI in Healthcare", "Digital Health", "Precision Medicine", "Healthcare IT Solutions", "Therapeutic Devices", "Cybersecurity (Healthcare)"]
-    },
-    "Philips Healthcare": {
-        "description": "A diversified technology company focused on improving people's health and well-being through meaningful innovation.",
-        "keywords": ["Healthcare Technology", "Medical Devices", "Diagnostic Imaging", "Patient Monitoring", "Connected Care", "Personal Health", "AI in Healthcare", "Digital Health", "Software as a Medical Device (SaMD)"]
-    },
-    "TSMC (Taiwan Semiconductor Manufacturing Company)": {
-        "description": "The world's largest dedicated independent (pure-play) semiconductor foundry.",
-        "keywords": ["Semiconductors", "Chip Manufacturing", "Foundry Services", "Process Technology", "Microelectronics", "Wafer Fabrication", "Advanced Packaging", "R&D (Semiconductor)", "Supply Chain (Semiconductor)"]
-    },
-    "ASML Holding": {
-        "description": "A Dutch multinational corporation specializing in the development and manufacturing of photolithography systems for the semiconductor industry.",
-        "keywords": ["Semiconductor Equipment", "Photolithography", "EUV Lithography", "Advanced Manufacturing", "Optics", "Precision Engineering", "Vacuum Technology", "Cleanroom Technology", "High-Tech Manufacturing"]
-    },
-    "Micron Technology": {
-        "description": "An American producer of computer memory and computer data storage including DRAM, NAND flash, and NOR flash.",
-        "keywords": ["Semiconductors", "Memory (DRAM, NAND)", "Flash Storage", "Solid State Drives (SSDs)", "Memory Controllers", "Chip Design", "Manufacturing (Memory)", "Data Storage Solutions"]
-    },
-    "Applied Materials": {
-        "description": "A global leader in materials engineering solutions for the semiconductor, flat panel display, and solar photovoltaic industries.",
-        "keywords": ["Semiconductor Equipment", "Materials Science", "Process Engineering", "Thin Film Deposition", "Etch Technology", "Ion Implantation", "Metrology", "Yield Management", "Manufacturing (Semiconductor)"]
-    },
-    "Lam Research": {
-        "description": "A global supplier of wafer fabrication equipment and services to the semiconductor industry.",
-        "keywords": ["Semiconductor Equipment", "Wafer Fabrication", "Etch", "Deposition", "Process Control", "Materials Engineering", "Advanced Manufacturing", "R&D (Semiconductor)"]
-    },
-    "Amdocs": {
-        "description": "A multinational corporation that specializes in software and services for communications, media, and financial services providers.",
-        "keywords": ["Telecommunications Software", "BSS/OSS", "Digital Transformation (Telecom)", "CRM (Telecom)", "Billing Systems", "Customer Experience (Telecom)", "Cloud Native (Telecom)", "5G Solutions", "Network Management"]
-    },
-    "Ericsson": {
-        "description": "A Swedish multinational networking and telecommunications company.",
-        "keywords": ["Telecommunications", "5G Networks", "Mobile Networks", "Radio Access Networks (RAN)", "Network Infrastructure", "IoT Connectivity", "Managed Services", "Network Orchestration", "Cloud Native (Telecom)"]
-    },
-    "Nokia": {
-        "description": "A Finnish multinational telecommunications, information technology, and consumer electronics company.",
-        "keywords": ["Telecommunications", "5G Networks", "Network Infrastructure", "Fixed Networks", "Cloud & Network Services", "Optical Networks", "Cybersecurity (Telecom)", "IoT", "Private Wireless Networks"]
-    },
-    "ZTE Corporation": {
-        "description": "A Chinese multinational telecommunications equipment and systems company.",
-        "keywords": ["Telecommunications Equipment", "5G Networks", "Wireless Communication", "Optical Communication", "Core Network", "IoT Solutions", "Smart City Solutions", "Network Infrastructure"]
-    },
-    "SoftBank Group": {
-        "description": "A Japanese multinational conglomerate holding company primarily focused on investment in technology, energy, and financial companies.",
-        "keywords": ["Investment (Tech)", "Venture Capital", "Vision Fund", "AI Investment", "Telecommunications (SoftBank Corp.)", "ARM Holdings", "Robotics (Boston Dynamics)", "Disruptive Technologies"]
-    },
-    "Tencent": {
-        "description": "A Chinese multinational technology and entertainment conglomerate holding company.",
-        "keywords": ["Gaming (Tencent Games)", "Social Media (WeChat)", "FinTech (WeChat Pay)", "Cloud Computing (Tencent Cloud)", "AI", "Content Platforms", "Digital Entertainment", "E-commerce", "Online Advertising"]
-    },
-    "Alibaba Group": {
-        "description": "A Chinese multinational technology company specializing in e-commerce, retail, Internet, and technology.",
-        "keywords": ["E-commerce (Taobao, Tmall)", "FinTech (Ant Group, Alipay)", "Cloud Computing (Alibaba Cloud)", "Logistics (Cainiao)", "Digital Media & Entertainment", "AI", "Big Data", "Supply Chain", "Retail Tech"]
-    },
-    "ByteDance": {
-        "description": "A Chinese internet technology company, best known for its video-sharing platform TikTok.",
-        "keywords": ["Social Media", "Short-form Video (TikTok)", "Content Recommendation", "AI (Recommendation Algorithms)", "Machine Learning", "Natural Language Processing (NLP)", "Computer Vision", "Content Creation Tools", "AdTech", "Global Scale"]
-    },
-    "Baidu": {
-        "description": "A Chinese multinational technology company specializing in internet-related services and products, and artificial intelligence.",
-        "keywords": ["Search Engine", "AI", "Autonomous Driving (Apollo)", "Cloud Computing (Baidu AI Cloud)", "Natural Language Processing (NLP)", "Computer Vision", "Smart Devices", "Digital Assistant (DuerOS)", "Machine Learning", "Big Data"]
-    },
-    "SAP": {
-        "description": "A German multinational software corporation that makes enterprise software to manage business operations and customer relations.",
-        "keywords": ["ERP", "CRM", "S/4HANA", "Cloud Computing", "Business Intelligence", "Supply Chain Management", "Procurement", "Financial Software", "ABAP", "Enterprise Solutions", "SaaS"]
-    },
-    "Siemens AG": {
-        "description": "A global technology powerhouse focusing on industry, infrastructure, transport, and healthcare.",
-        "keywords": ["Industrial IoT", "Automation", "Digital Twin", "Smart Infrastructure", "Mobility Solutions", "Healthcare Technology", "Software Engineering (Industrial)", "AI in Manufacturing", "Edge Computing", "Cybersecurity (Industrial)"]
-    },
-    "GE Digital": {
-        "description": "A subsidiary of General Electric, focusing on industrial IoT software and services.",
-        "keywords": ["Industrial IoT", "Asset Performance Management (APM)", "Digital Twin", "Data Analytics (Industrial)", "Cloud Platforms", "Cybersecurity (OT/IT)", "Predictive Maintenance", "Operational Technology (OT)"]
-    },
-    "ABB": {
-        "description": "A leading global technology company that energizes the transformation of society and industry to achieve a more productive, sustainable future.",
-        "keywords": ["Industrial Automation", "Robotics", "Power Grids", "Electrification", "Motion Control", "IoT", "Digital Transformation (Industry)", "Control Systems", "Sustainable Technologies"]
-    },
-    "Honeywell": {
-        "description": "A diversified technology and manufacturing company with segments in aerospace, building technologies, performance materials, and safety and productivity solutions.",
-        "keywords": ["Industrial IoT", "Automation", "Aerospace Systems", "Building Management Systems", "Supply Chain Software", "Cybersecurity (Industrial)", "Control Systems", "Sensing Technologies", "Connected Solutions"]
-    },
-    "Schneider Electric": {
-        "description": "A global specialist in energy management and automation.",
-        "keywords": ["Energy Management", "Industrial Automation", "IoT", "Smart Buildings", "Data Center Solutions", "Renewable Energy", "Digital Transformation (Energy)", "Edge Computing", "Power Management", "Sustainability Tech"]
-    },
-    "Qualtrics": {
-        "description": "An experience management company, helping organizations manage customer, employee, product, and brand experiences.",
-        "keywords": ["Experience Management (XM)", "Customer Experience (CX)", "Employee Experience (EX)", "Survey Software", "Data Analytics", "Sentiment Analysis", "AI in CX", "Feedback Management", "SaaS"]
-    },
-    "ZoomInfo": {
-        "description": "A leading go-to-market intelligence platform for sales and marketing teams.",
-        "keywords": ["Go-to-Market (GTM)", "Sales Intelligence", "Marketing Intelligence", "Lead Generation", "Data Analytics", "CRM Integration", "SaaS", "B2B Data", "Predictive Analytics"]
-    },
-    "Asana": {
-        "description": "A web and mobile application designed to help teams organize, track, and manage their work.",
-        "keywords": ["Project Management", "Work Management", "Collaboration Tools", "SaaS", "Agile Project Management", "Workflow Automation", "Task Management", "Team Productivity"]
-    },
-    "Atlassian": {
-        "description": "A software company that develops products for software developers, project managers, and other software development teams.",
-        "keywords": ["Jira", "Confluence", "Trello", "Bitbucket", "DevOps Tools", "Project Management", "Team Collaboration", "Agile Software Development", "SaaS", "Cloud Tools", "Enterprise Software"]
-    },
-    "HubSpot": {
-        "description": "A developer and marketer of software products for inbound marketing, sales, and customer service.",
-        "keywords": ["CRM", "Marketing Automation", "Sales Software", "Customer Service Software", "SaaS", "Inbound Marketing", "Content Management System (CMS)", "Website Builder", "Email Marketing", "Analytics"]
-    },
-    "Adyen": {
-        "description": "A global payment company providing payment solutions for businesses.",
-        "keywords": ["FinTech", "Payment Processing", "Online Payments", "Point-of-Sale (POS)", "Global Payments", "Fraud Prevention", "Payment Gateway", "API", "Merchant Services"]
-    },
-    "Fiserv": {
-        "description": "A global provider of financial services technology solutions.",
-        "keywords": ["FinTech", "Payment Processing", "Core Banking", "Digital Banking", "Financial Technology", "Enterprise Software", "Risk Management (Financial)", "Data Analytics (Financial)"]
-    },
-    "Fidelity National Information Services (FIS)": {
-        "description": "A global leader in financial services technology, specializing in payment processing and banking solutions.",
-        "keywords": ["FinTech", "Payment Processing", "Banking Technology", "Capital Markets Solutions", "Enterprise Payments", "Fraud & Risk Management", "Wealth Management Tech", "Blockchain (Financial)"]
-    },
-    "Illumina": {
-        "description": "A company that develops, manufactures, and markets integrated systems for large-scale analysis of genetic variation and function.",
-        "keywords": ["Bioinformatics", "Genomics", "Life Sciences", "Data Analysis (Genomics)", "Sequencing Technology", "Biotech", "Research & Development", "Machine Learning (Genetics)"]
-    },
-    "Moderna": {
-        "description": "A biotechnology company focused on drug discovery, drug development, and vaccine technologies based on messenger RNA (mRNA).",
-        "keywords": ["Biotechnology", "mRNA Technology", "Drug Discovery", "Vaccine Development", "Genomics", "Bioinformatics", "Clinical Trials", "Research & Development", "Life Sciences"]
-    },
-    "Guardant Health": {
-        "description": "A precision oncology company focused on developing and commercializing proprietary blood tests for cancer.",
-        "keywords": ["Biotech", "Healthcare Tech", "Precision Oncology", "Liquid Biopsy", "Genomics", "Data Analytics (Healthcare)", "Machine Learning (Diagnostics)", "Medical Devices", "Molecular Diagnostics"]
-    },
-    "Intuitive Surgical": {
-        "description": "A company that develops, manufactures, and markets robotic products designed to improve clinical outcomes of patients through minimally invasive surgery.",
-        "keywords": ["Robotics (Surgical)", "Medical Devices", "Healthcare Tech", "Minimally Invasive Surgery", "Computer Vision (Medical)", "Haptics", "AI in Healthcare", "Embedded Systems", "Hardware Engineering (Medical)"]
-    },
-    "GE Healthcare": {
-        "description": "A leading global medical technology, pharmaceutical diagnostics, and digital solutions innovator.",
-        "keywords": ["Healthcare Technology", "Medical Imaging", "AI in Healthcare", "Data Analytics (Healthcare)", "Digital Health", "Precision Health", "Healthcare IT", "Patient Monitoring", "Diagnostic Equipment"]
-    },
-    "Siemens Healthineers": {
-        "description": "A leading medical technology company and independent listed company of Siemens AG, offering products and services for diagnostic and therapeutic purposes.",
-        "keywords": ["Healthcare Technology", "Medical Imaging", "Laboratory Diagnostics", "AI in Healthcare", "Digital Health", "Precision Medicine", "Healthcare IT Solutions", "Therapeutic Devices", "Cybersecurity (Healthcare)"]
-    },
-    "Philips Healthcare": {
-        "description": "A diversified technology company focused on improving people's health and well-being through meaningful innovation.",
-        "keywords": ["Healthcare Technology", "Medical Devices", "Diagnostic Imaging", "Patient Monitoring", "Connected Care", "Personal Health", "AI in Healthcare", "Digital Health", "Software as a Medical Device (SaMD)"]
-    },
-    "TSMC (Taiwan Semiconductor Manufacturing Company)": {
-        "description": "The world's largest dedicated independent (pure-play) semiconductor foundry.",
-        "keywords": ["Semiconductors", "Chip Manufacturing", "Foundry Services", "Process Technology", "Microelectronics", "Wafer Fabrication", "Advanced Packaging", "R&D (Semiconductor)", "Supply Chain (Semiconductor)"]
-    },
-    "ASML Holding": {
-        "description": "A Dutch multinational corporation specializing in the development and manufacturing of photolithography systems for the semiconductor industry.",
-        "keywords": ["Semiconductor Equipment", "Photolithography", "EUV Lithography", "Advanced Manufacturing", "Optics", "Precision Engineering", "Vacuum Technology", "Cleanroom Technology", "High-Tech Manufacturing"]
-    },
-    "Micron Technology": {
-        "description": "An American producer of computer memory and computer data storage including DRAM, NAND flash, and NOR flash.",
-        "keywords": ["Semiconductors", "Memory (DRAM, NAND)", "Flash Storage", "Solid State Drives (SSDs)", "Memory Controllers", "Chip Design", "Manufacturing (Memory)", "Data Storage Solutions"]
-    },
-    "Applied Materials": {
-        "description": "A global leader in materials engineering solutions for the semiconductor, flat panel display, and solar photovoltaic industries.",
-        "keywords": ["Semiconductor Equipment", "Materials Science", "Process Engineering", "Thin Film Deposition", "Etch Technology", "Ion Implantation", "Metrology", "Yield Management", "Manufacturing (Semiconductor)"]
-    },
-    "Lam Research": {
-        "description": "A global supplier of wafer fabrication equipment and services to the semiconductor industry.",
-        "keywords": ["Semiconductor Equipment", "Wafer Fabrication", "Etch", "Deposition", "Process Control", "Materials Engineering", "Advanced Manufacturing", "R&D (Semiconductor)"]
-    },
-    "Amdocs": {
-        "description": "A multinational corporation that specializes in software and services for communications, media, and financial services providers.",
-        "keywords": ["Telecommunications Software", "BSS/OSS", "Digital Transformation (Telecom)", "CRM (Telecom)", "Billing Systems", "Customer Experience (Telecom)", "Cloud Native (Telecom)", "5G Solutions", "Network Management"]
-    },
-    "Ericsson": {
-        "description": "A Swedish multinational networking and telecommunications company.",
-        "keywords": ["Telecommunications", "5G Networks", "Mobile Networks", "Radio Access Networks (RAN)", "Network Infrastructure", "IoT Connectivity", "Managed Services", "Network Orchestration", "Cloud Native (Telecom)"]
-    },
-    "Nokia": {
-        "description": "A Finnish multinational telecommunications, information technology, and consumer electronics company.",
-        "keywords": ["Telecommunications", "5G Networks", "Network Infrastructure", "Fixed Networks", "Cloud & Network Services", "Optical Networks", "Cybersecurity (Telecom)", "IoT", "Private Wireless Networks"]
-    },
-    "ZTE Corporation": {
-        "description": "A Chinese multinational telecommunications equipment and systems company.",
-        "keywords": ["Telecommunications Equipment", "5G Networks", "Wireless Communication", "Optical Communication", "Core Network", "IoT Solutions", "Smart City Solutions", "Network Infrastructure"]
-    },
-    "SoftBank Group": {
-        "description": "A Japanese multinational conglomerate holding company primarily focused on investment in technology, energy, and financial companies.",
-        "keywords": ["Investment (Tech)", "Venture Capital", "Vision Fund", "AI Investment", "Telecommunications (SoftBank Corp.)", "ARM Holdings", "Robotics (Boston Dynamics)", "Disruptive Technologies"]
-    },
-    "Tencent": {
-        "description": "A Chinese multinational technology and entertainment conglomerate holding company.",
-        "keywords": ["Gaming (Tencent Games)", "Social Media (WeChat)", "FinTech (WeChat Pay)", "Cloud Computing (Tencent Cloud)", "AI", "Content Platforms", "Digital Entertainment", "E-commerce", "Online Advertising"]
-    },
-    "Alibaba Group": {
-        "description": "A Chinese multinational technology company specializing in e-commerce, retail, Internet, and technology.",
-        "keywords": ["E-commerce (Taobao, Tmall)", "FinTech (Ant Group, Alipay)", "Cloud Computing (Alibaba Cloud)", "Logistics (Cainiao)", "Digital Media & Entertainment", "AI", "Big Data", "Supply Chain", "Retail Tech"]
-    },
-    "ByteDance": {
-        "description": "A Chinese internet technology company, best known for its video-sharing platform TikTok.",
-        "keywords": ["Social Media", "Short-form Video (TikTok)", "Content Recommendation", "AI (Recommendation Algorithms)", "Machine Learning", "Natural Language Processing (NLP)", "Computer Vision", "Content Creation Tools", "AdTech", "Global Scale"]
-    },
-    "Baidu": {
-        "description": "A Chinese multinational technology company specializing in internet-related services and products, and artificial intelligence.",
-        "keywords": ["Search Engine", "AI", "Autonomous Driving (Apollo)", "Cloud Computing (Baidu AI Cloud)", "Natural Language Processing (NLP)", "Computer Vision", "Smart Devices", "Digital Assistant (DuerOS)", "Machine Learning", "Big Data"]
-    },
-    # More Indian Tech Companies (Established & Emerging)
-    "Zerodha": {
-        "description": "India's largest retail stockbroker, offering a flat-fee brokerage model.",
-        "keywords": ["FinTech", "Stock Trading", "Investment Platform", "Brokerage", "Mobile App Development", "Data Analytics (Finance)", "Algorithmic Trading", "Frontend Development", "Backend Development", "Scalability", "Security (Financial)"]
-    },
-    "Groww": {
-        "description": "An Indian online investment platform for mutual funds and stocks.",
-        "keywords": ["FinTech", "Investment Platform", "Mutual Funds", "Stock Trading", "User Experience (UX)", "Mobile App Development", "Data Analytics", "Personal Finance", "Wealth Management"]
-    },
-    "ShareChat": {
-        "description": "An Indian social media and short video platform available in multiple Indian languages.",
-        "keywords": ["Social Media", "Short-form Video", "Content Recommendation", "AI (Content)", "Machine Learning", "Natural Language Processing (NLP)", "Mobile App Development", "Vernacular Content", "User Engagement", "AdTech"]
-    },
-    "Dailyhunt": {
-        "description": "An Indian content and news aggregator platform, providing local language content.",
-        "keywords": ["Content Aggregation", "News Platform", "Local Language Content", "AI (Content Recommendation)", "Natural Language Processing (NLP)", "Mobile App Development", "AdTech", "User Engagement", "Big Data"]
-    },
-    "Dreamplug (formerly CRED's parent company)": {
-        "description": "Parent company of CRED, focusing on financial technology and consumer products.",
-        "keywords": ["FinTech", "Consumer Tech", "Financial Products", "Digital Payments", "Data Analytics", "Product Management", "Mobile Development", "Strategy", "User Experience (UX)"]
-    },
-    "Pine Labs": {
-        "description": "An Indian merchant commerce platform providing payment solutions and financial services.",
-        "keywords": ["FinTech", "Payment Solutions", "POS Systems", "Merchant Services", "Digital Payments", "Installment Payments", "Credit", "SME Solutions", "API Integration", "Cloud Payments"]
-    },
-    "IndusInd Bank": {
-        "description": "A leading private sector bank in India, focusing on digital banking initiatives.",
-        "keywords": ["FinTech", "Digital Banking", "Core Banking Systems", "Mobile Banking", "Cybersecurity (Banking)", "Data Analytics (Financial)", "Risk Management", "Blockchain (Financial Services)", "Retail Banking", "Corporate Banking"]
-    },
-    "HDFC Bank": {
-        "description": "India's largest private sector bank, rapidly adopting digital technologies.",
-        "keywords": ["FinTech", "Digital Banking", "Mobile Banking", "Core Banking", "Payments", "Cybersecurity (Banking)", "Data Analytics (Financial)", "AI in Banking", "Fraud Detection", "Risk Management"]
-    },
-    "ICICI Bank": {
-        "description": "A major Indian multinational banking and financial services company, leveraging technology for customer experience.",
-        "keywords": ["FinTech", "Digital Banking", "Mobile Banking", "Payments", "AI in Banking", "Blockchain (Financial)", "Cybersecurity (Banking)", "Data Analytics", "Customer Experience", "Retail Banking", "Corporate Banking"]
-    },
-    "Airtel Digital": {
-        "description": "The digital arm of Bharti Airtel, focusing on digital services and products.",
-        "keywords": ["Digital Services", "Telecommunications", "Mobile Payments (Airtel Payments Bank)", "Content Streaming (Airtel Xstream)", "AdTech", "Gaming", "Cybersecurity", "Cloud Services", "Data Analytics", "5G applications"]
-    },
-    "Nazara Technologies": {
-        "description": "An Indian gaming and sports media company.",
-        "keywords": ["Gaming Tech", "Mobile Gaming", "Esports", "Advergaming", "Subscription Gaming", "Game Development", "User Engagement", "Data Analytics (Gaming)"]
-    },
-    "Games24x7": {
-        "description": "An Indian online skill gaming company.",
-        "keywords": ["Gaming Tech", "Skill Gaming", "Fantasy Sports", "Rummy", "Poker", "Real-time Systems", "Fraud Detection", "Data Analytics (Gaming)", "Mobile Gaming", "User Acquisition"]
-    },
-    "OYO Rooms": {
-        "description": "An Indian multinational hospitality chain of leased and franchised hotels, homes, and living spaces.",
-        "keywords": ["Hospitality Tech", "Travel Tech", "Platform Development", "Supply Chain (Hospitality)", "Revenue Management", "Mobile App Development", "User Experience (UX)", "Data Analytics", "Hyperlocal"]
-    },
-    "MakeMyTrip": {
-        "description": "An Indian online travel company providing travel services and products.",
-        "keywords": ["Travel Tech", "Online Travel Agency (OTA)", "Flight Booking", "Hotel Booking", "Holiday Packages", "Mobile App Development", "E-commerce", "Payment Gateways", "Recommendation Systems"]
-    },
-    "EaseMyTrip": {
-        "description": "An Indian online travel company offering flight, hotel, and holiday bookings.",
-        "keywords": ["Travel Tech", "Online Travel Agency (OTA)", "Flight Booking", "Hotel Booking", "Bus Booking", "Rail Booking", "E-commerce", "Payment Gateways", "User Experience (UX)"]
-    },
-    "CarDekho": {
-        "description": "An Indian automotive platform providing information and services related to new and used cars.",
-        "keywords": ["Automotive Tech", "Online Marketplace (Cars)", "Digital Marketing", "Lead Generation", "Data Analytics (Automotive)", "AI (Pricing)", "Customer Experience", "Mobile App Development"]
-    },
-    "Spinny": {
-        "description": "An Indian used car retailing platform focusing on transparency and quality.",
-        "keywords": ["Automotive Tech", "Used Car Market", "E-commerce", "Logistics (Automotive)", "Quality Assurance", "Data Analytics", "Customer Experience", "Blockchain (Supply Chain)"]
-    },
-    "PharmEasy": {
-        "description": "An Indian online pharmacy and healthcare aggregator.",
-        "keywords": ["HealthTech", "E-pharmacy", "Online Diagnostics", "Telemedicine", "Supply Chain (Pharma)", "Logistics", "Mobile App Development", "Data Analytics (Healthcare)", "Personalized Healthcare"]
-    },
-    "Apollo Hospitals": {
-        "description": "One of India's largest healthcare groups, also venturing into digital health.",
-        "keywords": ["HealthTech", "Hospital Management Systems (HMS)", "Telemedicine", "Digital Health Records (EHR)", "AI in Healthcare", "Medical Imaging", "Data Analytics (Clinical)", "Patient Engagement Platforms", "IoT (Medical Devices)"]
-    },
-    "Max Healthcare": {
-        "description": "A leading chain of hospitals in India, adopting digital transformation in healthcare delivery.",
-        "keywords": ["HealthTech", "Hospital Information Systems (HIS)", "Digital Health", "Teleconsultation", "AI in Diagnostics", "Data Analytics (Healthcare Operations)", "Patient Portals", "Medical IoT"]
-    },
-    "Innovaccer": {
-        "description": "A healthcare technology company unifying patient data and providing actionable insights.",
-        "keywords": ["HealthTech", "Data Platform (Healthcare)", "Population Health Management", "AI in Healthcare", "Machine Learning (Clinical)", "Interoperability", "Data Governance (Healthcare)", "Value-Based Care", "Cloud Computing"]
-    },
-    "Practo": {
-        "description": "An Indian healthcare technology company connecting patients with doctors and clinics online.",
-        "keywords": ["HealthTech", "Telemedicine", "Online Doctor Consultation", "Appointment Booking", "EHR (Electronic Health Records)", "Practice Management Software", "Mobile App Development", "Data Analytics (Healthcare)"]
-    },
-    "Lenskart": {
-        "description": "An Indian optical prescription eyewear retail chain, integrating online and offline experiences.",
-        "keywords": ["Retail Tech", "E-commerce", "Omnichannel Retail", "Computer Vision (Eyewear Try-on)", "Supply Chain (Retail)", "Manufacturing (Eyewear)", "Customer Experience (CX)", "Mobile App Development"]
-    },
-    "BharatPe": {
-        "description": "An Indian FinTech company offering QR code-based payment solutions and financial services to merchants.",
-        "keywords": ["FinTech", "Digital Payments", "QR Code Payments", "Merchant Solutions", "SME Lending", "UPI", "Data Analytics (Merchant)", "Fraud Detection", "Mobile App Development"]
-    },
-    "Open Financial Technologies": {
-        "description": "Asia's first neo-banking platform for SMEs and startups.",
-        "keywords": ["FinTech", "Neo-banking", "SME Banking", "Payments API", "Expense Management", "Payroll Automation", "Cloud Banking", "API Integrations", "Cybersecurity (FinTech)", "Financial Automation"]
-    },
-    "Jupiter Money": {
-        "description": "An Indian neo-banking platform providing a digital-first banking experience.",
-        "keywords": ["FinTech", "Neo-banking", "Digital Banking", "Mobile Banking", "Personal Finance", "Wealth Management", "Payments", "User Experience (UX)", "Data Analytics"]
-    },
-    "CoinDCX": {
-        "description": "An Indian cryptocurrency exchange and crypto investment platform.",
-        "keywords": ["FinTech", "Cryptocurrency", "Blockchain", "Crypto Exchange", "Decentralized Finance (DeFi)", "Trading Platforms", "Cybersecurity (Crypto)", "Risk Management", "Backend Development", "Scalability"]
-    },
-    "CoinSwitch Kuber": {
-        "description": "An Indian cryptocurrency exchange platform for simplified crypto investments.",
-        "keywords": ["FinTech", "Cryptocurrency", "Blockchain", "Crypto Investment", "Mobile App Development", "User Experience (UX)", "Security (Crypto)", "Data Analytics", "Trading Algorithms"]
-    },
-    "OfBusiness": {
-        "description": "An Indian B2B e-commerce and FinTech platform providing raw materials and credit to SMEs.",
-        "keywords": ["B2B E-commerce", "FinTech (SME Lending)", "Supply Chain", "Procurement", "Data Analytics (B2B)", "Credit Risk Assessment", "Logistics", "Marketplace", "Enterprise Software"]
-    },
-    "Infibeam Avenues": {
-        "description": "An Indian e-commerce and payment solutions company.",
-        "keywords": ["E-commerce Platform", "Payment Gateway (CCAvenue)", "FinTech", "Online Retail Solutions", "Digital Payments", "White-label Solutions", "Cloud Computing"]
-    },
-    "MapmyIndia (CE Info Systems)": {
-        "description": "An Indian company specializing in digital maps, geospatial software, and location-based IoT technologies.",
-        "keywords": ["Mapping Technology", "GIS (Geographic Information Systems)", "Location-based Services", "IoT", "Navigation Systems", "GPS", "Data Analytics (Geospatial)", "Autonomous Vehicles (Mapping)", "Smart Cities"]
-    },
-    "Happiest Minds Technologies": {
-        "description": "An Indian IT services company focusing on digital transformation, cloud, and cybersecurity.",
-        "keywords": ["Digital Transformation", "Cloud Services", "Cybersecurity", "IoT", "AI & Analytics", "Product Engineering", "Infrastructure Management", "Automation", "DevOps", "Agile", "Enterprise Solutions"]
-    },
-    "Coforge": {
-        "description": "A global IT solutions organization enabling businesses to transform with digital technologies.",
-        "keywords": ["Digital Transformation", "Cloud Services", "AI", "Machine Learning", "Data Analytics", "Enterprise Solutions", "Automation", "Cybersecurity", "Application Development", "Microservices", "API Management", "Travel Tech", "Financial Services"]
-    },
-    "Mindtree (now LTIMindtree)": {
-        "description": "A global technology consulting and services company, now part of LTIMindtree.",
-        "keywords": ["Digital Transformation", "Cloud Solutions", "Data & AI", "Enterprise Applications", "Product Engineering", "Customer Experience (CX)", "Agile Development", "DevOps", "IoT", "Managed Services"]
-    },
-    "Genpact": {
-        "description": "A global professional services firm focused on delivering digital transformation and business process management.",
-        "keywords": ["Digital Transformation", "Business Process Management (BPM)", "AI & Automation", "Data Analytics", "Financial Services Operations", "Supply Chain Management", "Risk & Compliance", "Robotics Process Automation (RPA)", "Consulting"]
-    },
-    "EXL Service": {
-        "description": "A global analytics and digital operations and solutions company.",
-        "keywords": ["Data Analytics", "AI", "Machine Learning", "Digital Operations", "Business Process Outsourcing (BPO)", "Risk Management", "Customer Experience (CX)", "Healthcare Analytics", "Insurance Analytics", "Financial Services Analytics"]
-    },
-    "WNS (Holdings)": {
-        "description": "A global business process management (BPM) company.",
-        "keywords": ["Business Process Management (BPM)", "Digital Transformation", "Automation", "Analytics", "Customer Experience (CX)", "Travel BPM", "Healthcare BPM", "Finance & Accounting BPM", "Robotics Process Automation (RPA)"]
-    },
-    "KPIT Technologies": {
-        "description": "An Indian multinational corporation that provides software to the automotive industry.",
-        "keywords": ["Automotive Software", "Autonomous Driving", "Electric Vehicles (EV)", "Connected Cars", "Infotainment Systems", "Embedded Systems", "Software-Defined Vehicles (SDV)", "AI (Automotive)", "ADAS (Advanced Driver-Assistance Systems)", "Vehicle Diagnostics"]
-    },
-    "Tata Motors": {
-        "description": "An Indian multinational automotive manufacturing company, increasingly focused on electric vehicles and connected car technologies.",
-        "keywords": ["Automotive Manufacturing", "Electric Vehicles (EV)", "Connected Car Technology", "ADAS", "Software Engineering (Automotive)", "Battery Management Systems (BMS)", "Infotainment", "IoT (Automotive)", "Supply Chain (Automotive)"]
-    },
-    "Mahindra & Mahindra": {
-        "description": "An Indian multinational automotive manufacturing corporation, with a focus on SUVs, commercial vehicles, and electric mobility.",
-        "keywords": ["Automotive Manufacturing", "Electric Vehicles (EV)", "Farm Equipment (Tech)", "Connected Vehicles", "ADAS", "Software Engineering (Automotive)", "IoT (Automotive)", "Sustainable Mobility"]
-    },
-    "Bajaj Auto": {
-        "description": "An Indian multinational two-wheeler and three-wheeler manufacturing company, exploring electric and smart mobility solutions.",
-        "keywords": ["Automotive Manufacturing", "Electric Two/Three Wheelers", "Connected Mobility", "IoT (Vehicles)", "Powertrain Technology", "Software Engineering (Embedded)"]
-    },
-    "Ather Energy": {
-        "description": "An Indian electric scooter manufacturer and charging infrastructure provider.",
-        "keywords": ["Electric Vehicles (EV)", "Electric Scooters", "Battery Technology", "IoT (Connected Vehicles)", "Charging Infrastructure", "Mobile App Development (EV)", "Embedded Systems", "Hardware Engineering (EV)"]
-    },
-    "Rebel Foods": {
-        "description": "An Indian online restaurant company, operating multiple cloud kitchen brands.",
-        "keywords": ["Cloud Kitchen", "Food Tech", "Restaurant Tech", "Logistics", "Supply Chain (Food)", "Data Analytics (Food Delivery)", "AI (Demand Forecasting)", "Brand Management", "Ghost Kitchens"]
-    },
-    "BigBasket": {
-        "description": "An Indian online grocery delivery service, part of the Tata Group.",
-        "keywords": ["E-grocery", "E-commerce", "Logistics (Grocery)", "Supply Chain Optimization", "Last-Mile Delivery", "Data Analytics (Retail)", "Inventory Management", "Mobile App Development", "Hyperlocal"]
-    },
-    "Dunzo": {
-        "description": "An Indian hyperlocal delivery service that delivers anything locally.",
-        "keywords": ["Hyperlocal Delivery", "Quick Commerce", "Logistics", "On-demand Services", "Mobile App Development", "Geolocation", "Route Optimization", "User Experience (UX)"]
-    },
-    "Zomato": {
-        "description": "An Indian multinational restaurant aggregator and food delivery company.",
-        "keywords": ["Food Delivery", "Restaurant Technology", "Logistics", "Mobile Development", "Data Analytics", "Machine Learning (Recommendation Systems)", "Cloud Infrastructure", "Geolocation", "Payment Gateways", "User Experience (UX)", "Growth Hacking"]
-    },
-    "Myntra": {
-        "description": "An Indian fashion e-commerce company, a subsidiary of Flipkart.",
-        "keywords": ["E-commerce (Fashion)", "Online Retail", "Supply Chain (Fashion)", "Logistics", "Digital Marketing", "Personalization", "AI (Fashion Recommendations)", "Mobile App Development", "User Experience (UX)"]
-    },
-    "Urban Company": {
-        "description": "An Indian at-home services platform.",
-        "keywords": ["On-demand Services", "Hyperlocal", "Mobile App Development", "Logistics", "Geolocation", "Service Marketplace", "User Experience (UX)", "Payment Systems"]
-    },
-    "Vedantu": {
-        "description": "An Indian online tutoring platform providing live interactive classes.",
-        "keywords": ["EdTech", "Online Tutoring", "Live Classes", "Personalized Learning", "Mobile App Development", "Learning Management Systems (LMS)", "AI (Learning Analytics)", "Gamification"]
-    },
-    "Unacademy": {
-        "description": "An Indian online education technology company.",
-        "keywords": ["EdTech", "Online Learning", "Live Classes", "Test Preparation", "Content Creation", "Mobile App Development", "Data Analytics (Learning)", "Personalized Learning"]
-    },
-    "Toppr (Byju's Group)": {
-        "description": "An Indian online learning platform for K-12 and competitive exams.",
-        "keywords": ["EdTech", "Online Learning", "Test Preparation", "Content Creation", "Adaptive Learning", "AI (Personalized Study)", "Mobile App Development", "Gamification"]
-    },
-    "BYJU'S": {
-        "description": "An Indian multinational educational technology company, providing online tutoring and learning programs.",
-        "keywords": ["EdTech", "Online Learning", "Content Creation (Video, Animation)", "Mobile App Development", "AI (Personalized Learning)", "Machine Learning", "Data Analytics (Student Progress)", "Curriculum Development", "User Experience", "Subscription Models"]
-    },
-    "UpGrad": {
-        "description": "An Indian online higher education company providing online programs.",
-        "keywords": ["EdTech", "Online Higher Education", "Skill Development", "Career Services", "Content Curation", "Learning Management Systems (LMS)", "Data Analytics (Career Outcomes)", "Industry Partnerships"]
-    },
-    "Great Learning": {
-        "description": "An Indian ed-tech company providing online professional and higher education programs.",
-        "keywords": ["EdTech", "Professional Education", "Upskilling", "Data Science Courses", "AI Courses", "Cloud Computing Courses", "Career Development", "Online Learning Platform"]
-    },
-    "Druva": {
-        "description": "A cloud data protection and management company.",
-        "keywords": ["Cloud Data Protection", "Data Backup", "Disaster Recovery", "Data Governance", "Cybersecurity", "SaaS", "Cloud Computing", "Data Resilience", "Compliance", "Security Automation"]
-    },
-    "Capillary Technologies": {
-        "description": "A leading provider of AI-powered loyalty and customer engagement solutions for retailers.",
-        "keywords": ["Retail Tech", "Customer Engagement", "Loyalty Programs", "Personalization", "AI (Retail)", "Machine Learning (Retail)", "Data Analytics (Retail)", "CRM", "Omnichannel Marketing"]
-    },
-    "RateGain": {
-        "description": "A global provider of SaaS solutions for the travel and hospitality industry.",
-        "keywords": ["Travel Tech", "Hospitality Tech", "SaaS", "Revenue Management", "Pricing Optimization", "Data Analytics (Travel)", "AI (Pricing)", "Distribution Channels", "API Integration"]
-    },
-    "Sigmoid": {
-        "description": "A leading data engineering and AI consulting company.",
-        "keywords": ["Data Engineering", "Big Data", "Data Analytics", "Cloud Data Platforms", "AI Consulting", "Machine Learning Engineering", "Data Warehousing", "Data Lakes", "ETL", "AWS", "GCP", "Azure"]
-    },
-    "Analytics Vidhya": {
-        "description": "A leading global community and knowledge portal for analytics and data science professionals.",
-        "keywords": ["Data Science", "Machine Learning", "Deep Learning", "AI", "Python", "R", "SQL", "Big Data Technologies", "Data Visualization", "Natural Language Processing (NLP)", "Computer Vision", "Statistical Modeling", "Data Analytics Training"]
-    },
-    "Indegene": {
-        "description": "A global healthcare solutions company providing commercialization and marketing services for life sciences.",
-        "keywords": ["HealthTech", "Life Sciences", "Digital Marketing (Pharma)", "Medical Communications", "Data Analytics (Healthcare)", "AI (Commercialization)", "CRM (Pharma)", "Omnichannel Engagement"]
-    },
-    "Netcore Cloud": {
-        "description": "A full-stack marketing technology company providing AI-powered solutions for customer engagement.",
-        "keywords": ["Marketing Automation", "Customer Engagement", "Personalization", "AI (Marketing)", "Machine Learning", "Email Marketing", "Push Notifications", "Customer Data Platform (CDP)", "Analytics"]
-    },
-    "Manthan": {
-        "description": "A global leader in AI-powered analytics solutions for retail and consumer businesses.",
-        "keywords": ["Retail Analytics", "Consumer Analytics", "AI (Retail)", "Machine Learning (Retail)", "Big Data", "Personalization", "Merchandising Analytics", "Customer Analytics", "Supply Chain Analytics"]
-    },
-    "Happay": {
-        "description": "An Indian FinTech company offering expense management and corporate card solutions.",
-        "keywords": ["FinTech", "Expense Management", "Corporate Cards", "Payment Solutions", "SaaS", "Financial Automation", "Mobile App Development", "Data Analytics (Expenses)"]
-    },
-    "Zetwerk": {
-        "description": "An Indian B2B marketplace for manufacturing goods.",
-        "keywords": ["B2B Marketplace", "Manufacturing Tech", "Supply Chain", "Procurement", "Digital Manufacturing", "IoT (Manufacturing)", "Quality Control", "Logistics", "Cloud Platform"]
-    },
-    "Infra.Market": {
-        "description": "An Indian B2B marketplace for construction materials.",
-        "keywords": ["B2B Marketplace", "Construction Tech", "Supply Chain", "Logistics", "Procurement", "FinTech (Construction Finance)", "Digital Platform"]
-    },
-    "Mobikwik": {
-        "description": "An Indian FinTech company offering mobile wallet, payments, and financial services.",
-        "keywords": ["FinTech", "Mobile Wallet", "Digital Payments", "UPI", "Lending", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Cybersecurity"]
-    },
-    "Juspay": {
-        "description": "An Indian payments technology company providing full-stack payment solutions.",
-        "keywords": ["FinTech", "Payment Gateway", "UPI", "Payment Orchestration", "Mobile Payments", "Fraud Prevention", "Security (Payments)", "API Development", "Scalability"]
-    },
-    "BillDesk (now part of Prosus' PayU)": {
-        "description": "An Indian online payment gateway company.",
-        "keywords": ["FinTech", "Payment Gateway", "Online Payments", "Billing Solutions", "Payment Processing", "Digital Payments", "Security (Payments)"]
-    },
-    "MobiKwik": { # Duplicate with slightly different description for clarity if needed
-        "description": "An Indian FinTech company offering mobile wallet, payments, and financial services, with a focus on lending and insurance.",
-        "keywords": ["FinTech", "Mobile Wallet", "Digital Payments", "UPI", "Lending", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Cybersecurity"]
-    },
-    "Nazara Technologies": {
-        "description": "An Indian diversified gaming and sports media platform.",
-        "keywords": ["Gaming Tech", "Mobile Gaming", "Esports", "Advergaming", "Subscription Gaming", "Game Development", "User Engagement", "Data Analytics (Gaming)", "Fantasy Sports"]
-    },
-    "Games24x7": {
-        "description": "An Indian online skill gaming company operating platforms like RummyCircle and My11Circle.",
-        "keywords": ["Gaming Tech", "Skill Gaming", "Fantasy Sports", "Rummy", "Poker", "Real-time Systems", "Fraud Detection", "Data Analytics (Gaming)", "Mobile Gaming", "User Acquisition"]
-    },
-    "Dream11": {
-        "description": "India's largest fantasy sports platform.",
-        "keywords": ["Gaming Tech", "Fantasy Sports", "Mobile Gaming", "Data Analytics", "User Engagement", "Real-time Systems", "Scalability", "Backend Development", "Payments Integration", "Sports Analytics"]
-    },
-    "Myntra": {
-        "description": "An Indian fashion e-commerce company, a subsidiary of Flipkart.",
-        "keywords": ["E-commerce (Fashion)", "Online Retail", "Supply Chain (Fashion)", "Logistics", "Digital Marketing", "Personalization", "AI (Fashion Recommendations)", "Mobile App Development", "User Experience (UX)"]
-    },
-    "Lenskart": {
-        "description": "An Indian optical prescription eyewear retail chain, integrating online and offline experiences.",
-        "keywords": ["Retail Tech", "E-commerce", "Omnichannel Retail", "Computer Vision (Eyewear Try-on)", "Supply Chain (Retail)", "Manufacturing (Eyewear)", "Customer Experience (CX)", "Mobile App Development"]
-    },
-    "Pepperfry": {
-        "description": "An Indian online furniture and home goods marketplace.",
-        "keywords": ["E-commerce (Furniture)", "Home Decor Tech", "Supply Chain", "Logistics", "Online Marketplace", "Digital Marketing", "3D Visualization", "Augmented Reality (AR) in Retail"]
-    },
-    "BigBasket": {
-        "description": "An Indian online grocery delivery service, part of the Tata Group.",
-        "keywords": ["E-grocery", "E-commerce", "Logistics (Grocery)", "Supply Chain Optimization", "Last-Mile Delivery", "Data Analytics (Retail)", "Inventory Management", "Mobile App Development", "Hyperlocal"]
-    },
-    "Dunzo": {
-        "description": "An Indian hyperlocal delivery service that delivers anything locally.",
-        "keywords": ["Hyperlocal Delivery", "Quick Commerce", "Logistics", "On-demand Services", "Mobile App Development", "Geolocation", "Route Optimization", "User Experience (UX)"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Blue Dart Express": {
-        "description": "India's premier express air and integrated transportation and distribution company.",
-        "keywords": ["Logistics", "Express Delivery", "Supply Chain", "Warehousing", "Air Cargo", "Tracking Systems", "Route Optimization", "Customs Clearance", "Automation (Logistics)"]
-    },
-    "Shiprocket": {
-        "description": "An Indian logistics software solution for e-commerce businesses.",
-        "keywords": ["Logistics Tech", "E-commerce Logistics", "Shipping Software", "Order Fulfillment", "Carrier Integration", "Tracking & Analytics", "SME Solutions", "API (Logistics)"]
-    },
-    "Vistara": {
-        "description": "An Indian airline, a joint venture between Tata Sons and Singapore Airlines, focusing on premium air travel.",
-        "keywords": ["Airline Technology", "Travel Tech", "Flight Operations", "Customer Experience (Airline)", "Reservations Systems", "Loyalty Programs", "Digital Transformation (Airline)", "Mobile App Development"]
-    },
-    "IndiGo": {
-        "description": "India's largest airline by passengers carried and fleet size, known for its low-cost model.",
-        "keywords": ["Airline Technology", "Flight Operations", "Revenue Management", "Fleet Management", "Digital Transformation (Airline)", "Mobile App Development", "E-ticketing", "Customer Experience"]
-    },
-    "IRCTC": {
-        "description": "Indian Railway Catering and Tourism Corporation, managing catering, tourism, and online ticketing operations for Indian Railways.",
-        "keywords": ["E-ticketing", "Railway Systems", "Online Reservations", "Payment Gateways", "Logistics (Catering)", "Tourism Tech", "Mobile App Development", "Scalability (High Traffic)"]
-    },
-    "Tata Digital": {
-        "description": "The digital arm of Tata Group, building a super app and digital ecosystem.",
-        "keywords": ["Super App", "Digital Ecosystem", "E-commerce (Tata Neu)", "FinTech", "HealthTech", "EdTech", "Loyalty Programs", "Data Analytics", "AI (Cross-platform)", "User Experience (UX)"]
-    },
-    "JioMart": {
-        "description": "Reliance Retail's online grocery and e-commerce platform.",
-        "keywords": ["E-commerce (Grocery)", "Omnichannel Retail", "Logistics", "Supply Chain", "Hyperlocal", "Digital Payments", "Customer Experience", "Mobile App Development"]
-    },
-    "FreshToHome": {
-        "description": "An Indian e-commerce platform for fresh fish and meat.",
-        "keywords": ["E-commerce (Perishables)", "Supply Chain (Fresh Food)", "Logistics", "Cold Chain Management", "Mobile App Development", "Data Analytics (Supply/Demand)", "Quality Control"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Zetwerk": {
-        "description": "An Indian B2B marketplace for manufacturing goods.",
-        "keywords": ["B2B Marketplace", "Manufacturing Tech", "Supply Chain", "Procurement", "Digital Manufacturing", "IoT (Manufacturing)", "Quality Control", "Logistics", "Cloud Platform"]
-    },
-    "Infra.Market": {
-        "description": "An Indian B2B marketplace for construction materials.",
-        "keywords": ["B2B Marketplace", "Construction Tech", "Supply Chain", "Logistics", "Procurement", "FinTech (Construction Finance)", "Digital Platform"]
-    },
-    "OfBusiness": {
-        "description": "An Indian B2B e-commerce and FinTech platform providing raw materials and credit to SMEs.",
-        "keywords": ["B2B E-commerce", "FinTech (SME Lending)", "Supply Chain", "Procurement", "Data Analytics (B2B)", "Credit Risk Assessment", "Logistics", "Marketplace", "Enterprise Software"]
-    },
-    "Capillary Technologies": {
-        "description": "A leading provider of AI-powered loyalty and customer engagement solutions for retailers.",
-        "keywords": ["Retail Tech", "Customer Engagement", "Loyalty Programs", "Personalization", "AI (Retail)", "Machine Learning (Retail)", "Data Analytics (Retail)", "CRM", "Omnichannel Marketing"]
-    },
-    "RateGain": {
-        "description": "A global provider of SaaS solutions for the travel and hospitality industry.",
-        "keywords": ["Travel Tech", "Hospitality Tech", "SaaS", "Revenue Management", "Pricing Optimization", "Data Analytics (Travel)", "AI (Pricing)", "Distribution Channels", "API Integration"]
-    },
-    "Sigmoid": {
-        "description": "A leading data engineering and AI consulting company.",
-        "keywords": ["Data Engineering", "Big Data", "Data Analytics", "Cloud Data Platforms", "AI Consulting", "Machine Learning Engineering", "Data Warehousing", "Data Lakes", "ETL", "AWS", "GCP", "Azure"]
-    },
-    "Analytics Vidhya": {
-        "description": "A leading global community and knowledge portal for analytics and data science professionals.",
-        "keywords": ["Data Science", "Machine Learning", "Deep Learning", "AI", "Python", "R", "SQL", "Big Data Technologies", "Data Visualization", "Natural Language Processing (NLP)", "Computer Vision", "Statistical Modeling", "Data Analytics Training"]
-    },
-    "Indegene": {
-        "description": "A global healthcare solutions company providing commercialization and marketing services for life sciences.",
-        "keywords": ["HealthTech", "Life Sciences", "Digital Marketing (Pharma)", "Medical Communications", "Data Analytics (Healthcare)", "AI (Commercialization)", "CRM (Pharma)", "Omnichannel Engagement"]
-    },
-    "Netcore Cloud": {
-        "description": "A full-stack marketing technology company providing AI-powered solutions for customer engagement.",
-        "keywords": ["Marketing Automation", "Customer Engagement", "Personalization", "AI (Marketing)", "Machine Learning", "Email Marketing", "Push Notifications", "Customer Data Platform (CDP)", "Analytics"]
-    },
-    "Manthan": {
-        "description": "A global leader in AI-powered analytics solutions for retail and consumer businesses.",
-        "keywords": ["Retail Analytics", "Consumer Analytics", "AI (Retail)", "Machine Learning (Retail)", "Big Data", "Personalization", "Merchandising Analytics", "Customer Analytics", "Supply Chain Analytics"]
-    },
-    "Happay": {
-        "description": "An Indian FinTech company offering expense management and corporate card solutions.",
-        "keywords": ["FinTech", "Expense Management", "Corporate Cards", "Payment Solutions", "SaaS", "Financial Automation", "Mobile App Development", "Data Analytics (Expenses)"]
-    },
-    "Juspay": {
-        "description": "An Indian payments technology company providing full-stack payment solutions.",
-        "keywords": ["FinTech", "Payment Gateway", "UPI", "Payment Orchestration", "Mobile Payments", "Fraud Prevention", "Security (Payments)", "API Development", "Scalability"]
-    },
-    "BillDesk (now part of Prosus' PayU)": {
-        "description": "An Indian online payment gateway company.",
-        "keywords": ["FinTech", "Payment Gateway", "Online Payments", "Billing Solutions", "Payment Processing", "Digital Payments", "Security (Payments)"]
-    },
-    "MobiKwik": {
-        "description": "An Indian FinTech company offering mobile wallet, payments, and financial services, with a focus on lending and insurance.",
-        "keywords": ["FinTech", "Mobile Wallet", "Digital Payments", "UPI", "Lending", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Cybersecurity"]
-    },
-    "Nazara Technologies": {
-        "description": "An Indian diversified gaming and sports media platform.",
-        "keywords": ["Gaming Tech", "Mobile Gaming", "Esports", "Advergaming", "Subscription Gaming", "Game Development", "User Engagement", "Data Analytics (Gaming)", "Fantasy Sports"]
-    },
-    "Games24x7": {
-        "description": "An Indian online skill gaming company operating platforms like RummyCircle and My11Circle.",
-        "keywords": ["Gaming Tech", "Skill Gaming", "Fantasy Sports", "Rummy", "Poker", "Real-time Systems", "Fraud Detection", "Data Analytics (Gaming)", "Mobile Gaming", "User Acquisition"]
-    },
-    "Dream11": {
-        "description": "India's largest fantasy sports platform.",
-        "keywords": ["Gaming Tech", "Fantasy Sports", "Mobile Gaming", "Data Analytics", "User Engagement", "Real-time Systems", "Scalability", "Backend Development", "Payments Integration", "Sports Analytics"]
-    },
-    "Myntra": {
-        "description": "An Indian fashion e-commerce company, a subsidiary of Flipkart.",
-        "keywords": ["E-commerce (Fashion)", "Online Retail", "Supply Chain (Fashion)", "Logistics", "Digital Marketing", "Personalization", "AI (Fashion Recommendations)", "Mobile App Development", "User Experience (UX)"]
-    },
-    "Lenskart": {
-        "description": "An Indian optical prescription eyewear retail chain, integrating online and offline experiences.",
-        "keywords": ["Retail Tech", "E-commerce", "Omnichannel Retail", "Computer Vision (Eyewear Try-on)", "Supply Chain (Retail)", "Manufacturing (Eyewear)", "Customer Experience (CX)", "Mobile App Development"]
-    },
-    "Pepperfry": {
-        "description": "An Indian online furniture and home goods marketplace.",
-        "keywords": ["E-commerce (Furniture)", "Home Decor Tech", "Supply Chain", "Logistics", "Online Marketplace", "Digital Marketing", "3D Visualization", "Augmented Reality (AR) in Retail"]
-    },
-    "BigBasket": {
-        "description": "An Indian online grocery delivery service, part of the Tata Group.",
-        "keywords": ["E-grocery", "E-commerce", "Logistics (Grocery)", "Supply Chain Optimization", "Last-Mile Delivery", "Data Analytics (Retail)", "Inventory Management", "Mobile App Development", "Hyperlocal"]
-    },
-    "Dunzo": {
-        "description": "An Indian hyperlocal delivery service that delivers anything locally.",
-        "keywords": ["Hyperlocal Delivery", "Quick Commerce", "Logistics", "On-demand Services", "Mobile App Development", "Geolocation", "Route Optimization", "User Experience (UX)"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Blue Dart Express": {
-        "description": "India's premier express air and integrated transportation and distribution company.",
-        "keywords": ["Logistics", "Express Delivery", "Supply Chain", "Warehousing", "Air Cargo", "Tracking Systems", "Route Optimization", "Customs Clearance", "Automation (Logistics)"]
-    },
-    "Shiprocket": {
-        "description": "An Indian logistics software solution for e-commerce businesses.",
-        "keywords": ["Logistics Tech", "E-commerce Logistics", "Shipping Software", "Order Fulfillment", "Carrier Integration", "Tracking & Analytics", "SME Solutions", "API (Logistics)"]
-    },
-    "Vistara": {
-        "description": "An Indian airline, a joint venture between Tata Sons and Singapore Airlines, focusing on premium air travel.",
-        "keywords": ["Airline Technology", "Travel Tech", "Flight Operations", "Customer Experience (Airline)", "Reservations Systems", "Loyalty Programs", "Digital Transformation (Airline)", "Mobile App Development"]
-    },
-    "IndiGo": {
-        "description": "India's largest airline by passengers carried and fleet size, known for its low-cost model.",
-        "keywords": ["Airline Technology", "Flight Operations", "Revenue Management", "Fleet Management", "Digital Transformation (Airline)", "Mobile App Development", "E-ticketing", "Customer Experience"]
-    },
-    "IRCTC": {
-        "description": "Indian Railway Catering and Tourism Corporation, managing catering, tourism, and online ticketing operations for Indian Railways.",
-        "keywords": ["E-ticketing", "Railway Systems", "Online Reservations", "Payment Gateways", "Logistics (Catering)", "Tourism Tech", "Mobile App Development", "Scalability (High Traffic)"]
-    },
-    "Tata Digital": {
-        "description": "The digital arm of Tata Group, building a super app and digital ecosystem.",
-        "keywords": ["Super App", "Digital Ecosystem", "E-commerce (Tata Neu)", "FinTech", "HealthTech", "EdTech", "Loyalty Programs", "Data Analytics", "AI (Cross-platform)", "User Experience (UX)"]
-    },
-    "JioMart": {
-        "description": "Reliance Retail's online grocery and e-commerce platform.",
-        "keywords": ["E-commerce (Grocery)", "Omnichannel Retail", "Logistics", "Supply Chain", "Hyperlocal", "Digital Payments", "Customer Experience", "Mobile App Development"]
-    },
-    "FreshToHome": {
-        "description": "An Indian e-commerce platform for fresh fish and meat.",
-        "keywords": ["E-commerce (Perishables)", "Supply Chain (Fresh Food)", "Logistics", "Cold Chain Management", "Mobile App Development", "Data Analytics (Supply/Demand)", "Quality Control"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Zetwerk": {
-        "description": "An Indian B2B marketplace for manufacturing goods.",
-        "keywords": ["B2B Marketplace", "Manufacturing Tech", "Supply Chain", "Procurement", "Digital Manufacturing", "IoT (Manufacturing)", "Quality Control", "Logistics", "Cloud Platform"]
-    },
-    "Infra.Market": {
-        "description": "An Indian B2B marketplace for construction materials.",
-        "keywords": ["B2B Marketplace", "Construction Tech", "Supply Chain", "Logistics", "Procurement", "FinTech (Construction Finance)", "Digital Platform"]
-    },
-    "OfBusiness": {
-        "description": "An Indian B2B e-commerce and FinTech platform providing raw materials and credit to SMEs.",
-        "keywords": ["B2B E-commerce", "FinTech (SME Lending)", "Supply Chain", "Procurement", "Data Analytics (B2B)", "Credit Risk Assessment", "Logistics", "Marketplace", "Enterprise Software"]
-    },
-    "Capillary Technologies": {
-        "description": "A leading provider of AI-powered loyalty and customer engagement solutions for retailers.",
-        "keywords": ["Retail Tech", "Customer Engagement", "Loyalty Programs", "Personalization", "AI (Retail)", "Machine Learning (Retail)", "Data Analytics (Retail)", "CRM", "Omnichannel Marketing"]
-    },
-    "RateGain": {
-        "description": "A global provider of SaaS solutions for the travel and hospitality industry.",
-        "keywords": ["Travel Tech", "Hospitality Tech", "SaaS", "Revenue Management", "Pricing Optimization", "Data Analytics (Travel)", "AI (Pricing)", "Distribution Channels", "API Integration"]
-    },
-    "Sigmoid": {
-        "description": "A leading data engineering and AI consulting company.",
-        "keywords": ["Data Engineering", "Big Data", "Data Analytics", "Cloud Data Platforms", "AI Consulting", "Machine Learning Engineering", "Data Warehousing", "Data Lakes", "ETL", "AWS", "GCP", "Azure"]
-    },
-    "Analytics Vidhya": {
-        "description": "A leading global community and knowledge portal for analytics and data science professionals.",
-        "keywords": ["Data Science", "Machine Learning", "Deep Learning", "AI", "Python", "R", "SQL", "Big Data Technologies", "Data Visualization", "Natural Language Processing (NLP)", "Computer Vision", "Statistical Modeling", "Data Analytics Training"]
-    },
-    "Indegene": {
-        "description": "A global healthcare solutions company providing commercialization and marketing services for life sciences.",
-        "keywords": ["HealthTech", "Life Sciences", "Digital Marketing (Pharma)", "Medical Communications", "Data Analytics (Healthcare)", "AI (Commercialization)", "CRM (Pharma)", "Omnichannel Engagement"]
-    },
-    "Netcore Cloud": {
-        "description": "A full-stack marketing technology company providing AI-powered solutions for customer engagement.",
-        "keywords": ["Marketing Automation", "Customer Engagement", "Personalization", "AI (Marketing)", "Machine Learning", "Email Marketing", "Push Notifications", "Customer Data Platform (CDP)", "Analytics"]
-    },
-    "Manthan": {
-        "description": "A global leader in AI-powered analytics solutions for retail and consumer businesses.",
-        "keywords": ["Retail Analytics", "Consumer Analytics", "AI (Retail)", "Machine Learning (Retail)", "Big Data", "Personalization", "Merchandising Analytics", "Customer Analytics", "Supply Chain Analytics"]
-    },
-    "Happay": {
-        "description": "An Indian FinTech company offering expense management and corporate card solutions.",
-        "keywords": ["FinTech", "Expense Management", "Corporate Cards", "Payment Solutions", "SaaS", "Financial Automation", "Mobile App Development", "Data Analytics (Expenses)"]
-    },
-    "Juspay": {
-        "description": "An Indian payments technology company providing full-stack payment solutions.",
-        "keywords": ["FinTech", "Payment Gateway", "UPI", "Payment Orchestration", "Mobile Payments", "Fraud Prevention", "Security (Payments)", "API Development", "Scalability"]
-    },
-    "BillDesk (now part of Prosus' PayU)": {
-        "description": "An Indian online payment gateway company.",
-        "keywords": ["FinTech", "Payment Gateway", "Online Payments", "Billing Solutions", "Payment Processing", "Digital Payments", "Security (Payments)"]
-    },
-    "MobiKwik": {
-        "description": "An Indian FinTech company offering mobile wallet, payments, and financial services, with a focus on lending and insurance.",
-        "keywords": ["FinTech", "Mobile Wallet", "Digital Payments", "UPI", "Lending", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Cybersecurity"]
-    },
-    "Nazara Technologies": {
-        "description": "An Indian diversified gaming and sports media platform.",
-        "keywords": ["Gaming Tech", "Mobile Gaming", "Esports", "Advergaming", "Subscription Gaming", "Game Development", "User Engagement", "Data Analytics (Gaming)", "Fantasy Sports"]
-    },
-    "Games24x7": {
-        "description": "An Indian online skill gaming company operating platforms like RummyCircle and My11Circle.",
-        "keywords": ["Gaming Tech", "Skill Gaming", "Fantasy Sports", "Rummy", "Poker", "Real-time Systems", "Fraud Detection", "Data Analytics (Gaming)", "Mobile Gaming", "User Acquisition"]
-    },
-    "Dream11": {
-        "description": "India's largest fantasy sports platform.",
-        "keywords": ["Gaming Tech", "Fantasy Sports", "Mobile Gaming", "Data Analytics", "User Engagement", "Real-time Systems", "Scalability", "Backend Development", "Payments Integration", "Sports Analytics"]
-    },
-    "Myntra": {
-        "description": "An Indian fashion e-commerce company, a subsidiary of Flipkart.",
-        "keywords": ["E-commerce (Fashion)", "Online Retail", "Supply Chain (Fashion)", "Logistics", "Digital Marketing", "Personalization", "AI (Fashion Recommendations)", "Mobile App Development", "User Experience (UX)"]
-    },
-    "Lenskart": {
-        "description": "An Indian optical prescription eyewear retail chain, integrating online and offline experiences.",
-        "keywords": ["Retail Tech", "E-commerce", "Omnichannel Retail", "Computer Vision (Eyewear Try-on)", "Supply Chain (Retail)", "Manufacturing (Eyewear)", "Customer Experience (CX)", "Mobile App Development"]
-    },
-    "Pepperfry": {
-        "description": "An Indian online furniture and home goods marketplace.",
-        "keywords": ["E-commerce (Furniture)", "Home Decor Tech", "Supply Chain", "Logistics", "Online Marketplace", "Digital Marketing", "3D Visualization", "Augmented Reality (AR) in Retail"]
-    },
-    "BigBasket": {
-        "description": "An Indian online grocery delivery service, part of the Tata Group.",
-        "keywords": ["E-grocery", "E-commerce", "Logistics (Grocery)", "Supply Chain Optimization", "Last-Mile Delivery", "Data Analytics (Retail)", "Inventory Management", "Mobile App Development", "Hyperlocal"]
-    },
-    "Dunzo": {
-        "description": "An Indian hyperlocal delivery service that delivers anything locally.",
-        "keywords": ["Hyperlocal Delivery", "Quick Commerce", "Logistics", "On-demand Services", "Mobile App Development", "Geolocation", "Route Optimization", "User Experience (UX)"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Blue Dart Express": {
-        "description": "India's premier express air and integrated transportation and distribution company.",
-        "keywords": ["Logistics", "Express Delivery", "Supply Chain", "Warehousing", "Air Cargo", "Tracking Systems", "Route Optimization", "Customs Clearance", "Automation (Logistics)"]
-    },
-    "Shiprocket": {
-        "description": "An Indian logistics software solution for e-commerce businesses.",
-        "keywords": ["Logistics Tech", "E-commerce Logistics", "Shipping Software", "Order Fulfillment", "Carrier Integration", "Tracking & Analytics", "SME Solutions", "API (Logistics)"]
-    },
-    "Vistara": {
-        "description": "An Indian airline, a joint venture between Tata Sons and Singapore Airlines, focusing on premium air travel.",
-        "keywords": ["Airline Technology", "Travel Tech", "Flight Operations", "Customer Experience (Airline)", "Reservations Systems", "Loyalty Programs", "Digital Transformation (Airline)", "Mobile App Development"]
-    },
-    "IndiGo": {
-        "description": "India's largest airline by passengers carried and fleet size, known for its low-cost model.",
-        "keywords": ["Airline Technology", "Flight Operations", "Revenue Management", "Fleet Management", "Digital Transformation (Airline)", "Mobile App Development", "E-ticketing", "Customer Experience"]
-    },
-    "IRCTC": {
-        "description": "Indian Railway Catering and Tourism Corporation, managing catering, tourism, and online ticketing operations for Indian Railways.",
-        "keywords": ["E-ticketing", "Railway Systems", "Online Reservations", "Payment Gateways", "Logistics (Catering)", "Tourism Tech", "Mobile App Development", "Scalability (High Traffic)"]
-    },
-    "Tata Digital": {
-        "description": "The digital arm of Tata Group, building a super app and digital ecosystem.",
-        "keywords": ["Super App", "Digital Ecosystem", "E-commerce (Tata Neu)", "FinTech", "HealthTech", "EdTech", "Loyalty Programs", "Data Analytics", "AI (Cross-platform)", "User Experience (UX)"]
-    },
-    "JioMart": {
-        "description": "Reliance Retail's online grocery and e-commerce platform.",
-        "keywords": ["E-commerce (Grocery)", "Omnichannel Retail", "Logistics", "Supply Chain", "Hyperlocal", "Digital Payments", "Customer Experience", "Mobile App Development"]
-    },
-    "FreshToHome": {
-        "description": "An Indian e-commerce platform for fresh fish and meat.",
-        "keywords": ["E-commerce (Perishables)", "Supply Chain (Fresh Food)", "Logistics", "Cold Chain Management", "Mobile App Development", "Data Analytics (Supply/Demand)", "Quality Control"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Zetwerk": {
-        "description": "An Indian B2B marketplace for manufacturing goods.",
-        "keywords": ["B2B Marketplace", "Manufacturing Tech", "Supply Chain", "Procurement", "Digital Manufacturing", "IoT (Manufacturing)", "Quality Control", "Logistics", "Cloud Platform"]
-    },
-    "Infra.Market": {
-        "description": "An Indian B2B marketplace for construction materials.",
-        "keywords": ["B2B Marketplace", "Construction Tech", "Supply Chain", "Logistics", "Procurement", "FinTech (Construction Finance)", "Digital Platform"]
-    },
-    "OfBusiness": {
-        "description": "An Indian B2B e-commerce and FinTech platform providing raw materials and credit to SMEs.",
-        "keywords": ["B2B E-commerce", "FinTech (SME Lending)", "Supply Chain", "Procurement", "Data Analytics (B2B)", "Credit Risk Assessment", "Logistics", "Marketplace", "Enterprise Software"]
-    },
-    "Capillary Technologies": {
-        "description": "A leading provider of AI-powered loyalty and customer engagement solutions for retailers.",
-        "keywords": ["Retail Tech", "Customer Engagement", "Loyalty Programs", "Personalization", "AI (Retail)", "Machine Learning (Retail)", "Data Analytics (Retail)", "CRM", "Omnichannel Marketing"]
-    },
-    "RateGain": {
-        "description": "A global provider of SaaS solutions for the travel and hospitality industry.",
-        "keywords": ["Travel Tech", "Hospitality Tech", "SaaS", "Revenue Management", "Pricing Optimization", "Data Analytics (Travel)", "AI (Pricing)", "Distribution Channels", "API Integration"]
-    },
-    "Sigmoid": {
-        "description": "A leading data engineering and AI consulting company.",
-        "keywords": ["Data Engineering", "Big Data", "Data Analytics", "Cloud Data Platforms", "AI Consulting", "Machine Learning Engineering", "Data Warehousing", "Data Lakes", "ETL", "AWS", "GCP", "Azure"]
-    },
-    "Analytics Vidhya": {
-        "description": "A leading global community and knowledge portal for analytics and data science professionals.",
-        "keywords": ["Data Science", "Machine Learning", "Deep Learning", "AI", "Python", "R", "SQL", "Big Data Technologies", "Data Visualization", "Natural Language Processing (NLP)", "Computer Vision", "Statistical Modeling", "Data Analytics Training"]
-    },
-    "Indegene": {
-        "description": "A global healthcare solutions company providing commercialization and marketing services for life sciences.",
-        "keywords": ["HealthTech", "Life Sciences", "Digital Marketing (Pharma)", "Medical Communications", "Data Analytics (Healthcare)", "AI (Commercialization)", "CRM (Pharma)", "Omnichannel Engagement"]
-    },
-    "Netcore Cloud": {
-        "description": "A full-stack marketing technology company providing AI-powered solutions for customer engagement.",
-        "keywords": ["Marketing Automation", "Customer Engagement", "Personalization", "AI (Marketing)", "Machine Learning", "Email Marketing", "Push Notifications", "Customer Data Platform (CDP)", "Analytics"]
-    },
-    "Manthan": {
-        "description": "A global leader in AI-powered analytics solutions for retail and consumer businesses.",
-        "keywords": ["Retail Analytics", "Consumer Analytics", "AI (Retail)", "Machine Learning (Retail)", "Big Data", "Personalization", "Merchandising Analytics", "Customer Analytics", "Supply Chain Analytics"]
-    },
-    "Happay": {
-        "description": "An Indian FinTech company offering expense management and corporate card solutions.",
-        "keywords": ["FinTech", "Expense Management", "Corporate Cards", "Payment Solutions", "SaaS", "Financial Automation", "Mobile App Development", "Data Analytics (Expenses)"]
-    },
-    "Juspay": {
-        "description": "An Indian payments technology company providing full-stack payment solutions.",
-        "keywords": ["FinTech", "Payment Gateway", "UPI", "Payment Orchestration", "Mobile Payments", "Fraud Prevention", "Security (Payments)", "API Development", "Scalability"]
-    },
-    "BillDesk (now part of Prosus' PayU)": {
-        "description": "An Indian online payment gateway company.",
-        "keywords": ["FinTech", "Payment Gateway", "Online Payments", "Billing Solutions", "Payment Processing", "Digital Payments", "Security (Payments)"]
-    },
-    "MobiKwik": {
-        "description": "An Indian FinTech company offering mobile wallet, payments, and financial services, with a focus on lending and insurance.",
-        "keywords": ["FinTech", "Mobile Wallet", "Digital Payments", "UPI", "Lending", "Insurance Tech", "Investment Tech", "E-commerce Payments", "Cybersecurity"]
-    },
-    "Nazara Technologies": {
-        "description": "An Indian diversified gaming and sports media platform.",
-        "keywords": ["Gaming Tech", "Mobile Gaming", "Esports", "Advergaming", "Subscription Gaming", "Game Development", "User Engagement", "Data Analytics (Gaming)", "Fantasy Sports"]
-    },
-    "Games24x7": {
-        "description": "An Indian online skill gaming company operating platforms like RummyCircle and My11Circle.",
-        "keywords": ["Gaming Tech", "Skill Gaming", "Fantasy Sports", "Rummy", "Poker", "Real-time Systems", "Fraud Detection", "Data Analytics (Gaming)", "Mobile Gaming", "User Acquisition"]
-    },
-    "Dream11": {
-        "description": "India's largest fantasy sports platform.",
-        "keywords": ["Gaming Tech", "Fantasy Sports", "Mobile Gaming", "Data Analytics", "User Engagement", "Real-time Systems", "Scalability", "Backend Development", "Payments Integration", "Sports Analytics"]
-    },
-    "Myntra": {
-        "description": "An Indian fashion e-commerce company, a subsidiary of Flipkart.",
-        "keywords": ["E-commerce (Fashion)", "Online Retail", "Supply Chain (Fashion)", "Logistics", "Digital Marketing", "Personalization", "AI (Fashion Recommendations)", "Mobile App Development", "User Experience (UX)"]
-    },
-    "Lenskart": {
-        "description": "An Indian optical prescription eyewear retail chain, integrating online and offline experiences.",
-        "keywords": ["Retail Tech", "E-commerce", "Omnichannel Retail", "Computer Vision (Eyewear Try-on)", "Supply Chain (Retail)", "Manufacturing (Eyewear)", "Customer Experience (CX)", "Mobile App Development"]
-    },
-    "Pepperfry": {
-        "description": "An Indian online furniture and home goods marketplace.",
-        "keywords": ["E-commerce (Furniture)", "Home Decor Tech", "Supply Chain", "Logistics", "Online Marketplace", "Digital Marketing", "3D Visualization", "Augmented Reality (AR) in Retail"]
-    },
-    "BigBasket": {
-        "description": "An Indian online grocery delivery service, part of the Tata Group.",
-        "keywords": ["E-grocery", "E-commerce", "Logistics (Grocery)", "Supply Chain Optimization", "Last-Mile Delivery", "Data Analytics (Retail)", "Inventory Management", "Mobile App Development", "Hyperlocal"]
-    },
-    "Dunzo": {
-        "description": "An Indian hyperlocal delivery service that delivers anything locally.",
-        "keywords": ["Hyperlocal Delivery", "Quick Commerce", "Logistics", "On-demand Services", "Mobile App Development", "Geolocation", "Route Optimization", "User Experience (UX)"]
-    },
-    "Delhivery": {
-        "description": "An Indian logistics and supply chain services company.",
-        "keywords": ["Logistics", "Supply Chain Management", "Warehousing", "Last-Mile Delivery", "E-commerce Logistics", "Route Optimization", "Fleet Management", "Data Analytics", "Automation (Warehouse)", "IoT (Tracking)", "GIS", "Machine Learning (Forecasting)"]
-    },
-    "Blue Dart Express": {
-        "description": "India's premier express air and integrated transportation and distribution company.",
-        "keywords": ["Logistics", "Express Delivery", "Supply Chain", "Warehousing", "Air Cargo", "Tracking Systems", "Route Optimization", "Customs Clearance", "Automation (Logistics)"]
-    },
-    "Shiprocket": {
-        "description": "An Indian logistics software solution for e-commerce businesses.",
-        "keywords": ["Logistics Tech", "E-commerce Logistics", "Shipping Software", "Order Fulfillment", "Carrier Integration", "Tracking & Analytics", "SME Solutions", "API (Logistics)"]
-    },
-    "Vistara": {
-        "description": "An Indian airline, a joint venture between Tata Sons and Singapore Airlines, focusing on premium air travel.",
-        "keywords": ["Airline Technology", "Travel Tech", "Flight Operations", "Customer Experience (Airline)", "Reservations Systems", "Loyalty Programs", "Digital Transformation (Airline)", "Mobile App Development"]
-    },
-    "IndiGo": {
-        "description": "India's largest airline by passengers carried and fleet size, known for its low-cost model.",
-        "keywords": ["Airline Technology", "Flight Operations", "Revenue Management", "Fleet Management", "Digital Transformation (Airline)", "Mobile App Development", "E-ticketing", "Customer Experience"]
-    },
-    "IRCTC": {
-        "description": "Indian Railway Catering and Tourism Corporation, managing catering, tourism, and online ticketing operations for Indian Railways.",
-        "keywords": ["E-ticketing", "Railway Systems", "Online Reservations", "Payment Gateways", "Logistics (Catering)", "Tourism Tech", "Mobile App Development", "Scalability (High Traffic)"]
-    },
-    "Tata Digital": {
-        "description": "The digital arm of Tata Group, building a super app and digital ecosystem.",
-        "keywords": ["Super App", "Digital Ecosystem", "E-commerce (Tata Neu)", "FinTech", "HealthTech", "EdTech", "Loyalty Programs", "Data Analytics", "AI (Cross-platform)", "User Experience (UX)"]
-    },
-    "JioMart": {
-        "description": "Reliance Retail's online grocery and e-commerce platform.",
-        "keywords": ["E-commerce (Grocery)", "Omnichannel Retail", "Logistics", "Supply Chain", "Hyperlocal", "Digital Payments", "Customer Experience", "Mobile App Development"]
-    },
-    "FreshToHome": {
-        "description": "An Indian e-commerce platform for fresh fish and meat.",
-        "keywords": ["E-commerce (Perishables)", "Supply Chain (Fresh Food)", "Logistics", "Cold Chain Management", "Mobile App Development", "Data Analytics (Supply/Demand)", "Quality Control"]
-    }
-}
+# Define SKILL_LIST for the new functions
+SKILL_LIST = MASTER_SKILLS
 
 # IMPORTANT: REPLACE THESE WITH YOUR ACTUAL DEPLOYMENT URLs
 APP_BASE_URL = "https://candidate-screenerpro.streamlit.app/" # <--- UPDATED URL
@@ -2548,19 +1553,32 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         semantic_score_from_feedback = cosine_similarity(resume_embedding.reshape(1, -1), jd_embedding.reshape(1, -1))[0][0]
         semantic_score_from_feedback = float(np.clip(semantic_score_from_feedback, 0, 1)) # Ensure between 0 and 1
 
+        # Apply company-specific skill boost
+        company_boost_percentage = 0
+        if target_company_name and target_company_name != "None" and target_company_name in COMPANY_SKILL_PROFILES:
+            company_skills = set(s.lower() for s in COMPANY_SKILL_PROFILES[target_company_name])
+            candidate_matched_company_skills = resume_skills.intersection(company_skills)
+            if company_skills: # Avoid division by zero
+                company_skill_match_ratio = len(candidate_matched_company_skills) / len(company_skills)
+                company_boost_percentage = company_skill_match_ratio * 5 # Max 5% boost for company fit
+
+        overall_score = (match_score * 0.95) + (company_boost_percentage) # Adjust weights to accommodate boost
+        overall_score = np.clip(overall_score, 0, 100) # Ensure score is between 0 and 100
+
         # Generate candidate feedback (no LLM)
         candidate_ai_feedback = generate_candidate_feedback(
             candidate_name=candidate_name,
-            score=match_score,
+            score=overall_score, # Use the boosted score for feedback
             years_exp=exp,
             semantic_similarity=semantic_score_from_feedback,
             cgpa=cgpa,
             matched_skills=matched_skills_list,
-            missing_skills=missing_skills_list
+            missing_skills=missing_skills_list,
+            target_company_name=target_company_name # Pass company name to feedback
         )
 
         # Assign to variables used by downstream functions
-        score = match_score 
+        score = overall_score
         semantic_similarity = semantic_score_from_feedback 
         matched_keywords = matched_skills_list 
         missing_skills = missing_skills_list 
@@ -2687,7 +1705,7 @@ def calculate_match_score(resume_text, jd_text, sentence_model):
     return overall_score, list(matched_skills), list(missing_skills)
 
 # --- Function to generate candidate feedback (no LLM API calls) ---
-def generate_candidate_feedback(candidate_name, score, years_exp, semantic_similarity, cgpa, matched_skills, missing_skills):
+def generate_candidate_feedback(candidate_name, score, years_exp, semantic_similarity, cgpa, matched_skills, missing_skills, target_company_name=None):
     """
     Generates detailed, diverse feedback for the candidate based on their screening results.
     This function does NOT use an external LLM API.
@@ -2731,6 +1749,15 @@ def generate_candidate_feedback(candidate_name, score, years_exp, semantic_simil
     
     feedback_parts.append(f"- **Semantic Alignment:** Your resume's content has a semantic similarity of {semantic_similarity:.2f} with the job description, meaning the overall themes and concepts in your profile resonate well with the role's requirements.")
 
+    if target_company_name and target_company_name != "None" and target_company_name in COMPANY_SKILL_PROFILES:
+        company_skills = set(s.lower() for s in COMPANY_SKILL_PROFILES[target_company_name])
+        candidate_matched_company_skills = set(s.lower() for s in matched_skills).intersection(company_skills)
+        if candidate_matched_company_skills:
+            feedback_parts.append(f"- **Company Fit ({target_company_name}):** You demonstrate a good fit with {target_company_name}'s preferred technologies/skills, including: {', '.join(sorted(list(candidate_matched_company_skills)))}. This is a strong positive for roles within this company.")
+        else:
+            feedback_parts.append(f"- **Company Fit ({target_company_name}):** While your general skills are good, consider exploring more skills specific to {target_company_name} to enhance your profile for future applications with them.")
+
+
     # Areas for Improvement
     feedback_parts.append("\n#### Areas for Growth:")
     if missing_skills:
@@ -2770,6 +1797,20 @@ def get_learning_links(skill):
         "Google": f"https://www.google.com/search?q={urllib.parse.quote(skill)}+tutorial"
     }
 
+# Function to load JDs from a local folder
+def load_jds_from_folder(folder_path="data/jds"):
+    jds = {"Paste New JD": ""}
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        for filename in os.listdir(folder_path):
+            if filename.endswith((".txt", ".md")):
+                filepath = os.path.join(folder_path, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        jds[filename] = f.read()
+                except Exception as e:
+                    st.warning(f"Could not load JD from {filename}: {e}")
+    return jds
+
 def resume_screener_page():
     st.title("📄 AI-Powered Resume Screener")
     st.markdown("Upload a resume and paste a Job Description to get an instant match score and personalized feedback!")
@@ -2779,15 +1820,45 @@ def resume_screener_page():
         st.session_state.results = None
     if 'jd_text_input' not in st.session_state:
         st.session_state.jd_text_input = ""
+    if 'jd_selection_method' not in st.session_state:
+        st.session_state.jd_selection_method = "Paste JD"
+    if 'selected_jd_file' not in st.session_state:
+        st.session_state.selected_jd_file = "Paste New JD"
+
 
     # Input for Job Description
     st.subheader("1. Enter Job Description")
-    jd_text = st.text_area(
-        "Paste the Job Description here:",
-        height=300,
-        key="jd_text_input",
-        placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
+    
+    jd_options = load_jds_from_folder()
+    jd_selection_method = st.radio(
+        "Choose JD Input Method:",
+        ("Paste JD", "Select from Library"),
+        key="jd_selection_method"
     )
+
+    jd_text = ""
+    jd_name_for_results = "User Provided JD"
+
+    if jd_selection_method == "Paste JD":
+        jd_text = st.text_area(
+            "Paste the Job Description here:",
+            height=300,
+            key="jd_text_input",
+            placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
+        )
+    else: # Select from Library
+        selected_jd_file = st.selectbox(
+            "Select a Job Description from your library:",
+            options=list(jd_options.keys()),
+            key="selected_jd_file"
+        )
+        if selected_jd_file != "Paste New JD":
+            jd_text = jd_options[selected_jd_file]
+            jd_name_for_results = selected_jd_file
+            st.text_area("Selected JD Content (read-only):", value=jd_text, height=300, disabled=True)
+        else:
+            st.info("Please select a JD file or switch to 'Paste JD' to enter a new one.")
+
 
     # Input for Max Experience
     st.subheader("2. Set Max Experience (Years)")
@@ -2800,8 +1871,20 @@ def resume_screener_page():
         help="Candidates with experience significantly above this may be considered overqualified."
     )
 
+    # Company Selection
+    st.subheader("3. Select Target Company (Optional for Score Boost)")
+    company_names = ["None"] + sorted(list(COMPANY_SKILL_PROFILES.keys()))
+    target_company_name = st.selectbox(
+        "Select a company to apply a skill-based score boost (if applicable):",
+        options=company_names,
+        index=0 # Default to "None"
+    )
+    if target_company_name != "None":
+        st.info(f"A small score boost will be applied if your resume matches skills important to {target_company_name}.")
+
+
     # File Uploader for Resume
-    st.subheader("3. Upload Resume")
+    st.subheader("4. Upload Resume")
     uploaded_file = st.file_uploader(
         "Upload a resume (PDF only)",
         type=["pdf"],
@@ -2836,12 +1919,104 @@ def resume_screener_page():
                         jd_text=jd_text,
                         jd_embedding=jd_embedding,
                         resume_embedding=resume_embedding,
-                        jd_name_for_results="User Provided JD", # Or a name you define
+                        jd_name_for_results=jd_name_for_results,
                         max_experience=max_experience,
-                        _global_ml_model=global_ml_model # Pass the loaded model
+                        _global_ml_model=global_ml_model,
+                        target_company_name=target_company_name # Pass selected company
                     )
                     st.session_state.results = screening_results
                     st.success("Analysis complete! See the results below.")
+
+                    # --- Automatic Certificate Sending ---
+                    if st.session_state.results and st.session_state.results['Email'] != 'Not Found':
+                        gmail_address = st.secrets.get("GMAIL_ADDRESS")
+                        gmail_app_password = st.secrets.get("GMAIL_APP_PASSWORD")
+
+                        if gmail_address and gmail_app_password:
+                            st.info("Attempting to automatically send certificate...")
+                            certificate_html_content = f"""
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>ScreenerPro Certificate</title>
+                                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+                                <style>
+                                    body {{ font-family: 'Inter', sans-serif; background-color: #f0f2f6; color: #333; margin: 0; padding: 20px; }}
+                                    .certificate-container {{
+                                        width: 100%; max-width: 800px; margin: 20px auto; padding: 40px;
+                                        background-color: #ffffff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                                        text-align: center; border: 5px solid #4CAF50;
+                                        box-sizing: border-box;
+                                    }}
+                                    .header {{ color: #4CAF50; font-size: 2.5em; font-weight: 700; margin-bottom: 20px; }}
+                                    .subheader {{ font-size: 1.5em; color: #555; margin-bottom: 30px; }}
+                                    .name {{ font-size: 2.2em; font-weight: 700; color: #333; margin-bottom: 10px; text-transform: capitalize; }}
+                                    .award-text {{ font-size: 1.1em; margin-bottom: 20px; line-height: 1.6; }}
+                                    .score {{ font-size: 3em; font-weight: 700; color: #007BFF; margin: 20px 0; }}
+                                    .rank {{ font-size: 1.8em; font-weight: 700; color: #FFD700; margin-bottom: 30px; }}
+                                    .details {{ font-size: 0.9em; color: #777; margin-top: 30px; line-height: 1.5; }}
+                                    .signature-section {{ margin-top: 50px; display: flex; justify-content: space-around; align-items: flex-end; }}
+                                    .signature-block {{ text-align: center; }}
+                                    .signature-line {{ border-top: 1px solid #aaa; width: 150px; margin: 10px auto 5px auto; }}
+                                    .signature-name {{ font-weight: 600; font-size: 1em; }}
+                                    .footer {{ margin-top: 40px; font-size: 0.8em; color: #999; }}
+                                    .qr-code {{ margin-top: 20px; }}
+                                    @media (max-width: 600px) {{
+                                        .certificate-container {{ padding: 20px; }}
+                                        .header {{ font-size: 1.8em; }}
+                                        .subheader {{ font-size: 1.2em; }}
+                                        .name {{ font-size: 1.8em; }}
+                                        .score {{ font-size: 2.5em; }}
+                                        .rank {{ font-size: 1.4em; }}
+                                        .signature-section {{ flex-direction: column; }}
+                                        .signature-block {{ margin-bottom: 20px; }}
+                                    }}
+                                </style>
+                            </head>
+                            <body>
+                                <div class="certificate-container">
+                                    <div class="header">ScreenerPro</div>
+                                    <div class="subheader">Certificate of Achievement</div>
+                                    <p class="award-text">This certifies that</p>
+                                    <div class="name">{st.session_state.results['Candidate Name']}</div>
+                                    <p class="award-text">has successfully completed the automated resume screening process for the role of <strong>{st.session_state.results['JD Used']}</strong>, demonstrating a significant match in skills and experience.</p>
+                                    <div class="score">{st.session_state.results['Skill Match']:.1f}%</div>
+                                    <div class="rank">{st.session_state.results['Certificate Rank']}</div>
+                                    <div class="details">
+                                        <p><strong>Date Screened:</strong> {st.session_state.results['Date Screened']}</p>
+                                        <p><strong>Certificate ID:</strong> {st.session_state.results['Certificate ID']}</p>
+                                        <p><strong>Semantic Match:</strong> {st.session_state.results['Semantic Match']:.2f}</p>
+                                        <p><strong>Years Experience:</strong> {st.session_state.results['Years Experience']:.1f}</p>
+                                        <p><strong>CGPA (4.0 Scale):</strong> {st.session_state.results['CGPA (4.0 Scale)'] if st.session_state.results['CGPA (4.0 Scale)'] is not None else 'N/A'}</p>
+                                    </div>
+                                    <div class="signature-section">
+                                        <div class="signature-block">
+                                            <div class="signature-line"></div>
+                                            <div class="signature-name">ScreenerPro Team</div>
+                                            <div>Automated Assessment</div>
+                                        </div>
+                                    </div>
+                                    <div class="footer">
+                                        Verify this certificate at: {CERTIFICATE_HOSTING_URL}?id={st.session_state.results['Certificate ID']}
+                                    </div>
+                                </div>
+                            </body>
+                            </html>
+                            """
+                            send_certificate_email(
+                                recipient_email=st.session_state.results['Email'],
+                                candidate_name=st.session_state.results['Candidate Name'],
+                                score=st.session_state.results['Skill Match'],
+                                certificate_html_content=certificate_html_content,
+                                certificate_public_url=f"{CERTIFICATE_HOSTING_URL}?id={st.session_state.results['Certificate ID']}",
+                                gmail_address=gmail_address,
+                                gmail_app_password=gmail_app_password
+                            )
+                        else:
+                            st.warning("Email sending not configured. Certificate was not sent automatically. Please check your Streamlit secrets for GMAIL_ADDRESS and GMAIL_APP_PASSWORD.")
+                    elif st.session_state.results and st.session_state.results['Email'] == 'Not Found':
+                        st.warning("No email address found in the resume. Certificate could not be sent automatically.")
+
 
                 except Exception as e:
                     st.error(f"An unexpected error occurred during processing: {e}")
@@ -3002,10 +2177,10 @@ def resume_screener_page():
             mime="application/pdf"
         )
 
-        # Email certificate section
-        with st.expander("Email Certificate"):
+        # Email certificate section (manual trigger still available)
+        with st.expander("Manually Email Certificate"):
             recipient_email = st.text_input("Enter recipient email address:", value=results['Email'] if results['Email'] != 'Not Found' else '')
-            if st.button("Send Certificate via Email"):
+            if st.button("Send Certificate via Email (Manual)"):
                 if recipient_email and re.match(r"[^@]+@[^@]+\.[^@]+", recipient_email):
                     gmail_address = st.secrets.get("GMAIL_ADDRESS")
                     gmail_app_password = st.secrets.get("GMAIL_APP_PASSWORD")
