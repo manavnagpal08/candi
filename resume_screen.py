@@ -2770,3 +2770,279 @@ def get_learning_links(skill):
         "Google": f"https://www.google.com/search?q={urllib.parse.quote(skill)}+tutorial"
     }
 
+def resume_screener_page():
+    st.title("📄 AI-Powered Resume Screener")
+    st.markdown("Upload a resume and paste a Job Description to get an instant match score and personalized feedback!")
+
+    # Initialize session state for results if not already present
+    if 'results' not in st.session_state:
+        st.session_state.results = None
+    if 'jd_text_input' not in st.session_state:
+        st.session_state.jd_text_input = ""
+
+    # Input for Job Description
+    st.subheader("1. Enter Job Description")
+    jd_text = st.text_area(
+        "Paste the Job Description here:",
+        height=300,
+        key="jd_text_input",
+        placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
+    )
+
+    # Input for Max Experience
+    st.subheader("2. Set Max Experience (Years)")
+    max_experience = st.number_input(
+        "Maximum years of experience desired for this role:",
+        min_value=0,
+        max_value=30,
+        value=10,
+        step=1,
+        help="Candidates with experience significantly above this may be considered overqualified."
+    )
+
+    # File Uploader for Resume
+    st.subheader("3. Upload Resume")
+    uploaded_file = st.file_uploader(
+        "Upload a resume (PDF only)",
+        type=["pdf"],
+        help="Please upload a text-selectable PDF resume for best results."
+    )
+
+    if st.button("🚀 Screen Resume"):
+        if not jd_text.strip():
+            st.error("Please provide a Job Description.")
+        elif not uploaded_file:
+            st.error("Please upload a resume.")
+        else:
+            with st.spinner("Processing resume and generating insights..."):
+                try:
+                    # Extract text from uploaded resume
+                    resume_bytes = uploaded_file.read()
+                    resume_text = extract_text_from_file(resume_bytes, uploaded_file.name, uploaded_file.type)
+
+                    if resume_text.startswith("[ERROR]"):
+                        st.error(resume_text)
+                        st.session_state.results = None
+                        return
+
+                    # Generate embeddings for JD and resume
+                    jd_embedding = global_sentence_model.encode(clean_text(jd_text), convert_to_tensor=True)
+                    resume_embedding = global_sentence_model.encode(clean_text(resume_text), convert_to_tensor=True)
+
+                    # Process the resume
+                    screening_results = _process_single_resume_for_screener_page(
+                        file_name=uploaded_file.name,
+                        text=resume_text,
+                        jd_text=jd_text,
+                        jd_embedding=jd_embedding,
+                        resume_embedding=resume_embedding,
+                        jd_name_for_results="User Provided JD", # Or a name you define
+                        max_experience=max_experience,
+                        _global_ml_model=global_ml_model # Pass the loaded model
+                    )
+                    st.session_state.results = screening_results
+                    st.success("Analysis complete! See the results below.")
+
+                except Exception as e:
+                    st.error(f"An unexpected error occurred during processing: {e}")
+                    traceback.print_exc()
+                    st.session_state.results = None
+
+    if st.session_state.results:
+        results = st.session_state.results
+        st.subheader("📊 Screening Results")
+
+        st.markdown(f"### Candidate: {results['Candidate Name']}")
+        st.info(f"**Overall Match Score:** {results['Skill Match']:.2f}% {results['Tag']}")
+
+        # Display AI Suggestion/Feedback
+        st.markdown("---")
+        st.markdown("### AI Feedback")
+        st.markdown(results['LLM Feedback']) # This now holds the detailed candidate feedback
+
+        # Display Key Information
+        st.markdown("---")
+        st.markdown("### Key Information Extracted")
+        with st.expander("Personal Details"):
+            st.write(f"**Email:** {results['Email']}")
+            st.write(f"**Phone Number:** {results['Phone Number']}")
+            st.write(f"**Location:** {results['Location']}")
+            st.write(f"**Languages:** {results['Languages']}")
+            st.write(f"**Years of Experience:** {results['Years Experience']:.1f}")
+            st.write(f"**CGPA (4.0 Scale):** {results['CGPA (4.0 Scale)'] if results['CGPA (4.0 Scale)'] is not None else 'Not Found'}")
+
+        with st.expander("Education"):
+            st.write(f"**Education Details:** {results['Education Details']}")
+
+        with st.expander("Work History"):
+            if results['Work History'] != "Not Found":
+                st.markdown(f"**Work History:**")
+                for entry in results['Work History'].split('; '):
+                    st.markdown(f"- {entry}")
+            else:
+                st.write("**Work History:** Not Found")
+
+        with st.expander("Projects"):
+            if results['Project Details'] != "Not Found":
+                st.markdown(f"**Project Details:**")
+                for entry in results['Project Details'].split('; '):
+                    st.markdown(f"- {entry}")
+            else:
+                st.write("**Project Details:** Not Found")
+
+        # Display Matched and Missing Skills
+        st.markdown("---")
+        st.markdown("### Skill Alignment")
+        
+        matched_skills_list = results['Matched Skills']
+        missing_skills_list = results['Missing Skills']
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("✅ **Matched Skills:**")
+            if matched_skills_list:
+                for skill in sorted(matched_skills_list):
+                    st.markdown(f"- {skill.title()}")
+            else:
+                st.markdown("- No direct skill matches found.")
+
+        with col2:
+            st.markdown("❌ **Missing Skills & Learning Links:**")
+            if missing_skills_list:
+                for skill in sorted(missing_skills_list):
+                    st.markdown(f"**{skill.title()}**:")
+                    links = get_learning_links(skill)
+                    for platform, url in links.items():
+                        st.markdown(f"  - 🔗 [{platform}]({url})", unsafe_allow_html=True)
+            else:
+                st.markdown("- No missing skills identified based on JD.")
+                st.markdown("Great job! Your skills align well with the job description.")
+
+        # Certificate Generation
+        st.markdown("---")
+        st.markdown("### Your ScreenerPro Certificate")
+        st.markdown(f"Your unique Certificate ID: `{results['Certificate ID']}`")
+        st.markdown(f"**Rank Achieved:** {results['Certificate Rank']}")
+
+        certificate_html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>ScreenerPro Certificate</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+            <style>
+                body {{ font-family: 'Inter', sans-serif; background-color: #f0f2f6; color: #333; margin: 0; padding: 20px; }}
+                .certificate-container {{
+                    width: 100%; max-width: 800px; margin: 20px auto; padding: 40px;
+                    background-color: #ffffff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    text-align: center; border: 5px solid #4CAF50;
+                    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+                }}
+                .header {{ color: #4CAF50; font-size: 2.5em; font-weight: 700; margin-bottom: 20px; }}
+                .subheader {{ font-size: 1.5em; color: #555; margin-bottom: 30px; }}
+                .name {{ font-size: 2.2em; font-weight: 700; color: #333; margin-bottom: 10px; text-transform: capitalize; }}
+                .award-text {{ font-size: 1.1em; margin-bottom: 20px; line-height: 1.6; }}
+                .score {{ font-size: 3em; font-weight: 700; color: #007BFF; margin: 20px 0; }}
+                .rank {{ font-size: 1.8em; font-weight: 700; color: #FFD700; margin-bottom: 30px; }}
+                .details {{ font-size: 0.9em; color: #777; margin-top: 30px; line-height: 1.5; }}
+                .signature-section {{ margin-top: 50px; display: flex; justify-content: space-around; align-items: flex-end; }}
+                .signature-block {{ text-align: center; }}
+                .signature-line {{ border-top: 1px solid #aaa; width: 150px; margin: 10px auto 5px auto; }}
+                .signature-name {{ font-weight: 600; font-size: 1em; }}
+                .footer {{ margin-top: 40px; font-size: 0.8em; color: #999; }}
+                .qr-code {{ margin-top: 20px; }}
+                @media (max-width: 600px) {{
+                    .certificate-container {{ padding: 20px; }}
+                    .header {{ font-size: 1.8em; }}
+                    .subheader {{ font-size: 1.2em; }}
+                    .name {{ font-size: 1.8em; }}
+                    .score {{ font-size: 2.5em; }}
+                    .rank {{ font-size: 1.4em; }}
+                    .signature-section {{ flex-direction: column; }}
+                    .signature-block {{ margin-bottom: 20px; }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="certificate-container">
+                <div class="header">ScreenerPro</div>
+                <div class="subheader">Certificate of Achievement</div>
+                <p class="award-text">This certifies that</p>
+                <div class="name">{results['Candidate Name']}</div>
+                <p class="award-text">has successfully completed the automated resume screening process for the role of <strong>{results['JD Used']}</strong>, demonstrating a significant match in skills and experience.</p>
+                <div class="score">{results['Skill Match']:.1f}%</div>
+                <div class="rank">{results['Certificate Rank']}</div>
+                <div class="details">
+                    <p><strong>Date Screened:</strong> {results['Date Screened']}</p>
+                    <p><strong>Certificate ID:</strong> {results['Certificate ID']}</p>
+                    <p><strong>Semantic Match:</strong> {results['Semantic Match']:.2f}</p>
+                    <p><strong>Years Experience:</strong> {results['Years Experience']:.1f}</p>
+                    <p><strong>CGPA (4.0 Scale):</strong> {results['CGPA (4.0 Scale)'] if results['CGPA (4.0 Scale)'] is not None else 'N/A'}</p>
+                </div>
+                <div class="signature-section">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <div class="signature-name">ScreenerPro Team</div>
+                        <div>Automated Assessment</div>
+                    </div>
+                </div>
+                <div class="footer">
+                    Verify this certificate at: {CERTIFICATE_HOSTING_URL}?id={results['Certificate ID']}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Download button
+        st.download_button(
+            label="Download Certificate (PDF)",
+            data=HTML(string=certificate_html_content).write_pdf(),
+            file_name=f"ScreenerPro_Certificate_{results['Candidate Name'].replace(' ', '_')}.pdf",
+            mime="application/pdf"
+        )
+
+        # Email certificate section
+        with st.expander("Email Certificate"):
+            recipient_email = st.text_input("Enter recipient email address:", value=results['Email'] if results['Email'] != 'Not Found' else '')
+            if st.button("Send Certificate via Email"):
+                if recipient_email and re.match(r"[^@]+@[^@]+\.[^@]+", recipient_email):
+                    gmail_address = st.secrets.get("GMAIL_ADDRESS")
+                    gmail_app_password = st.secrets.get("GMAIL_APP_PASSWORD")
+                    
+                    if gmail_address and gmail_app_password:
+                        with st.spinner("Sending email..."):
+                            send_certificate_email(
+                                recipient_email=recipient_email,
+                                candidate_name=results['Candidate Name'],
+                                score=results['Skill Match'],
+                                certificate_html_content=certificate_html_content,
+                                certificate_public_url=f"{CERTIFICATE_HOSTING_URL}?id={results['Certificate ID']}",
+                                gmail_address=gmail_address,
+                                gmail_app_password=gmail_app_password
+                            )
+                    else:
+                        st.error("Email sending is not configured. Please set GMAIL_ADDRESS and GMAIL_APP_PASSWORD in your Streamlit secrets.")
+                else:
+                    st.error("Please enter a valid recipient email address.")
+
+        # Save to Leaderboard button
+        st.markdown("---")
+        st.markdown("### Contribute to Leaderboard")
+        if st.button("Add My Score to Leaderboard"):
+            with st.spinner("Saving to leaderboard..."):
+                save_screening_result_to_firestore_rest(results)
+
+# This is the entry point for your Streamlit app.
+# If you have an `app.py` file, it should look something like this:
+#
+# # app.py
+# import streamlit as st
+# from resume_screener import resume_screener_page
+#
+# def main():
+#     st.set_page_config(layout="wide", page_title="ScreenerPro")
+#     resume_screener_page()
+#
+# if __name__ == "__main__":
+#     main()
