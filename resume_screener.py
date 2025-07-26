@@ -1843,7 +1843,7 @@ def generate_company_fit_assessment(candidate_name, company_name, resume_embeddi
     # Keyword overlap with company's preferred skills
     company_keywords_set = set(company_keywords)
     matched_company_skills = resume_skills_set.intersection(company_keywords_set)
-    missing_company_skills = company_keywords_set.difference(resume_keywords_set) # Corrected to use resume_keywords_set
+    missing_company_skills = company_keywords_set.difference(resume_skills_set) # Corrected to use resume_skills_set
 
     if matched_company_skills:
         assessment_parts.append(f"\n**Key Skills for {company_name}:** You possess several skills highly valued by {company_name}, including: {', '.join(sorted(list(matched_company_skills)))}. This direct skill match is a significant advantage.")
@@ -1861,9 +1861,7 @@ def generate_company_fit_assessment(candidate_name, company_name, resume_embeddi
 
 def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedding, 
                                              resume_embedding, jd_name_for_results,
-                                             min_score_threshold, min_experience_threshold, 
-                                             min_cgpa_threshold, max_experience, 
-                                             _global_ml_model, target_company_name=None):
+                                             _global_ml_model, target_company_name=None): # Removed thresholds
     """
     Processes a single resume (pre-extracted text and pre-computed embeddings)
     for the main screener page and returns a dictionary of results.
@@ -1990,19 +1988,16 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         elif score >= 50:
             certificate_rank = "🟡 Basic Fit"
         
-        # Determine Tag based on all criteria (including user-set thresholds)
+        # Determine Tag based on Skill Match and Semantic Match only (removed explicit thresholds)
         tag = "❌ Limited Match"
-        if score >= min_score_threshold and exp >= min_experience_threshold and exp <= max_experience and (cgpa is None or cgpa >= min_cgpa_threshold):
-            if score >= 90 and semantic_similarity >= 0.85:
-                tag = "👑 Exceptional Match"
-            elif score >= 80 and semantic_similarity >= 0.7:
-                tag = "🔥 Strong Candidate"
-            elif score >= 60:
-                tag = "✨ Promising Fit"
-            else:
-                tag = "✅ Qualified (Meets Thresholds)"
+        if score >= 90 and semantic_similarity >= 0.85:
+            tag = "👑 Exceptional Match"
+        elif score >= 80 and semantic_similarity >= 0.7:
+            tag = "🔥 Strong Candidate"
+        elif score >= 60:
+            tag = "✨ Promising Fit"
         else:
-            tag = "⚠️ Does Not Meet Thresholds"
+            tag = "⚪ General Match"
 
 
         return {
@@ -2199,18 +2194,15 @@ def get_learning_links(skill):
     }
 
 # Function to load JDs from a local folder
-def load_jds_from_folder(folder_path="data/jds"):
-    jds = {"Paste New JD": ""}
+def load_jds_from_folder(folder_path="data"): # Changed default folder_path to "data"
+    jds_paths = {}
     if os.path.exists(folder_path) and os.path.isdir(folder_path):
         for filename in os.listdir(folder_path):
             if filename.endswith((".txt", ".md")):
                 filepath = os.path.join(folder_path, filename)
-                try:
-                    with open(filepath, "r", encoding="utf-8") as f:
-                        jds[filename] = f.read()
-                except Exception as e:
-                    st.warning(f"Could not load JD from {filename}: {e}")
-    return jds
+                display_name = filename.replace(".txt", "").replace(".md", "").replace("_", " ").title()
+                jds_paths[display_name] = filepath
+    return jds_paths
 
 def resume_screener_page():
     st.title("📄 AI-Powered Resume Screener")
@@ -2235,44 +2227,49 @@ def resume_screener_page():
     jd_name_for_results = "User Provided JD"
 
     st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
-    col1_jd, col2_jd = st.columns([2, 1]) # Renamed columns to avoid conflict
+    col1_jd, col2_jd = st.columns([2, 1]) 
 
     with col1_jd:
-        job_roles = {"Upload my own": None}
-        # Load JDs from the 'data/jds' folder
-        jd_files_from_folder = load_jds_from_folder("data/")
-        job_roles.update(jd_files_from_folder) # Add loaded JDs to options
-
-        jd_option = st.selectbox("📌 **Select a Pre-Loaded Job Role or Upload Your Own Job Description**", list(job_roles.keys()))
+        # Load JD file paths from the 'data' folder
+        pre_loaded_jd_paths = load_jds_from_folder("data")
         
-        if jd_option == "Upload my own":
-            jd_file = st.file_uploader("Upload Job Description (TXT, PDF)", type=["txt", "pdf"], help="Upload a .txt or .pdf file containing the job description.")
-            if jd_file:
-                jd_text = extract_text_from_file(jd_file.read(), jd_file.name, jd_file.type)
-                jd_name_for_results = jd_file.name.replace('.pdf', '').replace('.txt', '')
+        # Options for the selectbox
+        jd_options_display = ["Paste New JD", "Upload my own"] + sorted(list(pre_loaded_jd_paths.keys()))
+        
+        jd_option_selected = st.selectbox("📌 **Select a Pre-Loaded Job Role or Upload Your Own Job Description**", jd_options_display)
+
+        uploaded_jd_file = None # To store the uploaded file object
+
+        if jd_option_selected == "Paste New JD":
+            jd_text = st.text_area(
+                "Paste the Job Description here:",
+                height=300,
+                key="jd_text_input_paste",
+                placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
+            )
+            jd_name_for_results = "User Provided JD (Pasted)"
+        elif jd_option_selected == "Upload my own":
+            uploaded_jd_file = st.file_uploader("Upload Job Description (TXT, PDF)", type=["txt", "pdf"], help="Upload a .txt or .pdf file containing the job description.")
+            if uploaded_jd_file:
+                jd_text = extract_text_from_file(uploaded_jd_file.read(), uploaded_jd_file.name, uploaded_jd_file.type)
+                jd_name_for_results = uploaded_jd_file.name.replace('.pdf', '').replace('.txt', '')
             else:
                 jd_name_for_results = "Uploaded JD (No file selected)"
-        else:
-            # If a pre-loaded JD is selected
-            if jd_option in job_roles and job_roles[jd_option] is not None:
-                jd_path = job_roles[jd_option]
+        else: # A pre-loaded JD was selected
+            jd_path = pre_loaded_jd_paths.get(jd_option_selected)
+            if jd_path and os.path.exists(jd_path):
                 try:
                     with open(jd_path, "r", encoding="utf-8") as f:
                         jd_text = f.read()
-                    jd_name_for_results = jd_option
+                    jd_name_for_results = jd_option_selected
                 except Exception as e:
-                    st.error(f"Error loading selected JD: {e}")
+                    st.error(f"Error loading selected JD from file '{jd_path}': {e}")
                     jd_text = ""
                     jd_name_for_results = "Error Loading JD"
-            else: # This case handles "Paste New JD" if it was added to job_roles, or if the path is None
-                jd_text = st.text_area(
-                    "Paste the Job Description here:",
-                    height=300,
-                    key="jd_text_input_paste", # Changed key to avoid conflict
-                    placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
-                )
-                jd_name_for_results = "User Provided JD"
-
+            else:
+                st.error(f"Selected JD file not found: {jd_path}")
+                jd_text = ""
+                jd_name_for_results = "Error Loading JD"
 
     with col2_jd:
         if jd_text:
@@ -2284,7 +2281,7 @@ def resume_screener_page():
             st.caption("Visualizing the most frequent and important keywords from the Job Description.")
             st.info("💡 To filter candidates by these skills, use the 'Filter Candidates by Skill' section below the main results table.")
             
-            jd_words_for_cloud_set, _ = extract_relevant_keywords(jd_text, MASTER_SKILLS) # Corrected to MASTER_SKILLS
+            jd_words_for_cloud_set, _ = extract_relevant_keywords(jd_text, MASTER_SKILLS) 
             jd_words_for_cloud = " ".join(list(jd_words_for_cloud_set))
 
             if jd_words_for_cloud:
@@ -2301,7 +2298,29 @@ def resume_screener_page():
             st.info("Please select or upload a Job Description to view its keyword cloud.")
 
 
-   
+    # Removed Filtering Criteria from the previous file
+    st.subheader("2. Set Screening Criteria (No explicit thresholds applied)")
+    st.info("The screening process now focuses on overall match and semantic similarity, providing a holistic assessment without strict numerical cutoffs for experience or CGPA.")
+    # min_score_threshold = st.slider(
+    #     "Minimum Match Score (%) for Qualification:",
+    #     min_value=0, max_value=100, value=70, step=5,
+    #     help="Candidates must meet or exceed this score to be considered qualified."
+    # )
+    # min_experience_threshold = st.slider(
+    #     "Minimum Years of Experience Required:",
+    #     min_value=0, max_value=20, value=2, step=1,
+    #     help="Candidates must have at least this many years of experience."
+    # )
+    # max_experience = st.slider(
+    #     "Maximum Years of Experience (Overqualified if above):",
+    #     min_value=0, max_value=30, value=10, step=1,
+    #     help="Candidates with experience significantly above this might be considered overqualified."
+    # )
+    # min_cgpa_threshold = st.slider(
+    #     "Minimum CGPA (on 4.0 scale):",
+    #     min_value=0.0, max_value=4.0, value=2.5, step=0.1,
+    #     help="Candidates must meet or exceed this CGPA. Set to 0.0 to ignore."
+    # )
 
 
     # Company Selection
@@ -2318,7 +2337,7 @@ def resume_screener_page():
 
 
     # File Uploader for Resume
-    st.subheader("4. Upload Resume")
+    st.subheader("3. Upload Resume") # Changed step number
     uploaded_resume_file = st.file_uploader(
         "Upload a resume (PDF only)",
         type=["pdf"],
@@ -2334,8 +2353,8 @@ def resume_screener_page():
             with st.spinner("Processing resume and generating insights..."):
                 try:
                     # Extract text from uploaded resume
-                    resume_bytes = uploaded_resume_file.read() # Corrected variable name
-                    resume_text = extract_text_from_file(resume_bytes, uploaded_resume_file.name, uploaded_resume_file.type) # Corrected variable name
+                    resume_bytes = uploaded_resume_file.read() 
+                    resume_text = extract_text_from_file(resume_bytes, uploaded_resume_file.name, uploaded_resume_file.type) 
 
                     if resume_text.startswith("[ERROR]"):
                         st.error(resume_text)
@@ -2348,18 +2367,15 @@ def resume_screener_page():
 
                     # Process the resume
                     screening_results = _process_single_resume_for_screener_page(
-                        file_name=uploaded_resume_file.name, # Corrected variable name
+                        file_name=uploaded_resume_file.name, 
                         text=resume_text,
                         jd_text=jd_text,
                         jd_embedding=jd_embedding,
                         resume_embedding=resume_embedding,
                         jd_name_for_results=jd_name_for_results,
-                        min_score_threshold=min_score_threshold, # Pass thresholds
-                        min_experience_threshold=min_experience_threshold,
-                        min_cgpa_threshold=min_cgpa_threshold,
-                        max_experience=max_experience,
+                        # Removed explicit thresholds from function call
                         _global_ml_model=global_ml_model,
-                        target_company_name=target_company_name # Pass selected company
+                        target_company_name=target_company_name 
                     )
                     st.session_state.results = screening_results
                     st.success("Analysis complete! See the results below.")
@@ -2371,7 +2387,13 @@ def resume_screener_page():
 
                         if gmail_address and gmail_app_password:
                             st.info("Attempting to automatically send certificate...")
-                            certificate_html_content = generate_certificate_html(st.session_state.results) # Use the dedicated function
+                            # Make sure generate_certificate_html is defined or imported
+                            # For this example, I'll add a placeholder function if it's not in the provided context
+                            try:
+                                certificate_html_content = generate_certificate_html(st.session_state.results) 
+                            except NameError:
+                                st.warning("`generate_certificate_html` function not found. Certificate HTML preview and PDF generation will not work.")
+                                certificate_html_content = "Certificate HTML content placeholder."
                             
                             # Construct the public URL for the certificate (if you plan to host them)
                             certificate_public_url = f"{CERTIFICATE_HOSTING_URL}?id={st.session_state.results['Certificate ID']}" 
@@ -2480,7 +2502,152 @@ def resume_screener_page():
         st.markdown(f"Your unique Certificate ID: `{results['Certificate ID']}`")
         st.markdown(f"**Rank Achieved:** {results['Certificate Rank']}")
 
-        certificate_html_content = generate_certificate_html(results) # Use the dedicated function
+        # Placeholder for generate_certificate_html if it's not in the provided context
+        def generate_certificate_html(results):
+            candidate_name = results.get('Candidate Name', 'Candidate')
+            score = results.get('Skill Match', 0)
+            date_screened = results.get('Date Screened', datetime.now().date()).strftime("%B %d, %Y")
+            certificate_id = results.get('Certificate ID', 'N/A')
+            rank = results.get('Certificate Rank', 'Not Applicable')
+
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>ScreenerPro Certificate</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    body {{
+                        font-family: 'Inter', sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #f0f2f5;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        color: #333;
+                    }}
+                    .certificate-container {{
+                        width: 100%;
+                        max-width: 800px;
+                        background-color: #fff;
+                        border: 10px solid #4CAF50;
+                        padding: 40px;
+                        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                        text-align: center;
+                        position: relative;
+                        overflow: hidden;
+                        border-radius: 15px;
+                    }}
+                    .certificate-container::before {{
+                        content: '';
+                        position: absolute;
+                        top: -50px;
+                        left: -50px;
+                        right: -50px;
+                        bottom: -50px;
+                        background: linear-gradient(45deg, #e0ffe0, #ffffff, #e0ffe0);
+                        z-index: -1;
+                        opacity: 0.3;
+                    }}
+                    h1 {{
+                        color: #2196F3;
+                        font-size: 2.5em;
+                        margin-bottom: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                    }}
+                    h2 {{
+                        color: #4CAF50;
+                        font-size: 1.8em;
+                        margin-top: 5px;
+                        margin-bottom: 20px;
+                    }}
+                    p {{
+                        font-size: 1.1em;
+                        line-height: 1.6;
+                        margin-bottom: 10px;
+                    }}
+                    .name {{
+                        font-size: 2.2em;
+                        font-weight: 700;
+                        color: #3F51B5;
+                        margin: 20px 0;
+                        text-transform: capitalize;
+                    }}
+                    .score {{
+                        font-size: 1.8em;
+                        font-weight: 600;
+                        color: #FF9800;
+                        margin: 15px 0;
+                    }}
+                    .date {{
+                        font-size: 1em;
+                        color: #777;
+                        margin-top: 30px;
+                    }}
+                    .footer {{
+                        margin-top: 40px;
+                        font-size: 0.9em;
+                        color: #555;
+                    }}
+                    .logo {{
+                        max-width: 150px;
+                        margin-bottom: 20px;
+                    }}
+                    .signature {{
+                        margin-top: 30px;
+                        border-top: 1px dashed #ccc;
+                        padding-top: 10px;
+                        display: inline-block;
+                    }}
+                    .signature p {{
+                        margin: 5px 0;
+                        font-weight: 600;
+                    }}
+                    .certificate-id {{
+                        font-size: 0.8em;
+                        color: #999;
+                        margin-top: 20px;
+                    }}
+                    .rank {{
+                        font-size: 1.3em;
+                        font-weight: 700;
+                        color: #E91E63;
+                        margin-top: 10px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="certificate-container">
+                    <img src="https://placehold.co/150x50/4CAF50/ffffff?text=ScreenerPro" alt="ScreenerPro Logo" class="logo">
+                    <h1>Certificate of Achievement</h1>
+                    <h2>For Outstanding Resume Screening Performance</h2>
+                    <p>This certifies that</p>
+                    <p class="name">{candidate_name}</p>
+                    <p>has successfully undergone the AI-powered resume screening process and achieved a remarkable</p>
+                    <p class="score">Match Score of {score:.2f}%</p>
+                    <p>demonstrating strong alignment with current industry job requirements.</p>
+                    <p class="rank">Rank Achieved: {rank}</p>
+                    <p class="date">Awarded on: {date_screened}</p>
+                    <div class="signature">
+                        <p>ScreenerPro AI Team</p>
+                        <p>Leading the Future of Recruitment</p>
+                    </div>
+                    <p class="certificate-id">Certificate ID: {certificate_id}</p>
+                    <div class="footer">
+                        <p>ScreenerPro - Empowering Careers, Streamlining Hiring.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            return html_content
+
+        certificate_html_content = generate_certificate_html(results) 
 
         # Download button
         st.download_button(
