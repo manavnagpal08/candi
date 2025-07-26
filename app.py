@@ -8,8 +8,8 @@ import requests
 import base64
 import random
 
-
-from resume_screen import resume_screener_page
+import resume_screen
+# from resume_screen import resume_screener_page
 from top_leaderboard import leaderboard_page
 from about_us import about_us_page
 from feedback_form import feedback_and_help_page
