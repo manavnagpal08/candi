@@ -1843,7 +1843,7 @@ def generate_company_fit_assessment(candidate_name, company_name, resume_embeddi
     # Keyword overlap with company's preferred skills
     company_keywords_set = set(company_keywords)
     matched_company_skills = resume_skills_set.intersection(company_keywords_set)
-    missing_company_skills = company_keywords_set.difference(resume_skills_set)
+    missing_company_skills = company_keywords_set.difference(resume_keywords_set) # Corrected to use resume_keywords_set
 
     if matched_company_skills:
         assessment_parts.append(f"\n**Key Skills for {company_name}:** You possess several skills highly valued by {company_name}, including: {', '.join(sorted(list(matched_company_skills)))}. This direct skill match is a significant advantage.")
@@ -2230,39 +2230,75 @@ def resume_screener_page():
     if 'certificate_html_content' not in st.session_state:
         st.session_state['certificate_html_content'] = ""
 
-
-    # Input for Job Description
-    st.subheader("1. Enter Job Description")
-    
-    jd_options = load_jds_from_folder()
-    jd_selection_method = st.radio(
-        "Choose JD Input Method:",
-        ("Paste JD", "Select from Library"),
-        key="jd_selection_method"
-    )
-
+    # Initialize jd_text and jd_name_for_results outside the column scope
     jd_text = ""
     jd_name_for_results = "User Provided JD"
 
-    if jd_selection_method == "Paste JD":
-        jd_text = st.text_area(
-            "Paste the Job Description here:",
-            height=300,
-            key="jd_text_input",
-            placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
-        )
-    else: # Select from Library
-        selected_jd_file = st.selectbox(
-            "Select a Job Description from your library:",
-            options=list(jd_options.keys()),
-            key="selected_jd_file"
-        )
-        if selected_jd_file != "Paste New JD":
-            jd_text = jd_options[selected_jd_file]
-            jd_name_for_results = selected_jd_file
-            st.text_area("Selected JD Content (read-only):", value=jd_text, height=300, disabled=True)
+    st.markdown("## ⚙️ Define Job Requirements & Screening Criteria")
+    col1_jd, col2_jd = st.columns([2, 1]) # Renamed columns to avoid conflict
+
+    with col1_jd:
+        job_roles = {"Upload my own": None}
+        # Load JDs from the 'data/jds' folder
+        jd_files_from_folder = load_jds_from_folder("data/jds")
+        job_roles.update(jd_files_from_folder) # Add loaded JDs to options
+
+        jd_option = st.selectbox("📌 **Select a Pre-Loaded Job Role or Upload Your Own Job Description**", list(job_roles.keys()))
+        
+        if jd_option == "Upload my own":
+            jd_file = st.file_uploader("Upload Job Description (TXT, PDF)", type=["txt", "pdf"], help="Upload a .txt or .pdf file containing the job description.")
+            if jd_file:
+                jd_text = extract_text_from_file(jd_file.read(), jd_file.name, jd_file.type)
+                jd_name_for_results = jd_file.name.replace('.pdf', '').replace('.txt', '')
+            else:
+                jd_name_for_results = "Uploaded JD (No file selected)"
         else:
-            st.info("Please select a JD file or switch to 'Paste JD' to enter a new one.")
+            # If a pre-loaded JD is selected
+            if jd_option in job_roles and job_roles[jd_option] is not None:
+                jd_path = job_roles[jd_option]
+                try:
+                    with open(jd_path, "r", encoding="utf-8") as f:
+                        jd_text = f.read()
+                    jd_name_for_results = jd_option
+                except Exception as e:
+                    st.error(f"Error loading selected JD: {e}")
+                    jd_text = ""
+                    jd_name_for_results = "Error Loading JD"
+            else: # This case handles "Paste New JD" if it was added to job_roles, or if the path is None
+                jd_text = st.text_area(
+                    "Paste the Job Description here:",
+                    height=300,
+                    key="jd_text_input_paste", # Changed key to avoid conflict
+                    placeholder="E.g., 'We are looking for a Software Engineer with strong Python, AWS, and React skills...'"
+                )
+                jd_name_for_results = "User Provided JD"
+
+
+    with col2_jd:
+        if jd_text:
+            with st.expander("📝 View Loaded Job Description"):
+                st.text_area("Job Description Content", jd_text, height=200, disabled=True, label_visibility="collapsed")
+            
+            st.markdown("---")
+            st.markdown("## ☁️ Job Description Keyword Cloud")
+            st.caption("Visualizing the most frequent and important keywords from the Job Description.")
+            st.info("💡 To filter candidates by these skills, use the 'Filter Candidates by Skill' section below the main results table.")
+            
+            jd_words_for_cloud_set, _ = extract_relevant_keywords(jd_text, MASTER_SKILLS) # Corrected to MASTER_SKILLS
+            jd_words_for_cloud = " ".join(list(jd_words_for_cloud_set))
+
+            if jd_words_for_cloud:
+                wordcloud = WordCloud(width=800, height=400, background_color='white', collocations=False).generate(jd_words_for_cloud)
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.imshow(wordcloud, interpolation='bilinear')
+                ax.axis('off')
+                st.pyplot(fig)
+                plt.close(fig)
+            else:
+                st.info("No significant keywords to display for the Job Description. Please ensure your JD has sufficient content or adjust your SKILL_CATEGORIES list.")
+            st.markdown("---")
+        else:
+            st.info("Please select or upload a Job Description to view its keyword cloud.")
 
 
     # Filtering Criteria from the previous file
@@ -2290,12 +2326,13 @@ def resume_screener_page():
 
 
     # Company Selection
-    st.subheader("3. Select Target Company (Optional for Score Boost)")
-    company_names = ["None"] + sorted(list(COMPANY_SKILL_PROFILES.keys()))
+    st.markdown("## 🏢 Target Company Fit (Optional)")
+    st.caption("Assess how well your resume aligns with a specific company's profile.")
     target_company_name = st.selectbox(
-        "Select a company to apply a skill-based score boost (if applicable):",
-        options=company_names,
-        index=0 # Default to "None"
+        "**Select a Target Company**",
+        options=["None"] + sorted(list(COMPANY_SKILL_PROFILES.keys())), # Added "None" as first option
+        index=0, # Default to "None"
+        help="Choose a company from the list to see how well your resume aligns with its typical profile. This is based on a simplified, predefined list of company keywords."
     )
     if target_company_name != "None":
         st.info(f"A small score boost will be applied if your resume matches skills important to {target_company_name}. A detailed company fit assessment will also be provided.")
@@ -2318,8 +2355,8 @@ def resume_screener_page():
             with st.spinner("Processing resume and generating insights..."):
                 try:
                     # Extract text from uploaded resume
-                    resume_bytes = uploaded_file.read()
-                    resume_text = extract_text_from_file(resume_bytes, uploaded_file.name, uploaded_file.type)
+                    resume_bytes = uploaded_resume_file.read() # Corrected variable name
+                    resume_text = extract_text_from_file(resume_bytes, uploaded_resume_file.name, uploaded_resume_file.type) # Corrected variable name
 
                     if resume_text.startswith("[ERROR]"):
                         st.error(resume_text)
@@ -2332,7 +2369,7 @@ def resume_screener_page():
 
                     # Process the resume
                     screening_results = _process_single_resume_for_screener_page(
-                        file_name=uploaded_file.name,
+                        file_name=uploaded_resume_file.name, # Corrected variable name
                         text=resume_text,
                         jd_text=jd_text,
                         jd_embedding=jd_embedding,
