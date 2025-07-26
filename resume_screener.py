@@ -66,15 +66,22 @@ MASTER_CITIES = set([
     "Metpally", "Armoor", "Bodhan", "Kamareddy", "Nirmal", "Bhainsa"
 ])
 
-FIRESTORE_PROJECT_ID = "your-gcp-project-id"
+# IMPORTANT: Replace 'your-gcp-project-id' with your actual Google Cloud Project ID.
+# This ID is necessary for the Firestore integration to work correctly.
+# You also need to set FIREBASE_API_KEY in Streamlit secrets.
+# Example for Streamlit secrets (.streamlit/secrets.toml):
+# FIREBASE_PROJECT_ID = "your-gcp-project-id-here"
+# FIREBASE_API_KEY = "your-firebase-web-api-key-here"
+FIRESTORE_PROJECT_ID = "your-gcp-project-id" # Placeholder, will be overridden by st.secrets
 FIRESTORE_COLLECTION_PATH = "screenerpro_results"
 
 def _to_firestore_value(value):
+    """Converts Python types to Firestore's REST API value format."""
     if isinstance(value, str):
         return {"stringValue": value}
     elif isinstance(value, (int, float)):
         if isinstance(value, int):
-            return {"integerValue": str(value)}
+            return {"integerValue": str(value)} # Firestore integers must be strings
         else:
             return {"doubleValue": value}
     elif isinstance(value, bool):
@@ -87,50 +94,70 @@ def _to_firestore_value(value):
     elif value is None:
         return {"nullValue": None}
     else:
+        # Fallback for unsupported types, convert to string
         st.warning(f"Unsupported data type for Firestore: {type(value)}. Converting to string.")
         return {"stringValue": str(value)}
 
 def save_screening_result_to_firestore_rest(candidate_data):
-    if FIRESTORE_PROJECT_ID == "your-gcp-project-id":
-        st.error("Please replace 'your-gcp-project-id' with your actual Google Cloud Project ID in the code to enable Firestore saving.")
-        return
-
-    url = f"https://firestore.googleapis.com/v1/projects/{FIRESTORE_PROJECT_ID}/databases/(default)/documents/{FIRESTORE_COLLECTION_PATH}"
-    headers = {
-        "Content-Type": "application/json"
-    }
-
-    firestore_fields = {}
-    for key, value in candidate_data.items():
-        firestore_fields[key] = _to_firestore_value(value)
-
-    payload = {
-        "fields": firestore_fields
-    }
-
+    """
+    Saves a single screening result to Firestore using the REST API.
+    Requires FIREBASE_PROJECT_ID and FIREBASE_API_KEY in st.secrets.
+    """
     try:
+        project_id = st.secrets.get("FIREBASE_PROJECT_ID")
+        api_key = st.secrets.get("FIREBASE_API_KEY")
+        
+        if not project_id or not api_key:
+            st.error("❌ Firestore API keys not configured. Please set FIREBASE_PROJECT_ID and FIREBASE_API_KEY in your Streamlit secrets.")
+            return
+
+        # Firestore collection path (using 'leaderboard' as before)
+        # Note: For public data, your Firestore security rules must allow unauthenticated writes
+        # or you need to implement user authentication and pass an ID token.
+        collection_id = "leaderboard" # Using 'leaderboard' as requested for public data
+        
+        # Firestore REST API endpoint for creating a document with an auto-generated ID
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/{collection_id}?key={api_key}"
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        firestore_fields = {}
+        for key, value in candidate_data.items():
+            # Convert datetime.date objects to string for Firestore
+            if isinstance(value, date):
+                firestore_fields[key] = _to_firestore_value(value.isoformat())
+            else:
+                firestore_fields[key] = _to_firestore_value(value)
+
+        payload = {
+            "fields": firestore_fields
+        }
+
         response = requests.post(url, headers=headers, data=json.dumps(payload))
-        response.raise_for_status()
-        st.success("Screening result saved to Firestore!")
-        st.json(response.json())
+        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+        st.success("✅ Screening result saved to Leaderboard (Firestore)!")
+        # st.json(response.json()) # Optional: show the full response for debugging
     except requests.exceptions.HTTPError as http_err:
-        st.error(f"HTTP error occurred: {http_err} - {response.text}")
+        st.error(f"❌ HTTP error occurred during Firestore save: {http_err} - {response.text}")
+        st.info("Please check your Firestore security rules and API key permissions.")
     except requests.exceptions.ConnectionError as conn_err:
-        st.error(f"Connection error occurred: {conn_err}. Check your internet connection or Firestore project ID/rules.")
+        st.error(f"❌ Connection error occurred during Firestore save: {conn_err}. Check your internet connection or Firestore project ID/rules.")
     except requests.exceptions.Timeout as timeout_err:
-        st.error(f"Timeout error occurred: {timeout_err}. The request took too long.")
+        st.error(f"❌ Timeout error occurred during Firestore save: {timeout_err}. The request took too long.")
     except requests.exceptions.RequestException as req_err:
-        st.error(f"An unexpected error occurred: {req_err}")
+        st.error(f"❌ An unexpected request error occurred during Firestore save: {req_err}")
     except Exception as e:
-        st.error(f"An error occurred while saving to Firestore: {e}")
-        st.error(traceback.format_exc())
+        st.error(f"❌ An general error occurred while saving to Firestore: {e}")
+        st.error(traceback.format_exc()) # Print full traceback for debugging
 
 @st.cache_resource
 def load_models():
     with st.spinner("Loading AI models... This may take a moment."):
         try:
             model = SentenceTransformer("all-MiniLM-L6-v2")
-            ml_model = None
+            ml_model = None # No specific ML model used beyond SentenceTransformer
             return model, ml_model
         except Exception as e:
             st.error(f"❌ Error loading AI models: {e}. Please ensure 'all-MiniLM-L6-v2' model can be loaded.")
@@ -138,12 +165,16 @@ def load_models():
 
 global_sentence_model, global_ml_model = load_models()
 
-EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.\w+')
-PHONE_PATTERN = re.compile(r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b')
-CGPA_PATTERN = re.compile(r'(?:cgpa|gpa|grade point average)\s*[:\s]*(\d+\.\d+)(?:\s*[\/of]{1,4}\s*(\d+\.\d+|\d+))?|(\d+\.\d+)(?:\s*[\/of]{1,4}\s*(\d+\.\d+|\d+))?\s*(?:cgpa|gpa)')
+# Enhanced Regex Patterns for better extraction
+EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}') # More robust TLD
+# More flexible phone number pattern to capture various formats
+PHONE_PATTERN = re.compile(r'(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}|(?:(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b)')
+# CGPA pattern improved to handle "X/Y" and "X out of Y" more explicitly
+CGPA_PATTERN = re.compile(r'(?:cgpa|gpa|grade point average|score)\s*[:\s]*(\d+\.\d+)(?:\s*[\/of]{1,4}\s*(\d+\.\d+|\d+))?|(\d+\.\d+)(?:\s*[\/of]{1,4}\s*(\d+\.\d+|\d+))?\s*(?:cgpa|gpa|score)')
+
 WORK_HISTORY_SECTION_PATTERN = re.compile(r'(?:experience|work history|employment history)\s*(\n|$)', re.IGNORECASE)
 JOB_BLOCK_SPLIT_PATTERN = re.compile(r'\n(?=[A-Z][a-zA-Z\s,&\.]+(?:\s(?:at|@))?\s*[A-Z][a-zA-Z\s,&\.]*\s*(?:-|\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}))', re.IGNORECASE)
-DATE_RANGE_MATCH_PATTERN = re.compile(r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})\s*[-–]\s*(present|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})', re.IGNORECASE)
+DATE_RANGE_MATCH_PATTERN = re.compile(r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4}|present)\s*[-–]\s*(present|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})', re.IGNORECASE)
 TITLE_COMPANY_MATCH_PATTERN = re.compile(r'([A-Z][a-zA-Z\s,\-&.]+)\s+(?:at|@)\s+([A-Z][a-zA-Z\s,\-&.]+)')
 COMPANY_TITLE_MATCH_PATTERN = re.compile(r'^([A-Z][a-zA-Z\s,\-&.]+),\s*([A-Z][a-zA-Z\s,\-&.]+)')
 POTENTIAL_ORG_MATCH_PATTERN = re.compile(r'^[A-Z][a-zA-Z\s,\-&.]+')
@@ -285,7 +316,7 @@ CERTIFICATE_HOSTING_URL = "https://candidate-screeneerpro.streamlit.app/"
 def clean_text(text):
     text = re.sub(r'\n', ' ', text)
     text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text) # Remove non-ASCII characters
     return text.strip().lower()
 
 def extract_relevant_keywords(text, filter_set):
@@ -295,11 +326,14 @@ def extract_relevant_keywords(text, filter_set):
 
     if filter_set:
         filter_set_lower = {s.lower() for s in filter_set}
+        # Sort by length descending to match longer phrases first
         sorted_filter_skills = sorted([s for s in filter_set if ' ' in s], key=len, reverse=True)
         
         temp_text = cleaned_text
 
+        # First, try to match multi-word skill phrases
         for skill_phrase in sorted_filter_skills:
+            # Use word boundaries to prevent partial matches
             pattern = r'\b' + re.escape(skill_phrase.lower()) + r'\b'
             
             if re.search(pattern, temp_text):
@@ -312,8 +346,10 @@ def extract_relevant_keywords(text, filter_set):
                         break
                 if not found_category:
                     categorized_keywords["Uncategorized"].append(skill_phrase)
+                # Replace matched phrase with spaces to avoid re-matching parts of it
                 temp_text = re.sub(pattern, " ", temp_text)
         
+        # Then, match individual words from the remaining text
         individual_words_remaining = set(re.findall(r'\b\w+\b', temp_text))
         for word in individual_words_remaining:
             if word in filter_set_lower:
@@ -327,6 +363,7 @@ def extract_relevant_keywords(text, filter_set):
                 if not found_category:
                     categorized_keywords["Uncategorized"].append(word)
     else:
+        # If no filter set provided, extract all non-stop words
         all_words = set(re.findall(r'\b\w+\b', cleaned_text))
         extracted_keywords = {word for word in all_words if word not in STOP_WORDS}
         for word in extracted_keywords:
@@ -366,78 +403,84 @@ def extract_years_of_experience(resume_text):
         for line in lines:
             if any(keyword in line for keyword in [
                 "education", "b.tech", "btech", "class x", "class xii", "school",
-                "higher secondary", "cgpa", "percentage"
+                "higher secondary", "cgpa", "percentage", "university", "college", "institute"
             ]):
                 inside_education = True
-            elif inside_education and line.strip() == "":
+            elif inside_education and line.strip() == "": # Exit education block on empty line
                 inside_education = False
             if not inside_education:
                 filtered.append(line)
         return "\n".join(filtered)
 
-    def normalize_date_str(date_str):
-        return re.sub(r'[,\.\s]+', ' ', date_str.strip().lower()).title()
+    def parse_date(date_str):
+        # Normalize date string: remove extra spaces, commas, periods, and hyphens, then title case
+        date_str = re.sub(r'[,\.\s–—]+', ' ', date_str.strip()).strip()
 
-    text = remove_education_section(resume_text)
-    text = re.sub(r'[\:\,\–—]+', ' - ', text)
+        # Define common date formats to try for parsing
+        date_formats_to_try = [
+            '%B %Y',    # January 2020
+            '%b %Y',    # Jan 2020
+            '%Y',       # 2020 (for year-only entries)
+            '%m/%Y',    # 01/2020
+            '%d/%m/%Y', # 01/01/2020
+            '%d-%m-%Y', # 01-01-2020
+            '%Y-%m-%d', # 2020-01-01
+            '%B. %Y',   # Jan. 2020
+            '%b. %Y',   # January. 2020
+            '%B %d, %Y', # January 1, 2020
+            '%b %d, %Y', # Jan 1, 2020
+        ]
+        
+        for fmt in date_formats_to_try:
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
+                continue
+        return None
 
+    text_without_education = remove_education_section(resume_text)
+    
     total_months = 0
     now = datetime.now()
 
+    # Patterns to find date ranges like "Month Year - Month Year" or "Year - Year" or "MM/YYYY - MM/YYYY"
+    # Added flexibility for "Present" and various separators
     date_patterns = [
-        r'(\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4})\s*[-to]+\s*(present|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4})',
-        r'(\b\d{4})\s*[-to]+\s*(present|\b\d{4})'
+        r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4}|present)\s*[-–—to]+\s*(present|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}|\d{4})',
+        r'(\d{1,2}[-/]\d{4})\s*[-–—to]+\s*(present|\d{1,2}[-/]\d{4})', # MM/YYYY or DD/YYYY
+        r'(\d{4})\s*[-–—to]+\s*(present|\d{4})' # Year - Year
     ]
 
     for pattern in date_patterns:
-        job_date_ranges = re.findall(pattern, text)
+        job_date_ranges = re.findall(pattern, text_without_education, re.IGNORECASE)
         for start_str, end_str in job_date_ranges:
-            start_str = normalize_date_str(start_str)
-            end_str = normalize_date_str(end_str)
-
-            try:
-                start_date = datetime.strptime(start_str, '%B %Y')
-            except:
-                try:
-                    start_date = datetime.strptime(start_str, '%b %Y')
-                except:
-                    try:
-                        start_date = datetime(int(start_str.strip()), 1, 1)
-                    except:
-                        continue
-
-            if not start_date or start_date > now:
+            start_date = parse_date(start_str)
+            
+            if not start_date or start_date > now: # Skip if start date is invalid or in the future
                 continue
 
+            end_date = None
             if 'present' in end_str.lower():
                 end_date = now
             else:
-                try:
-                    end_date = datetime.strptime(end_str, '%B %Y')
-                except:
-                    try:
-                        end_date = datetime.strptime(end_str, '%b %Y')
-                    except:
-                        try:
-                            end_date = datetime(int(end_str.strip()), 12, 31)
-                        except:
-                            continue
-
-                if end_date > now:
+                end_date = parse_date(end_str)
+                
+                if end_date and end_date > now: # Cap end date at present if it's in the future
                     end_date = now
 
-            if not end_date:
+            if not end_date: # Skip if end date could not be parsed
                 continue
 
             delta_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
-            total_months += max(delta_months, 0)
+            total_months += max(delta_months, 0) # Ensure non-negative months
 
     if total_months > 0:
         return round(total_months / 12, 1)
 
-    match = re.search(r'(\d+(?:\.\d+)?)\s*(\+)?\s*(year|yrs|years)\b', text)
+    # Fallback: Look for explicit "years of experience" phrases
+    match = re.search(r'(\d+(?:\.\d+)?)\s*(\+)?\s*(?:year|yrs|years)\b', resume_text, re.IGNORECASE)
     if not match:
-        match = re.search(r'experience[^\d]{0,10}(\d+(?:\.\d+)?)', text)
+        match = re.search(r'experience[^\d]{0,10}(\d+(?:\.\d+)?)', resume_text, re.IGNORECASE)
     if match:
         return float(match.group(1))
 
@@ -448,16 +491,23 @@ def extract_email(text):
     return match.group(0) if match else None
 
 def extract_phone_number(text):
-    match = PHONE_PATTERN.search(text)
+    # Normalize text for better phone number extraction (e.g., remove spaces around hyphens)
+    normalized_text = re.sub(r'\s*-\s*', '-', text)
+    match = PHONE_PATTERN.search(normalized_text)
     return match.group(0) if match else None
 
 def extract_location(text):
     found_locations = set()
     text_lower = text.lower()
 
+    # Expand location keywords to include states/regions and common country indicators if needed
+    # For now, sticking to cities as per MASTER_CITIES, but making search more robust
+    
+    # Sort by length descending to match longer city names first (e.g., "New York" before "New")
     sorted_cities = sorted(list(MASTER_CITIES), key=len, reverse=True)
 
     for city in sorted_cities:
+        # Use word boundaries (\b) to ensure full word match
         pattern = r'\b' + re.escape(city.lower()) + r'\b'
         if re.search(pattern, text_lower):
             found_locations.add(city)
@@ -483,24 +533,30 @@ def extract_name(text):
 
     potential_names = []
 
+    # Check top few lines for name
     for line in lines[:10]:
         original_line = line.strip()
         if not original_line:
             continue
 
         cleaned_line = PREFIX_CLEANER.sub('', original_line).strip()
+        # Remove non-alphabetic characters except spaces
         cleaned_line = re.sub(r'[^A-Za-z\s]', '', cleaned_line)
 
+        # Skip lines that clearly contain excluded terms
         if any(term in cleaned_line.lower() for term in EXCLUDE_TERMS):
             continue
 
         words = cleaned_line.split()
 
+        # A name usually has 2-4 words and consists only of alphabets
         if 1 < len(words) <= 4 and all(w.isalpha() for w in words):
+            # Check for title case or all caps (common for names)
             if all(w.istitle() or w.isupper() for w in words):
                 potential_names.append(cleaned_line)
 
     if potential_names:
+        # Return the longest potential name, assuming it's most complete
         return max(potential_names, key=len).title()
 
     return None
@@ -511,6 +567,8 @@ def extract_cgpa(text):
     matches = CGPA_PATTERN.findall(text)
 
     for match in matches:
+        # match[0] and match[1] are for the first group (e.g., "X.Y/Z")
+        # match[2] and match[3] are for the second group (e.g., "X.Y cgpa")
         if match[0] and match[0].strip():
             raw_cgpa = float(match[0])
             scale = float(match[1]) if match[1] else None
@@ -520,12 +578,12 @@ def extract_cgpa(text):
         else:
             continue
 
-        if scale and scale not in [0, 1]:
+        if scale and scale not in [0, 1]: # Avoid division by zero or 1
             normalized_cgpa = (raw_cgpa / scale) * 4.0
             return round(normalized_cgpa, 2)
-        elif raw_cgpa <= 4.0:
+        elif raw_cgpa <= 4.0: # Already on a 4.0 scale or similar
             return round(raw_cgpa, 2)
-        elif raw_cgpa <= 10.0:
+        elif raw_cgpa <= 10.0: # Assume 10.0 scale if value is between 4 and 10
             return round((raw_cgpa / 10.0) * 4.0, 2)
         
     return None
@@ -761,15 +819,17 @@ def extract_languages(text):
 
         language_chunk = cleaned_full_text[start_index:end_index]
     else:
-        language_chunk = cleaned_full_text
+        language_chunk = cleaned_full_text # Search whole text if no specific section found
 
     for lang in sorted_all_languages:
+        # Use word boundaries and optional parenthetical qualifiers (e.g., "English (Fluent)")
         pattern = r'\b' + re.escape(lang) + r'(?:\s*\(?[a-z\s,-]+\)?)?\b'
         if re.search(pattern, language_chunk, re.IGNORECASE):
+            # Special handling for "de" to be "German"
             if lang == "de":
                 languages_list.add("German")
             else:
-                languages_list.add(lang.title())
+                languages_list.add(lang.title()) # Capitalize for display
 
     return ", ".join(sorted(languages_list)) if languages_list else "Not Found"
 
@@ -1037,8 +1097,9 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         llm_feedback_text = candidate_ai_feedback
 
         certificate_id = str(uuid.uuid4())
-        certificate_rank = "Not Applicable"
+        certificate_rank = "Not Applicable" # Default value
 
+        # Logic to determine certificate rank based on score
         if score >= 90:
             certificate_rank = "🏅 Elite Match"
         elif score >= 80:
@@ -1050,7 +1111,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         elif score >= 50:
             certificate_rank = "🟡 Basic Fit"
         
-        tag = "❌ Limited Match"
+        tag = "❌ Limited Match" # Default tag
         if score >= 90 and semantic_similarity >= 0.85:
             tag = "👑 Exceptional Match"
         elif score >= 80 and semantic_similarity >= 0.7:
@@ -1084,8 +1145,8 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             "Resume Raw Text": text,
             "JD Used": jd_name_for_results,
             "Date Screened": datetime.now().date(),
-            "Certificate ID": str(uuid.uuid4()),
-            "Certificate Rank": certificate_rank,
+            "Certificate ID": certificate_id, # Ensure actual ID is passed
+            "Certificate Rank": certificate_rank, # Ensure actual rank is passed
             "Tag": tag,
             "LLM Feedback": llm_feedback_text
         }
@@ -1220,7 +1281,7 @@ def generate_certificate_html(results):
     score = results.get('Skill Match', 0)
     date_screened = results.get('Date Screened', datetime.now().date()).strftime("%B %d, %Y")
     certificate_id = results.get('Certificate ID', 'N/A')
-    rank = results.get('Certificate Rank', 'Not Applicable')
+    rank = results.get('Certificate Rank', 'Not Applicable') # This will now reflect the actual rank from results
 
     html_template = """
     <!DOCTYPE html>
