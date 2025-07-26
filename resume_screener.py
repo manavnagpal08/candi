@@ -1907,6 +1907,8 @@ def resume_screener_page():
             st.markdown(f"**Rank Achieved:** {results['Certificate Rank']}")
 
             certificate_html_content = generate_certificate_html(results)
+            # Display the generated HTML certificate directly
+            st.components.v1.html(certificate_html_content, height=700, scrolling=True)
 
             download_col, email_col_manual = st.columns(2) # Renamed email_col to email_col_manual to avoid conflict with manual email expander
             with download_col:
