@@ -210,7 +210,7 @@ MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for sk
 # Define SKILL_LIST for the new functions
 SKILL_LIST = MASTER_SKILLS
 
-# --- Removed: Company Skill Profiles (as per user request) ---
+# --- Removed: Company Skill Pr
 SKILL_CATEGORIES = {
     "Programming Languages": ["Python", "Java", "JavaScript", "C++", "C#", "Go", "Ruby", "PHP", "Swift", "Kotlin", "TypeScript", "R", "Bash Scripting", "Shell Scripting"],
     "Web Technologies": ["HTML5", "CSS3", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", "Spring Boot", "Express.js", "WebSockets"],
