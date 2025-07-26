@@ -414,7 +414,7 @@ def extract_info(text):
     info["Languages"] = list(set(found_languages)) # Remove duplicates
 
     # Education (simple extraction, looks for degree and university names)
-    education_matches = re.findall(r'(Bachelor\'s|Master\'s|Ph\.D\.|B\.S\.|M\.S\.|B.Tech|M.Tech|BCA|MCA|MBA|BBA|B.E\.|M.E\.)\s+in\s+([\w\s.&,-]+?)\s+from\s+([\w\s.,-]+?)(?:\s+-\s+(\d{4}))?', text, re.IGNORECASE)
+    education_matches = re.findall(r'(Bachelor\'s|Master\'s|Ph\.D\.|B\.S\.|M.S\.|B.Tech|M.Tech|BCA|MCA|MBA|BBA|B.E\.|M.E\.)\s+in\s+([\w\s.&,-]+?)\s+from\s+([\w\s.,-]+?)(?:\s+-\s+(\d{4}))?', text, re.IGNORECASE)
     for match in education_matches:
         degree, field, university, year = match
         info["Education"].append({"degree": degree.strip(), "field": field.strip(), "university": university.strip(), "year": year if year else "N/A"})
@@ -777,7 +777,7 @@ def generate_certificate(candidate_name, final_score, ai_tag, email, phone, expe
                     <div class="detail-item">
                         <strong>Matched Skills:</strong>
                         <div class="skills-list">
-                            {''.join([f'<span>{skill}</span>' for skill in matched_skills]) if matched_skills else '<span>No key skills matched</span>'}
+                            {''.join([f"<span>{skill}</span>" for skill in matched_skills]) if matched_skills else '<span>No key skills matched</span>'}
                         </div>
                     </div>
                 </div>
@@ -1063,14 +1063,16 @@ if jd_text and uploaded_resume_file:
         st.subheader("🎯 Skill Alignment")
         st.markdown("**Matched Skills:**")
         if matched_skills:
-            st.markdown(f"<div style='display: flex; flex-wrap: wrap; gap: 8px;'>{''.join([f'<span style=\'background-color:#d4edda; color:#155724; padding: 5px 10px; border-radius: 5px;\'>{s}</span>' for s in matched_skills])}</div>", unsafe_allow_html=True)
+            # Corrected f-string syntax here
+            st.markdown(f"<div style='display: flex; flex-wrap: wrap; gap: 8px;'>{''.join([f\"<span style='background-color:#d4edda; color:#155724; padding: 5px 10px; border-radius: 5px;'>{s}</span>\" for s in matched_skills])}</div>", unsafe_allow_html=True)
         else:
             st.info("No direct skill matches found with the JD.")
 
         st.markdown("---")
         st.markdown("**Missing Skills (from JD):**")
         if missing_skills:
-            st.markdown(f"<div style='display: flex; flex-wrap: wrap; gap: 8px;'>{''.join([f'<span style=\'background-color:#f8d7da; color:#721c24; padding: 5px 10px; border-radius: 5px;\'>{s}</span>' for s in missing_skills])}</div>", unsafe_allow_html=True)
+            # Corrected f-string syntax here
+            st.markdown(f"<div style='display: flex; flex-wrap: wrap; gap: 8px;'>{''.join([f\"<span style='background-color:#f8d7da; color:#721c24; padding: 5px 10px; border-radius: 5px;'>{s}</span>\" for s in missing_skills])}</div>", unsafe_allow_html=True)
         else:
             st.success("You have all the key skills mentioned in the JD!")
 
