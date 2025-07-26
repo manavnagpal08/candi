@@ -3806,3 +3806,38 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
     resume_screener_page()
+# ---------------------------- Skill Extraction & Match ----------------------------
+def extract_skills(text):
+    skills = set()
+    for skill in SKILL_LIST:
+        if skill.lower() in text.lower():
+            skills.add(skill.lower())
+    return skills
+
+def calculate_match_score(resume_text, job_desc_text):
+    resume_skills = extract_skills(resume_text)
+    jd_skills = extract_skills(job_desc_text)
+    if not jd_skills:
+        return 0, [], []
+    matched = resume_skills & jd_skills
+    unmatched = jd_skills - resume_skills
+    score = round((len(matched) / len(jd_skills)) * 100, 2)
+    return score, list(matched), list(unmatched)
+
+def smart_feedback(resume_text, job_desc_text):
+    embedding_resume = model.encode(resume_text, convert_to_tensor=True)
+    embedding_jd = model.encode(job_desc_text, convert_to_tensor=True)
+    semantic_score = round(util.cos_sim(embedding_resume, embedding_jd)[0][0].item() * 100, 2)
+
+    if semantic_score > 85:
+        feedback = "✅ Excellent match. Your resume closely aligns with the job description."
+    elif semantic_score > 70:
+        feedback = "🟡 Good match. Consider adding more role-specific keywords or tools."
+    elif semantic_score > 50:
+        feedback = "🔶 Partial match. Resume can be improved to reflect job requirements better."
+    else:
+        feedback = "🔴 Low match. Your resume and the job description don't align well."
+
+    return semantic_score, feedback
+
+
