@@ -238,7 +238,7 @@ def register_section():
     st.subheader("📝 Create New Account")
     with st.form("registration_form", clear_on_submit=True):
         new_username = st.text_input("Choose Username (Email address required)", key="new_username_reg_public")
-        new_company_name = st.text_input("Company Name", key="new_company_name_reg_public")
+        new_company_name = st.text_input("Company or Institution Name", key="new_company_name_reg_public")
         new_password = st.text_input("Choose Password", type="password", key="new_password_reg_public")
         confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password_reg_public")
         register_button = st.form_submit_button("Register New Account")
