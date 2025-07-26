@@ -9,7 +9,7 @@ from datetime import datetime, date
 import matplotlib.pyplot as plt
 import seaborn as sns
 from wordcloud import WordCloud
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
 import nltk
 import collections
 from sklearn.metrics.pairwise import cosine_similarity
@@ -170,6 +170,50 @@ CUSTOM_STOP_WORDS = set([
 ])
 STOP_WORDS = NLTK_STOP_WORDS.union(CUSTOM_STOP_WORDS)
 
+SKILL_CATEGORIES = {
+    "Programming Languages": ["Python", "Java", "JavaScript", "C++", "C#", "Go", "Ruby", "PHP", "Swift", "Kotlin", "TypeScript", "R", "Bash Scripting", "Shell Scripting"],
+    "Web Technologies": ["HTML5", "CSS3", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", "Spring Boot", "Express.js", "WebSockets"],
+    "Databases": ["SQL", "NoSQL", "PostgreSQL", "MySQL", "MongoDB", "Cassandra", "Elasticsearch", "Neo4j", "Redis", "BigQuery", "Snowflake", "Redshift", "Aurora", "DynamoDB", "DocumentDB", "CosmosDB"],
+    "Cloud Platforms": ["AWS", "Azure", "Google Cloud Platform", "GCP", "Serverless", "AWS Lambda", "Azure Functions", "Google Cloud Functions"],
+    "DevOps & MLOps": ["Git", "GitHub", "GitLab", "Bitbucket", "CI/CD", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "CircleCI", "GitHub Actions", "Azure DevOps", "MLOps"],
+    "Data Science & ML": ["Machine Learning", "Deep Learning", "Natural Language Processing", "Computer Vision", "Reinforcement Learning", "Scikit-learn", "TensorFlow", "PyTorch", "Keras", "XGBoost", "LightGBM", "Data Cleaning", "Feature Engineering",
+    "Model Evaluation", "Statistical Modeling", "Time Series Analysis", "Predictive Modeling", "Clustering",
+    "Classification", "Regression", "Neural Networks", "Convolutional Networks", "Recurrent Networks",
+    "Transformers", "LLMs", "Prompt Engineering", "Generative AI", "MLOps", "Data Munging", "A/B Testing",
+    "Experiment Design", "Hypothesis Testing", "Bayesian Statistics", "Causal Inference", "Graph Neural Networks"],
+    "Data Analytics & BI": ["Data Cleaning", "Feature Engineering", "Model Evaluation", "Statistical Analysis", "Time Series Analysis", "Data Munging", "A/B Testing", "Experiment Design", "Hypothesis Testing", "Bayesian Statistics", "Causal Inference", "Excel (Advanced)", "Tableau", "Power BI", "Looker", "Qlik Sense", "Google Data Studio", "Dax", "M Query", "ETL", "ELT", "Data Warehousing", "Data Lake", "Data Modeling", "Business Intelligence", "Data Visualization", "Dashboarding", "Report Generation", "Google Analytics"],
+    "Soft Skills": ["Stakeholder Management", "Risk Management", "Change Management", "Communication Skills", "Public Speaking", "Presentation Skills", "Cross-functional Collaboration",
+    "Problem Solving", "Critical Thinking", "Analytical Skills", "Adaptability", "Time Management",
+    "Organizational Skills", "Attention to Detail", "Leadership", "Mentorship", "Team Leadership",
+    "Decision Making", "Negotiation", "Client Management", "Stakeholder Communication", "Active Listening",
+    "Creativity", "Innovation", "Research", "Data Analysis", "Report Writing", "Documentation"],
+    "Project Management": ["Agile Methodologies", "Scrum", "Kanban", "Jira", "Trello", "Product Lifecycle", "Sprint Planning", "Project Charter", "Gantt Charts", "MVP", "Backlog Grooming",
+    "Program Management", "Portfolio Management", "PMP", "CSM"],
+    "Security": ["Cybersecurity", "Information Security", "Risk Assessment", "Compliance", "GDPR", "HIPAA", "ISO 27001", "Penetration Testing", "Vulnerability Management", "Incident Response", "Security Audits", "Forensics", "Threat Intelligence", "SIEM", "Firewall Management", "Endpoint Security", "IAM", "Cryptography", "Network Security", "Application Security", "Cloud Security"],
+    "Other Tools & Frameworks": ["Jira", "Confluence", "Swagger", "OpenAPI", "Zendesk", "ServiceNow", "Intercom", "Live Chat", "Ticketing Systems", "HubSpot", "Salesforce Marketing Cloud",
+    "QuickBooks", "SAP FICO", "Oracle Financials", "Workday", "Microsoft Dynamics", "NetSuite", "Adobe Creative Suite", "Canva", "Mailchimp", "Hootsuite", "Buffer", "SEMrush", "Ahrefs", "Moz", "Screaming Frog",
+    "JMeter", "Postman", "SoapUI", "SVN", "Perforce", "Asana", "Monday.com", "Miro", "Lucidchart", "Visio", "MS Project", "Primavera", "AutoCAD", "SolidWorks", "MATLAB", "LabVIEW", "Simulink", "ANSYS",
+    "CATIA", "NX", "Revit", "ArcGIS", "QGIS", "OpenCV", "NLTK", "SpaCy", "Gensim", "Hugging Face Transformers",
+    "Docker Compose", "Helm", "Ansible Tower", "SaltStack", "Chef InSpec", "Terraform Cloud", "Vault",
+    "Consul", "Nomad", "Prometheus", "Grafana", "Alertmanager", "Loki", "Tempo", "Jaeger", "Zipkin",
+    "Fluentd", "Logstash", "Kibana", "Grafana Loki", "Datadog", "New Relic", "AppDynamics", "Dynatrace",
+    "Nagios", "Zabbix", "Icinga", "PRTG", "SolarWinds", "Wireshark", "Nmap", "Metasploit", "Burp Suite",
+    "OWASP ZAP", "Nessus", "Qualys", "Rapid7", "Tenable", "CrowdStrike", "SentinelOne", "Palo Alto Networks",
+    "Fortinet", "Cisco Umbrella", "Okta", "Auth0", "Keycloak", "Ping Identity", "Active Directory",
+    "LDAP", "OAuth", "JWT", "OpenID Connect", "SAML", "MFA", "SSO", "PKI", "TLS/SSL", "VPN", "IDS/IPS",
+    "DLP", "CASB", "SOAR", "XDR", "EDR", "MDR", "GRC", "ITIL", "Lean Six Sigma", "CFA", "CPA", "SHRM-CP",
+    "PHR", "CEH", "OSCP", "CCNA", "CISSP", "CISM", "CompTIA Security+"]
+}
+
+MASTER_SKILLS = set([skill for category_list in SKILL_CATEGORIES.values() for skill in category_list])
+
+# Define SKILL_LIST for the new functions
+SKILL_LIST = MASTER_SKILLS
+
+# --- NEW: Company Skill Profiles (Expanded for Demonstration) ---
+# This dictionary maps company names to a list of keywords/phrases
+# that represent their typical tech stack, industry focus, or values.
+# In a real-world scenario, this would be a much larger, dynamically updated database.
 SKILL_CATEGORIES = {
     "Programming Languages": ["Python", "Java", "JavaScript", "C++", "C#", "Go", "Ruby", "PHP", "Swift", "Kotlin", "TypeScript", "R", "Bash Scripting", "Shell Scripting"],
     "Web Technologies": ["HTML5", "CSS3", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", "Spring Boot", "Express.js", "WebSockets"],
@@ -1593,6 +1637,7 @@ COMPANY_SKILL_PROFILES = {
         "keywords": ["E-commerce (Perishables)", "Supply Chain (Fresh Food)", "Logistics", "Cold Chain Management", "Mobile App Development", "Data Analytics (Supply/Demand)", "Quality Control"]
     }
 }
+
 # Convert all company keywords to lowercase for consistent matching
 for company_data in COMPANY_SKILL_PROFILES.values():
     company_data["keywords"] = [kw.lower() for kw in company_data["keywords"]]
@@ -1723,10 +1768,12 @@ def load_ml_model():
     with st.spinner("Loading AI models... This may take a moment."): # Added spinner here
         try:
             model = SentenceTransformer("all-MiniLM-L6-v2")
-            ml_model = joblib.load("ml_screening_model.pkl")
-            return model, ml_model
+            # The ml_screening_model.pkl is no longer directly used in the new scoring logic,
+            # but we keep it loaded in case it's needed for future extensions or other parts.
+            # ml_model = joblib.load("ml_screening_model.pkl")
+            return model, None # Return None for ml_model as it's not used in the new flow
         except Exception as e:
-            st.error(f"❌ Error loading ML models: {e}. Please ensure 'ml_screening_model.pkl' is in the same directory.")
+            st.error(f"❌ Error loading AI models: {e}. Please ensure 'all-MiniLM-L6-v2' model can be loaded.")
             return None, None
 
 # Load models globally (once per app run)
@@ -2550,63 +2597,7 @@ def generate_company_fit_assessment(candidate_name, company_name, resume_embeddi
     return "\n".join(assessment)
 
 
-def semantic_score_calculation(jd_embedding, resume_embedding, years_exp, cgpa, weighted_keyword_overlap_score, _ml_model):
-    score = 0.0
-    semantic_similarity = cosine_similarity(jd_embedding.reshape(1, -1), resume_embedding.reshape(1, -1))[0][0]
-    semantic_similarity = float(np.clip(semantic_similarity, 0, 1))
-
-    if _ml_model is None:
-        print("DEBUG: ML model not loaded in semantic_score_calculation. Providing basic score and generic feedback.")
-        basic_score = (weighted_keyword_overlap_score * 0.7)
-        basic_score += min(years_exp * 5, 30)
-        
-        if cgpa is not None:
-            if cgpa >= 3.5:
-                basic_score += 5
-            elif cgpa < 2.5:
-                basic_score -= 5
-        
-        score = round(min(basic_score, 100), 2)
-        
-        return score, round(semantic_similarity, 2)
-
-    try:
-        years_exp_for_model = float(years_exp) if years_exp is not None else 0.0
-        # Corrected variable name here: years_exp_for_overlap_score -> years_exp_for_model
-        features = np.concatenate([jd_embedding, resume_embedding, [years_exp_for_model], [weighted_keyword_overlap_score]])
-        predicted_score = _ml_model.predict([features])[0]
-
-        blended_score = (predicted_score * 0.6) + \
-                        (weighted_keyword_overlap_score * 0.1) + \
-                        (semantic_similarity * 100 * 0.3)
-
-        if semantic_similarity > 0.7 and years_exp >= 3:
-            blended_score += 5
-        
-        if cgpa is not None:
-            if cgpa >= 3.5:
-                blended_score += 3
-            elif cgpa >= 3.0:
-                blended_score += 1
-            elif cgpa < 2.5:
-                blended_score -= 2
-
-        score = float(np.clip(blended_score, 0, 100))
-        
-        return round(score, 2), round(semantic_similarity, 2)
-
-    except Exception as e:
-        print(f"ERROR: Error during semantic score calculation: {e}")
-        traceback.print_exc()
-        basic_score = (weighted_keyword_overlap_score * 0.7)
-        basic_score += min(years_exp * 5, 30)
-        
-        if cgpa is not None:
-            basic_score += 5 if cgpa >= 3.5 else (-5 if cgpa < 2.5 else 0)
-
-        score = round(min(basic_score, 100), 2)
-
-        return score, 0.0
+# Removed semantic_score_calculation as it's replaced by new functions
 
 def create_mailto_link(recipient_email, candidate_name, job_title="Job Opportunity", sender_name="Recruiting Team"):
     subject = urllib.parse.quote(f"Invitation for Interview - {job_title} - {candidate_name}")
@@ -2716,17 +2707,16 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             return {
                 "File Name": file_name,
                 "Candidate Name": file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title(),
-                "Score (%)": 0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
+                "Skill Match": 0, "Semantic Match": 0.0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
                 "Email": "Not Found", "Phone Number": "Not Found", "Location": "Not Found",
                 "Languages": "Not Found", "Education Details": "Not Found",
                 "Work History": "Not Found", "Project Details": "Not Found",
                 "AI Suggestion": f"Error: {text.replace('[ERROR] ', '')}",
                 "Detailed HR Assessment": f"Error processing resume: {text.replace('[ERROR] ', '')}",
                 "Company Fit Assessment": "Error: Resume text extraction failed.", # New field
-                "Matched Keywords": "", "Missing Skills": "",
+                "Matched Skills": [], "Missing Skills": [],
                 "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
                 "Missing Skills (Categorized)": "{}", # Store as empty JSON string
-                "Semantic Similarity": 0.0, "Resume Raw Text": "",
                 "JD Used": jd_name_for_results, "Date Screened": datetime.now().date(),
                 "Certificate ID": str(uuid.uuid4()), "Certificate Rank": "Not Applicable",
                 "Tag": "❌ Text Extraction Error"
@@ -2749,65 +2739,35 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         candidate_name = extract_name(text) or file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title()
         cgpa = extract_cgpa(text)
 
-        resume_raw_skills_set, resume_categorized_skills = extract_relevant_keywords(text, MASTER_SKILLS)
-        jd_raw_skills_set, jd_categorized_skills = extract_relevant_keywords(jd_text, MASTER_SKILLS)
+        # --- NEW SCORING LOGIC INTEGRATION ---
+        match_score, matched_skills_list, missing_skills_list = calculate_match_score(text, jd_text)
+        semantic_score_from_feedback, llm_feedback_text = smart_feedback(text, jd_text)
 
-        # Defensive checks for sets
-        if not isinstance(resume_raw_skills_set, set):
-            print(f"DEBUG: resume_raw_skills_set is not a set. Type: {type(resume_raw_skills_set)}. Defaulting to empty set.")
-            resume_raw_skills_set = set()
-        if not isinstance(jd_raw_skills_set, set):
-            print(f"DEBUG: jd_raw_skills_set is not a set. Type: {type(jd_raw_skills_set)}. Defaulting to empty set.")
-            jd_raw_skills_set = set()
-
-        matched_keywords = list(resume_raw_skills_set.intersection(jd_raw_skills_set))
-        
-        # Corrected: Missing skills should be JD skills NOT found in resume
-        missing_skills = list(jd_raw_skills_set.difference(resume_raw_skills_set))
-
-
-        # Calculate weighted keyword overlap score
-        weighted_keyword_overlap_score = 0
-        total_jd_skill_weight = 0
-        WEIGHT_HIGH = 3
-        WEIGHT_MEDIUM = 2
-        WEIGHT_BASE = 1
-
-        for jd_skill in jd_raw_skills_set:
-            current_weight = WEIGHT_BASE
-            if jd_skill in [s.lower() for s in high_priority_skills]:
-                current_weight = WEIGHT_HIGH
-            elif jd_skill in [s.lower() for s in medium_priority_skills]:
-                current_weight = WEIGHT_MEDIUM
-            
-            total_jd_skill_weight += current_weight
-            
-            if jd_skill in resume_raw_skills_set:
-                weighted_keyword_overlap_score += current_weight
-
-        # Call the semantic score calculation with pre-computed embeddings
-        score, semantic_similarity = semantic_score_calculation(
-            jd_embedding, resume_embedding, exp, cgpa, weighted_keyword_overlap_score, _global_ml_model
-        )
+        # Assign to variables used by downstream functions
+        score = match_score # Primary score for overall assessment and certificate
+        semantic_similarity = semantic_score_from_feedback # Semantic similarity
+        matched_keywords = matched_skills_list # List of matched skills
+        missing_skills = missing_skills_list # List of missing skills
+        # --- END NEW SCORING LOGIC INTEGRATION ---
         
         concise_ai_suggestion = generate_concise_ai_suggestion(
             candidate_name=candidate_name,
-            score=score,
+            score=score, # Uses match_score
             years_exp=exp,
-            semantic_similarity=semantic_similarity,
+            semantic_similarity=semantic_similarity, # Uses semantic_score_from_feedback
             cgpa=cgpa
         )
 
         detailed_hr_assessment = generate_detailed_hr_assessment(
             candidate_name=candidate_name,
-            score=score,
+            score=score, # Uses match_score
             years_exp=exp,
-            semantic_similarity=semantic_similarity,
+            semantic_similarity=semantic_similarity, # Uses semantic_score_from_feedback
             cgpa=cgpa,
             jd_text=jd_text,
             resume_text=text,
-            matched_keywords=matched_keywords,
-            missing_skills=missing_skills,
+            matched_keywords=matched_keywords, # Uses new matched_skills_list
+            missing_skills=missing_skills, # Uses new missing_skills_list
             max_exp_cutoff=max_experience
         )
 
@@ -2835,7 +2795,7 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
                     company_name=normalized_company_name,
                     resume_embedding=resume_embedding,
                     company_profile_embedding=company_embedding,
-                    resume_skills_set=resume_raw_skills_set,
+                    resume_skills_set=extract_skills(text), # Use new extract_skills for company fit
                     company_keywords=company_profile["keywords"]
                 )
             else:
@@ -2871,7 +2831,8 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         return {
             "File Name": file_name,
             "Candidate Name": candidate_name,
-            "Score (%)": score,
+            "Skill Match": score, # Updated field name
+            "Semantic Match": semantic_similarity, # Updated field name
             "Years Experience": exp,
             "CGPA (4.0 Scale)": cgpa,
             "Email": email or "Not Found",
@@ -2884,17 +2845,17 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
             "AI Suggestion": concise_ai_suggestion,
             "Detailed HR Assessment": detailed_hr_assessment,
             "Company Fit Assessment": company_fit_assessment_text, # New field added here
-            "Matched Keywords": ", ".join(matched_keywords),
-            "Missing Skills": ", ".join(missing_skills),
-            "Matched Keywords (Categorized)": json.dumps(dict(resume_categorized_skills)), # Convert to JSON string
-            "Missing Skills (Categorized)": json.dumps(dict(jd_categorized_skills)),     # Convert to JSON string
-            "Semantic Similarity": semantic_similarity,
+            "Matched Skills": matched_keywords, # Updated field name
+            "Missing Skills": missing_skills, # Updated field name
+            "Matched Keywords (Categorized)": json.dumps(dict(extract_relevant_keywords(text, MASTER_SKILLS)[1])), # Re-extract for categorization
+            "Missing Skills (Categorized)": json.dumps(dict(extract_relevant_keywords(jd_text, MASTER_SKILLS)[1])), # Re-extract for categorization
             "Resume Raw Text": text,
             "JD Used": jd_name_for_results,
             "Date Screened": datetime.now().date(),
             "Certificate ID": str(uuid.uuid4()),
             "Certificate Rank": certificate_rank,
-            "Tag": tag
+            "Tag": tag,
+            "LLM Feedback": llm_feedback_text # New field
         }
     except Exception as e:
         print(f"CRITICAL ERROR: Unhandled exception processing {file_name}: {e}")
@@ -2902,20 +2863,21 @@ def _process_single_resume_for_screener_page(file_name, text, jd_text, jd_embedd
         return {
             "File Name": file_name,
             "Candidate Name": file_name.replace('.pdf', '').replace('.jpg', '').replace('.jpeg', '').replace('.png', '').replace('_', ' ').title(),
-            "Score (%)": 0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
+            "Skill Match": 0, "Semantic Match": 0.0, "Years Experience": 0, "CGPA (4.0 Scale)": None,
             "Email": "Not Found", "Phone Number": "Not Found", "Location": "Not Found",
             "Languages": "Not Found", "Education Details": "Not Found",
             "Work History": "Not Found", "Project Details": "Not Found",
             "AI Suggestion": f"Critical Error: {e}",
             "Detailed HR Assessment": f"Critical Error processing resume: {e}",
             "Company Fit Assessment": f"Critical Error: {e}", # New field
-            "Matched Keywords": "", "Missing Skills": "",
+            "Matched Skills": [], "Missing Skills": [],
             "Matched Keywords (Categorized)": "{}", # Store as empty JSON string
             "Missing Skills (Categorized)": "{}", # Store as empty JSON string
-            "Semantic Similarity": 0.0, "Resume Raw Text": "",
+            "Resume Raw Text": "",
             "JD Used": jd_name_for_results, "Date Screened": datetime.now().date(),
             "Certificate ID": str(uuid.uuid4()), "Certificate Rank": "Not Applicable",
-            "Tag": "❌ Critical Processing Error"
+            "Tag": "❌ Critical Processing Error",
+            "LLM Feedback": f"Critical Error: {e}" # New field
         }
 # --- NEW: Centralized Course Database ---
 course_database = {
@@ -3424,7 +3386,7 @@ def generate_certificate_html(candidate_data):
 
     <div class="subtext">has successfully completed the AI-powered resume screening process</div>
 
-    <div class="score-rank">Score: {{SCORE}}% | Rank: {{CERTIFICATE_RANK}}</div>
+    <div class="score-rank">Skill Match: {{SKILL_MATCH}}% | Semantic Match: {{SEMANTIC_MATCH}}% | Rank: {{CERTIFICATE_RANK}}</div>
 
     <div class="description">
       This certificate acknowledges the candidate’s exceptional qualifications, industry-aligned skills, and readiness to contribute effectively in challenging roles. Evaluated and validated by ScreenerPro’s advanced screening engine.
@@ -3449,13 +3411,15 @@ def generate_certificate_html(candidate_data):
     """
 
     candidate_name = candidate_data.get('Candidate Name', 'Candidate Name')
-    score = candidate_data.get('Score (%)', 0.0)
+    skill_match = candidate_data.get('Skill Match', 0.0)
+    semantic_match = candidate_data.get('Semantic Match', 0.0)
     certificate_rank = candidate_data.get('Certificate Rank', 'Not Applicable')
     date_screened = candidate_data.get('Date Screened', datetime.now().date()).strftime("%B %d, %Y")
     certificate_id = candidate_data.get('Certificate ID', 'N/A')
     
     html_content = html_template.replace("{{CANDIDATE_NAME}}", candidate_name)
-    html_content = html_content.replace("{{SCORE}}", f"{score:.1f}")
+    html_content = html_content.replace("{{SKILL_MATCH}}", f"{skill_match:.1f}")
+    html_content = html_content.replace("{{SEMANTIC_MATCH}}", f"{semantic_match:.1f}")
     html_content = html_content.replace("{{CERTIFICATE_RANK}}", certificate_rank)
     html_content = html_content.replace("{{DATE_SCREENED}}", date_screened)
     html_content = html_content.replace("{{CERTIFICATE_ID}}", certificate_id)
@@ -3632,12 +3596,17 @@ def resume_screener_page():
             candidate_data = result
             
             cgpa_display = f"{candidate_data['CGPA (4.0 Scale)']:.2f}" if pd.notna(candidate_data['CGPA (4.0 Scale)']) else "N/A"
-            semantic_sim_display = f"{candidate_data['Semantic Similarity']:.2f}" if pd.notna(candidate_data['Semantic Similarity']) else "N/A"
-
-            st.markdown(f"### **{candidate_data['Candidate Name']}**")
-            st.markdown(f"**Score:** {candidate_data['Score (%)']:.2f}% | **Experience:** {candidate_data['Years Experience']:.1f} years | **CGPA:** {cgpa_display} (4.0 Scale) | **Semantic Similarity:** {semantic_sim_display}")
             
-            if candidate_data.get('Certificate Rank') != "Not Applicable" and candidate_data['Score (%)'] >= 50:
+            st.markdown(f"### **{candidate_data['Candidate Name']}**")
+            st.metric("Skill Match", f"{candidate_data['Skill Match']:.2f}%")
+            st.metric("Semantic Match", f"{candidate_data['Semantic Match']:.2f}%")
+            st.markdown(f"**Years Experience:** {candidate_data['Years Experience']:.1f} | **CGPA:** {cgpa_display} (4.0 Scale)")
+
+            st.markdown(f"✅ **Matched Skills:** {', '.join(candidate_data['Matched Skills']) if candidate_data['Matched Skills'] else 'None'}")
+            st.markdown(f"❌ **Missing Skills:** {', '.join(candidate_data['Missing Skills']) if candidate_data['Missing Skills'] else 'None'}")
+            st.info(f"💬 **LLM Feedback:** {candidate_data['LLM Feedback']}")
+            
+            if candidate_data.get('Certificate Rank') != "Not Applicable" and candidate_data['Skill Match'] >= 50:
                 st.markdown(f"**ScreenerPro Certification:** {candidate_data['Certificate Rank']}")
 
             st.markdown(f"**Overall AI Assessment:**")
@@ -3650,40 +3619,25 @@ def resume_screener_page():
             # --- END NEW: Display Company Fit Assessment ---
 
             st.markdown("#### Matched Skills Breakdown:")
-            matched_kws_categorized_str = candidate_data['Matched Keywords (Categorized)']
-            if matched_kws_categorized_str and isinstance(matched_kws_categorized_str, str):
-                try:
-                    matched_kws_categorized_dict = json.loads(matched_kws_categorized_str)
-                    if matched_kws_categorized_dict:
-                        for category, skills in matched_kws_categorized_dict.items():
-                            st.write(f"**{category}:** {', '.join(skills)}")
-                    else:
-                        st.write("No categorized matched skills found.")
-                except json.JSONDecodeError:
-                    st.write(f"Error parsing matched skills data.")
+            # Re-extract and categorize for display, as the stored ones might be raw lists
+            resume_raw_skills_set_for_display, resume_categorized_skills_for_display = extract_relevant_keywords(candidate_data['Resume Raw Text'], MASTER_SKILLS)
+            if resume_categorized_skills_for_display:
+                for category, skills in resume_categorized_skills_for_display.items():
+                    # Only show skills that are actually matched
+                    intersection_skills = [s for s in skills if s.lower() in [mk.lower() for mk in candidate_data['Matched Skills']]]
+                    if intersection_skills:
+                        st.write(f"**{category}:** {', '.join(sorted(intersection_skills))}")
             else:
                 st.write("No categorized matched skills found.")
 
             st.markdown("#### Missing Skills Breakdown (from JD):")
-            # Defensive checks for sets before performing set operations
-            jd_raw_skills_set_for_display, jd_categorized_skills_for_top = extract_relevant_keywords(jd_text, all_master_skills)
-            resume_raw_skills_set_for_top, _ = extract_relevant_keywords(candidate_data['Resume Raw Text'], all_master_skills)
-
-            if not isinstance(jd_raw_skills_set_for_display, set):
-                print(f"DEBUG: jd_raw_skills_set_for_display is not a set. Type: {type(jd_raw_skills_set_for_display)}. Defaulting to empty set.")
-                jd_raw_skills_set_for_display = set()
-            if not isinstance(resume_raw_skills_set_for_top, set):
-                print(f"DEBUG: resume_raw_skills_set_for_top is not a set. Type: {type(resume_raw_skills_set_for_top)}. Defaulting to empty set.")
-                resume_raw_skills_set_for_top = set()
-            
-            missing_skills_for_current = list(jd_raw_skills_set_for_display.difference(resume_raw_skills_set_for_top))
-            
-            if missing_skills_for_current:
+            # Use the missing_skills from the result directly, which are already based on JD - Resume
+            if candidate_data['Missing Skills']:
                 missing_categorized = collections.defaultdict(list)
-                for skill in missing_skills_for_current:
+                for skill in candidate_data['Missing Skills']:
                     found_category = False
                     for category, skills_in_category in SKILL_CATEGORIES.items():
-                        if skill.lower() in [s.lower() for s in skills_in_category]:
+                        if skill.lower() in {s.lower() for s in skills_in_category}:
                             missing_categorized[category].append(skill)
                             found_category = True
                             break
@@ -3692,7 +3646,7 @@ def resume_screener_page():
                 
                 if missing_categorized:
                     for category, skills in missing_categorized.items():
-                        st.write(f"**{category}:** {', '.join(skills)}")
+                        st.write(f"**{category}:** {', '.join(sorted(skills))}")
                 else:
                     st.write("No categorized missing skills found for this candidate relative to the JD.")
             else:
@@ -3700,11 +3654,11 @@ def resume_screener_page():
             
             st.markdown("---")
             # Course Suggestions based on missing skills
-            suggest_courses_for_skills(missing_skills_for_current)
+            suggest_courses_for_skills(candidate_data['Missing Skills'])
             st.markdown("---")
 
             # --- Certificate Display and Email Logic (Conditional on Score >= 50) ---
-            if candidate_data.get('Certificate Rank') != "Not Applicable" and candidate_data['Score (%)'] >= 50:
+            if candidate_data.get('Certificate Rank') != "Not Applicable" and candidate_data['Skill Match'] >= 50:
                 st.markdown("## 🏆 Your ScreenerPro Certificate")
                 st.caption("Congratulations! Here is your certificate. It has also been sent to your email.")
 
@@ -3730,7 +3684,7 @@ def resume_screener_page():
                             if send_certificate_email(
                                 candidate_email, 
                                 candidate_data['Candidate Name'], 
-                                candidate_data['Score (%)'], 
+                                candidate_data['Skill Match'], # Use Skill Match for certificate score
                                 certificate_html_content, # Pass HTML content for email body
                                 certificate_public_url, # Pass public URL
                                 gmail_address, 
@@ -3760,7 +3714,7 @@ def resume_screener_page():
                 share_message = f"""I just received a Certificate of Screening Excellence from ScreenerPro! 🏆
 After uploading my resume, I was evaluated across multiple hiring parameters using AI-powered screening technology.
 
-I'm happy to share that I scored above {candidate_data['Score (%)']:.1f}%, which reflects the strength of my profile in today's job market.
+I'm happy to share that I scored above {candidate_data['Skill Match']:.1f}%, which reflects the strength of my profile in today's job market.
 View my certificate online: {certificate_public_url}
 
 Thanks to the team at ScreenerPro for building such a transparent and insightful platform for job seekers!
@@ -3791,8 +3745,8 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
                 st.markdown("---")
 
             else:
-                if candidate_data['Score (%)'] < 50:
-                    st.info(f"Your score of {candidate_data['Score (%)']:.2f}% is below the 50% threshold for certificate issuance. Keep improving!")
+                if candidate_data['Skill Match'] < 50:
+                    st.info(f"Your score of {candidate_data['Skill Match']:.2f}% is below the 50% threshold for certificate issuance. Keep improving!")
                 else:
                     st.info(f"{candidate_data['Candidate Name']} does not qualify for a ScreenerPro Certificate at this time.")
         else:
@@ -3806,36 +3760,59 @@ Thanks to the team at ScreenerPro for building such a transparent and insightful
 if __name__ == "__main__":
     st.set_page_config(page_title="ScreenerPro Resume Screener", layout="wide")
     resume_screener_page()
-# ---------------------------- Skill Extraction & Match ----------------------------
+
+# ---------------------------- Skill Extraction & Match (New Functions) ----------------------------
 def extract_skills(text):
+    """
+    Extracts skills from text based on the predefined MASTER_SKILLS list.
+    Returns a set of lowercase skills found.
+    """
     skills = set()
+    text_lower = text.lower()
     for skill in SKILL_LIST:
-        if skill.lower() in text.lower():
+        # Use word boundaries to ensure whole word matching
+        if re.search(r'\b' + re.escape(skill.lower()) + r'\b', text_lower):
             skills.add(skill.lower())
     return skills
 
 def calculate_match_score(resume_text, job_desc_text):
+    """
+    Calculates a skill-based match score between a resume and job description.
+    Returns the score, matched skills, and missing skills.
+    """
     resume_skills = extract_skills(resume_text)
     jd_skills = extract_skills(job_desc_text)
+    
     if not jd_skills:
-        return 0, [], []
-    matched = resume_skills & jd_skills
-    unmatched = jd_skills - resume_skills
+        return 0, [], [] # No job description skills to match against
+
+    matched = list(resume_skills.intersection(jd_skills))
+    unmatched = list(jd_skills.difference(resume_skills)) # Skills in JD but not in resume
+
     score = round((len(matched) / len(jd_skills)) * 100, 2)
-    return score, list(matched), list(unmatched)
+    return score, matched, unmatched
 
 def smart_feedback(resume_text, job_desc_text):
-    embedding_resume = model.encode(resume_text, convert_to_tensor=True)
-    embedding_jd = model.encode(job_desc_text, convert_to_tensor=True)
-    semantic_score = round(util.cos_sim(embedding_resume, embedding_jd)[0][0].item() * 100, 2)
+    """
+    Generates semantic similarity score and qualitative feedback using SentenceTransformer.
+    """
+    # Ensure global_sentence_model is loaded
+    if global_sentence_model is None:
+        return 0.0, "Error: Semantic model not loaded. Cannot provide detailed feedback."
+
+    embedding_resume = global_sentence_model.encode(resume_text, convert_to_tensor=True)
+    embedding_jd = global_sentence_model.encode(job_desc_text, convert_to_tensor=True)
+    
+    # Ensure embeddings are 2D for cosine_similarity
+    semantic_score = round(util.cos_sim(embedding_resume.reshape(1, -1), embedding_jd.reshape(1, -1))[0][0].item() * 100, 2)
 
     if semantic_score > 85:
-        feedback = "✅ Excellent match. Your resume closely aligns with the job description."
+        feedback = "✅ Excellent semantic match. Your resume's content closely aligns with the job description's overall meaning and context."
     elif semantic_score > 70:
-        feedback = "🟡 Good match. Consider adding more role-specific keywords or tools."
+        feedback = "🟡 Good semantic match. Your resume generally aligns with the job description, but there might be opportunities to use more industry-specific phrasing or context."
     elif semantic_score > 50:
-        feedback = "🔶 Partial match. Resume can be improved to reflect job requirements better."
+        feedback = "🔶 Partial semantic match. The core themes of your resume and the job description show some overlap, but more targeted language could improve alignment."
     else:
-        feedback = "🔴 Low match. Your resume and the job description don't align well."
+        feedback = "🔴 Low semantic match. Your resume's overall content and the job description's context do not align well. Consider rephrasing sections to better reflect the job's requirements."
 
     return semantic_score, feedback
